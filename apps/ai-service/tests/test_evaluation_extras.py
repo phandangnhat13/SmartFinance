@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.evaluate_models import calibration_report, error_analysis
+from scripts.evaluate_models import bootstrap_uncertainty, calibration_report, error_analysis
+from scripts.nested_cv import selective_from_flags
 from scripts.stability import describe
+from scripts.validate_dataset import jaccard
 
 
 def test_calibration_is_zero_for_perfectly_calibrated_predictions() -> None:
@@ -93,6 +95,49 @@ def test_error_analysis_respects_example_cap() -> None:
         max_examples=2,
     )
     assert len(report["examples"]) == 2
+
+
+def test_bootstrap_uses_groups_and_reports_paired_differences() -> None:
+    report = bootstrap_uncertainty(
+        truth=["food", "food", "transport", "transport"],
+        predictions_by_method={
+            "keyword": ["food", "transport", "food", "transport"],
+            "tfidf-lr": ["food", "food", "transport", "transport"],
+            "tfidf-svc": ["food", "food", "transport", "food"],
+        },
+        groups=["g1", "g1", "g2", "g3"],
+        n_boot=200,
+        seed=7,
+    )
+    assert report["groups"] == 3
+    assert report["point"]["tfidf-lr"] == {"accuracy": 1.0, "macroF1": 1.0}
+    assert report["intervals"]["tfidf-lr"]["accuracy"]["lower"] == 1.0
+    assert report["intervals"]["tfidf-lr"]["accuracy"]["upper"] == 1.0
+    # Most resamples rank the perfect method above the keyword baseline. A
+    # resample that happens to contain only g3 ties at 1.0, hence not 100%.
+    pair = report["pairedDifferences"]["tfidf-lr vs keyword"]
+    assert pair["accuracy"]["probabilityLeftBetter"] >= 0.9
+    assert pair["accuracy"]["mean"] > 0
+
+
+def test_selective_from_flags_counts_only_selected_rows() -> None:
+    report = selective_from_flags(
+        truth=["food", "transport"],
+        predictions=["food", "food"],
+        selected=[True, False],
+        policy="test policy",
+    )
+    assert report["coverage"] == 0.5
+    assert report["selectiveAccuracy"] == 1.0
+    assert report["selectiveRisk"] == 0.0
+    assert report["acceptedCount"] == 1
+    assert report["thresholdPolicy"] == "test policy"
+
+
+def test_jaccard_is_zero_for_disjoint_sets() -> None:
+    assert jaccard({"a", "b"}, {"a", "b"}) == 1.0
+    assert jaccard({"a"}, {"b"}) == 0.0
+    assert jaccard(set(), set()) == 0.0
 
 
 def test_stability_describe_reports_spread() -> None:

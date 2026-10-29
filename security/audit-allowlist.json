@@ -1,0 +1,45 @@
+{
+  "$comment": "Time-boxed accepted risk for scripts/audit-policy.mjs. Every entry needs a reason and an expiry; expired entries fail CI. Remove an entry as soon as the dependency is upgraded.",
+  "entries": [
+    {
+      "id": "GHSA-mrhx-c7xc-m3w5",
+      "package": "zod",
+      "scope": "production",
+      "severity": "high",
+      "reason": "Zod 3 is used only for client-side form validation in apps/web; no z.array() schema exists in the codebase, and the advisory concerns oversized array validation. Server-side input is validated by class-validator. Upgrading to zod 4 is a separate major migration with no server-side risk reduced.",
+      "expires": "2027-04-30"
+    },
+    {
+      "id": "GHSA-82fw-gwwq-j7x9",
+      "package": "vitest",
+      "scope": "development",
+      "severity": "critical",
+      "reason": "Vitest is a dev-only test runner and is not part of any runtime image. Exploitation requires control of the test files or config already running with developer privileges. Tracked for a Vitest 4 upgrade outside this remediation window.",
+      "expires": "2027-04-30"
+    },
+    {
+      "id": "GHSA-qxg6-89mg-rqv8",
+      "package": "@vitest/mocker",
+      "scope": "development",
+      "severity": "moderate",
+      "reason": "Same Vitest 3 toolchain; dev-only, not shipped. See the vitest entry.",
+      "expires": "2027-04-30"
+    },
+    {
+      "id": "GHSA-5gmw-xhrv-c9v3",
+      "package": "tinypool",
+      "scope": "development",
+      "severity": "critical",
+      "reason": "Transitive dependency of Vitest's worker pool; dev-only and not shipped. Requires attacker-controlled worker options inside the test process.",
+      "expires": "2027-04-30"
+    },
+    {
+      "id": "GHSA-85c8-ppgw-ccpr",
+      "package": "tinypool",
+      "scope": "development",
+      "severity": "critical",
+      "reason": "Transitive dependency of Vitest's worker pool; dev-only and not shipped. Requires attacker-controlled worker options inside the test process.",
+      "expires": "2027-04-30"
+    }
+  ]
+}

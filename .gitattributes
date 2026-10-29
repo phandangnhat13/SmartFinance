@@ -1,0 +1,10 @@
+# The synthetic dataset is fingerprinted byte-for-byte: every file's SHA-256 is
+# recorded in apps/ai-service/data/dataset_metadata.json and in the model
+# provenance, and tests/test_dataset_validation.py asserts the match.
+#
+# Git's end-of-line conversion rewrites those bytes on checkout (LF on Linux,
+# CRLF on a Windows checkout with core.autocrlf=true), which made the integrity
+# test pass locally and fail in CI. The hashes were generated from the CRLF
+# working copy, so pin the checkout format on every platform. The repository
+# itself keeps LF blobs (normalised on commit); only the working copy is CRLF.
+apps/ai-service/data/** text eol=crlf

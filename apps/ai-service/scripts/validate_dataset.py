@@ -58,6 +58,11 @@ def keyword_tokens(text: str) -> set[str]:
     return {token for token in normalize_loose(text).split() if len(token) >= 3}
 
 
+def jaccard(left: set[str], right: set[str]) -> float:
+    union = left | right
+    return len(left & right) / len(union) if union else 0.0
+
+
 def load_split(name: str, path: Path) -> tuple[list[dict[str, str]], list[str]]:
     errors: list[str] = []
     if not path.exists():
@@ -148,13 +153,26 @@ def main() -> int:
             if count < MIN_PER_CLASS:
                 warnings.append(f"{name}: label {label} has only {count} rows")
 
-    train_tokens: set[str] = set()
-    for row in splits.get("train", []):
-        train_tokens |= keyword_tokens(row["description"])
+    train_token_sets = [
+        keyword_tokens(row["description"]) for row in splits.get("train", [])
+    ]
+    train_tokens: set[str] = set().union(*train_token_sets) if train_token_sets else set()
     paraphrase_rows = splits.get("paraphrase", [])
     overlap_rows = sum(
         1 for row in paraphrase_rows if keyword_tokens(row["description"]) & train_tokens
     )
+    max_overlaps = [
+        max(
+            (jaccard(keyword_tokens(row["description"]), tokens) for tokens in train_token_sets),
+            default=0.0,
+        )
+        for row in paraphrase_rows
+    ]
+    mean_overlap = (
+        round(sum(max_overlaps) / len(max_overlaps), 4) if max_overlaps else None
+    )
+    above_05 = sum(1 for value in max_overlaps if value >= 0.5)
+    above_08 = sum(1 for value in max_overlaps if value >= 0.8)
 
     report = {
         "ok": not errors,
@@ -173,9 +191,13 @@ def main() -> int:
                 "rows": len(paraphrase_rows),
                 "rowsSharingTrainToken": overlap_rows,
                 "share": round(overlap_rows / len(paraphrase_rows), 4) if paraphrase_rows else None,
+                "meanMaxTokenJaccard": mean_overlap,
+                "rowsWithMaxJaccardAtLeast05": above_05,
+                "rowsWithMaxJaccardAtLeast08": above_08,
                 "note": (
                     "informational: the paraphrase bank reuses everyday Vietnamese vocabulary "
-                    "and is therefore not an out-of-distribution benchmark"
+                    "and is therefore not an out-of-distribution benchmark. Low Jaccard values "
+                    "mean the wording is not copied; they do not prove semantic independence."
                 ),
             },
         },

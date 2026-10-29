@@ -199,6 +199,8 @@ Không commit `.env`, API key hoặc dữ liệu cá nhân.
 | `npm run prisma:seed`                           | System categories (+ demo nếu `SEED_DEMO=true`)       |
 | `npm run prisma:studio`                         | Prisma Studio                                         |
 | `npm run feedback:export -w @smart-finance/api` | Xuất feedback AI đã khử định danh (có `--dry-run`)    |
+| `npm run imports:purge -w @smart-finance/api`   | Dọn preview CSV cũ (có `--dry-run`, `--days N`)       |
+| `npm run audit:policy`                          | Audit theo mức rủi ro + allowlist có thời hạn         |
 
 Script AI (chạy trong `apps/ai-service`):
 
@@ -208,16 +210,17 @@ Script AI (chạy trong `apps/ai-service`):
 | `python scripts/validate_dataset.py` | Kiểm tra trùng/rò rỉ/độ phủ nhãn trước khi train       |
 | `python scripts/evaluate_models.py`  | So sánh 3 phương pháp, chọn ngưỡng trên validation     |
 | `python scripts/stability.py`        | Độ ổn định theo split (train+validation, nhiều seed)   |
+| `python scripts/nested_cv.py`        | Nested CV trên train only (không đọc validation/test)  |
 | `python scripts/train.py`            | Huấn luyện artifact phục vụ từ `models/selection.json` |
 
 ### Kiểm thử
 
 ```bash
 npm run typecheck && npm run lint
-npm test                       # API unit (36) + web unit (11)
-npm run test:e2e               # API e2e (18), cần database test đã migrate
+npm test                       # API unit (38) + web unit (11)
+npm run test:e2e               # API e2e (20), cần database test đã migrate
 npm run test:e2e -w @smart-finance/web   # Trình duyệt (13); tự tạo DB + server riêng
-cd apps/ai-service && pytest   # AI service (30)
+cd apps/ai-service && pytest   # AI service (33)
 ```
 
 Playwright cần PostgreSQL đang chạy và `npx playwright install chromium` một lần. Suite tự tạo
@@ -250,7 +253,14 @@ Kết quả test held-out (200 dòng):
 - Ngưỡng **0.50**: test coverage 47.0% (94/200), selective accuracy 83.0%.
 - Calibration LR: ECE 0.1216 / Brier 0.2090 (validation); 0.2233 / 0.2510 (test) — confidence dùng
   để xếp hạng gợi ý tốt hơn là đọc như xác suất.
-- Stability (train+validation, 5-fold, seed 42/7/2026): LR 0.5971 ± 0.0384 accuracy.
+- Stability (train+validation, 5-fold, seed 42/7/2026): LR **accuracy** 0.5971 ± 0.0384; macro F1
+  0.5844 ± 0.0305; weighted F1 0.5915 ± 0.0398. Đây là conditional variance vì validation đã tham
+  gia chọn C/threshold.
+- Nested CV chỉ trên train (5 outer × 3 inner): LR 0.5799 ± 0.0538 accuracy, SVC 0.5926 ± 0.0598.
+  Bootstrap theo template group cho test LR accuracy [0.5449, 0.8450]; hiệu LR−SVC
+  +0.0199 [−0.0250, +0.0750] nên **không kết luận LR vượt SVC**.
+- Test split đã được quan sát trong các vòng trước; vẫn không dùng để chọn mô hình/ngưỡng nhưng
+  không còn là holdout một lần. Artifact serving được giữ nguyên.
 - Kết quả AI **chỉ là đề xuất**; giao dịch chỉ lưu danh mục sau khi người dùng xác nhận.
 - Đây là số liệu trên dữ liệu tổng hợp, **không phải** ước lượng độ chính xác trên người dùng thật.
 
@@ -297,11 +307,16 @@ account,type,amount,occurredAt,description,category,note,currency
   thoại/số dài, không xuất `userId`, email hay `predictionId`. Người dùng có thể xóa prediction
   của chính mình (`DELETE /api/v1/ai/predictions/:id`).
 - AI service không có xác thực riêng: chỉ nên chạy trong mạng nội bộ hoặc sau reverse proxy.
-  Không publish cổng 8000 ra Internet khi triển khai thật.
+  Compose bind cổng 8000 vào `127.0.0.1`; không publish ra Internet khi triển khai thật.
+- Cookie và JWT dùng chung TTL (`JWT_EXPIRES_IN`); logout xoá cookie và `/auth/me` trả 401. JWT đã
+  phát hành vẫn hợp lệ tới `exp` (stateless) — cần denylist/refresh token nếu yêu cầu thu hồi ngay.
+- Preview CSV cũ được dọn bằng `npm run imports:purge -w @smart-finance/api` (mặc định 30 ngày,
+  `--dry-run` trước); biến `IMPORT_PREVIEW_RETENTION_DAYS` trong `.env.example`.
 
-`npm audit` báo 20 mục (phần lớn ở dev tooling); 8 mục trên đường production, chủ yếu là
-`react-router`/`react-router-dom`, `zod` và `js-yaml` qua Swagger. Chưa nâng major để tránh phá vỡ
-tương thích — lý do và đường ảnh hưởng ghi tại
+`npm audit` hiện 15 mục toàn cây, 3 mục trên đường production (2 moderate `react-router`, 1 high
+`zod` đã allowlist có thời hạn). Hai override tương thích đã hạ `js-yaml` và `deepmerge-ts`; không
+nâng major. CI chạy `npm run audit:policy`: high/critical production chưa allowlist sẽ fail, entry
+hết hạn cũng fail. Lý do và đường ảnh hưởng ghi tại
 [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) và [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ---

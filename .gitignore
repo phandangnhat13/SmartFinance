@@ -26,6 +26,8 @@ apps/ai-service/artifacts/*.joblib
 apps/ai-service/artifacts/*.json
 apps/ai-service/artifacts/experiments/
 apps/ai-service/artifacts/stability/
+apps/ai-service/artifacts/nested_cv/
+apps/ai-service/.repro-libs/
 
 # Editor / OS
 .DS_Store

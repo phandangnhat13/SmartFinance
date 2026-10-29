@@ -10,12 +10,16 @@ Protocol
   train/validation/test split.
 * Hyper-parameters and the abstention threshold stay fixed at the values chosen
   by ``scripts/evaluate_models.py``. This measures split variance, not tuning.
+* Because the resampled pool contains the validation rows that were used to
+  choose those values, this is a *conditional* variance check, not an unbiased
+  estimate of the tuning procedure. ``scripts/nested_cv.py`` provides the
+  nested estimate on the train split only.
 * The keyword baseline is re-mined inside every fold from that fold's training
   rows only.
 
-The report gives mean, standard deviation, min and max of accuracy and macro F1
-across folds and seeds. A large standard deviation means a single split should
-not be read as a precise estimate.
+The report gives mean, standard deviation, min and max of accuracy, macro F1 and
+weighted F1 across folds and seeds. A large standard deviation means a single
+split should not be read as a precise estimate.
 
 Usage:
     python apps/ai-service/scripts/stability.py
@@ -64,11 +68,11 @@ def describe(values: list[float]) -> dict:
     }
 
 
-def load_best_c(path: Path) -> float:
+def load_best_c(path: Path, key: str = "bestC") -> float:
     if not path.exists():
         return FALLBACK_C
     try:
-        return float(json.loads(path.read_text(encoding="utf-8")).get("bestC", FALLBACK_C))
+        return float(json.loads(path.read_text(encoding="utf-8")).get(key, FALLBACK_C))
     except (OSError, json.JSONDecodeError, TypeError, ValueError):
         return FALLBACK_C
 
@@ -93,7 +97,9 @@ def main() -> int:
     types = [row["type"] for row in rows]
     groups = [row["group"] for row in rows]
 
-    best_c = load_best_c(ROOT / "models" / "selection.json")
+    selection_path = ROOT / "models" / "selection.json"
+    best_c = load_best_c(selection_path, "bestC")
+    best_svc_c = load_best_c(selection_path, "bestSvcC")
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
     per_method: dict[str, list[dict]] = {"keyword": [], "tfidf-lr": []}
@@ -129,7 +135,7 @@ def main() -> int:
             scores["tfidf-lr"] = metrics(fold_truth, lr_predictions)
 
             if not args.no_svc:
-                svc = build_svc(best_c)
+                svc = build_svc(best_svc_c)
                 svc.fit(fold_train_texts, fold_train_labels)
                 svc_predictions, _ = type_aware_predictions(svc, fold_texts, fold_types)
                 scores["tfidf-svc"] = metrics(fold_truth, svc_predictions)
@@ -154,6 +160,11 @@ def main() -> int:
             "seeds": seeds,
             "folds": args.folds,
             "fixedC": best_c,
+            "fixedSvcC": best_svc_c,
+            "tuningReuse": (
+                "The pool includes validation rows that selected these C values; this is a "
+                "conditional split-variance check, not an unbiased tuning estimate."
+            ),
             "note": "Hyper-parameters are fixed; this measures split variance, not tuning.",
         },
         "methods": {

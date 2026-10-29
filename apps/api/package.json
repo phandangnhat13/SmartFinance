@@ -11,7 +11,8 @@
     "test": "jest --config jest.config.cjs --runInBand",
     "test:cov": "jest --config jest.config.cjs --runInBand --coverage",
     "test:e2e": "jest --config test/jest-e2e.json --runInBand",
-    "feedback:export": "npm run build && node --env-file-if-exists=../../.env dist/scripts/export-ai-feedback.js"
+    "feedback:export": "npm run build && node --env-file-if-exists=../../.env dist/scripts/export-ai-feedback.js",
+    "imports:purge": "npm run build && node --env-file-if-exists=../../.env dist/scripts/purge-import-previews.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",

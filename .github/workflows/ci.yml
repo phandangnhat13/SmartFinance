@@ -40,8 +40,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Security audit (informational)
-        run: npm audit --omit=dev || true
+      - name: Security audit policy
+        run: npm run audit:policy
 
   e2e:
     name: API end-to-end tests

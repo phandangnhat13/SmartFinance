@@ -1,9 +1,32 @@
 {
   "modelName": "tfidf-char-logreg",
   "modelVersion": "tfidf-char-lr-v2",
-  "selectedAt": "2026-10-29T19:09:23.095975+00:00",
-  "runId": "20261029T190923Z",
+  "selectedAt": "2026-10-29T20:26:14.575745+00:00",
+  "runId": "20261029T202614Z",
   "bestC": 2.0,
+  "bestSvcC": 1.0,
+  "svcSearch": [
+    {
+      "C": 0.25,
+      "macroF1": 0.5341,
+      "accuracy": 0.57
+    },
+    {
+      "C": 0.5,
+      "macroF1": 0.5662,
+      "accuracy": 0.605
+    },
+    {
+      "C": 1.0,
+      "macroF1": 0.5667,
+      "accuracy": 0.6
+    },
+    {
+      "C": 2.0,
+      "macroF1": 0.5535,
+      "accuracy": 0.58
+    }
+  ],
   "threshold": 0.5,
   "thresholdSelection": {
     "threshold": 0.5,

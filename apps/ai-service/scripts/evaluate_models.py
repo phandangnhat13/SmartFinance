@@ -202,6 +202,20 @@ def load_latest_stability() -> dict | None:
         return None
 
 
+def load_latest_nested_cv() -> dict | None:
+    """Return the most recent ``scripts/nested_cv.py`` artifact, if any."""
+    directory = ROOT / "artifacts" / "nested_cv"
+    if not directory.exists():
+        return None
+    files = sorted(directory.glob("nested_cv-*.json"))
+    if not files:
+        return None
+    try:
+        return json.loads(files[-1].read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
 def git_commit() -> str:
     try:
         return subprocess.run(
@@ -318,6 +332,110 @@ def metrics(truth: list[str], predictions: list[str]) -> dict:
         "confusionMatrix": {
             "labels": LABELS,
             "matrix": [[int(value) for value in row] for row in matrix.tolist()],
+        },
+    }
+
+
+def bootstrap_uncertainty(
+    truth: list[str],
+    predictions_by_method: dict[str, list[str]],
+    groups: list[str],
+    n_boot: int = 2000,
+    seed: int = SEED,
+) -> dict:
+    """Cluster bootstrap over template groups for the held-out test.
+
+    Rows inside one template group are paraphrases of each other and are not
+    independent, so resampling rows would understate the interval. Resampling
+    whole groups keeps that correlation. The same resample is used for every
+    method, which makes the paired differences meaningful.
+    """
+    unique_groups = sorted(set(groups))
+    indices_by_group: defaultdict[str, list[int]] = defaultdict(list)
+    for index, group in enumerate(groups):
+        indices_by_group[group].append(index)
+
+    def score(truth_sample: list[str], predictions: list[str]) -> tuple[float, float]:
+        return (
+            float(accuracy_score(truth_sample, predictions)),
+            float(f1_score(truth_sample, predictions, average="macro", zero_division=0)),
+        )
+
+    point = {
+        method: {
+            "accuracy": round(score(truth, predictions)[0], 4),
+            "macroF1": round(score(truth, predictions)[1], 4),
+        }
+        for method, predictions in predictions_by_method.items()
+    }
+    samples: dict[str, dict[str, list[float]]] = {
+        method: {"accuracy": [], "macroF1": []} for method in predictions_by_method
+    }
+    pairs = [
+        ("tfidf-lr", "tfidf-svc"),
+        ("tfidf-lr", "keyword"),
+    ]
+    paired_samples: dict[str, dict[str, list[float]]] = {
+        f"{left} vs {right}": {"accuracy": [], "macroF1": []} for left, right in pairs
+    }
+
+    rng = np.random.default_rng(seed)
+    for _ in range(n_boot):
+        sampled_groups = rng.choice(unique_groups, size=len(unique_groups), replace=True)
+        sample_indices = [
+            index
+            for group in sampled_groups
+            for index in indices_by_group[str(group)]
+        ]
+        sample_truth = [truth[index] for index in sample_indices]
+        sample_scores: dict[str, tuple[float, float]] = {}
+        for method, predictions in predictions_by_method.items():
+            sample_predictions = [predictions[index] for index in sample_indices]
+            sample_scores[method] = score(sample_truth, sample_predictions)
+            samples[method]["accuracy"].append(sample_scores[method][0])
+            samples[method]["macroF1"].append(sample_scores[method][1])
+        for left, right in pairs:
+            for metric_index, metric in enumerate(("accuracy", "macroF1")):
+                paired_samples[f"{left} vs {right}"][metric].append(
+                    sample_scores[left][metric_index] - sample_scores[right][metric_index]
+                )
+
+    def interval(values: list[float]) -> dict:
+        array = np.array(values, dtype=float)
+        return {
+            "lower": round(float(np.percentile(array, 2.5)), 4),
+            "upper": round(float(np.percentile(array, 97.5)), 4),
+            "mean": round(float(array.mean()), 4),
+        }
+
+    return {
+        "method": "cluster bootstrap over template groups",
+        "resamples": n_boot,
+        "seed": seed,
+        "groups": len(unique_groups),
+        "point": point,
+        "intervals": {
+            method: {
+                metric: interval(values) for metric, values in metrics_for_method.items()
+            }
+            for method, metrics_for_method in samples.items()
+        },
+        "pairedDifferences": {
+            name: {
+                "accuracy": {
+                    **interval(values["accuracy"]),
+                    "probabilityLeftBetter": round(
+                        float(np.mean(np.array(values["accuracy"]) > 0)), 4
+                    ),
+                },
+                "macroF1": {
+                    **interval(values["macroF1"]),
+                    "probabilityLeftBetter": round(
+                        float(np.mean(np.array(values["macroF1"]) > 0)), 4
+                    ),
+                },
+            }
+            for name, values in paired_samples.items()
         },
     }
 
@@ -612,9 +730,17 @@ def main() -> int:
             "typeAware": True,
             "hyperparametersSelectedOn": "validation",
             "thresholdSelectedOn": "validation",
-            "testUsedFor": "final evaluation only",
+            "testUsedFor": "final evaluation after model lock; never used for selection",
+            "testPreviouslyObserved": True,
+            "testNote": (
+                "The held-out test split has been reported in earlier research rounds, so it is "
+                "no longer a pristine single-use holdout. It remains excluded from every "
+                "selection decision; nested cross-validation on train only estimates the "
+                "procedure without touching it."
+            ),
             "thresholdGrid": THRESHOLD_GRID,
             "selectiveAccuracyTarget": SELECTIVE_ACCURACY_TARGET,
+            "uncertainty": "cluster bootstrap over template groups (2,000 resamples)",
         },
     }
 
@@ -765,6 +891,21 @@ def main() -> int:
         results["tfidf-lr"]["sets"][set_name]["calibration"] = lr_calibration[set_name]
         results["tfidf-lr"]["sets"][set_name]["errorAnalysis"] = lr_error_analysis[set_name]
 
+    # Uncertainty on the held-out test. Group-level resampling keeps template
+    # paraphrases together, and every method uses the same resamples so the
+    # paired differences are meaningful.
+    test_truth = labels(test_rows)
+    test_groups = [row["group"] for row in test_rows]
+    uncertainty = bootstrap_uncertainty(
+        test_truth,
+        {
+            "keyword": evaluated["keyword"]["test"][0],
+            "tfidf-lr": evaluated["tfidf-lr"]["test"][0],
+            "tfidf-svc": evaluated["tfidf-svc"]["test"][0],
+        },
+        test_groups,
+    )
+
     misclassified_payload = {
         "provenance": (
             "Synthetic Vietnamese transaction descriptions from the held-out template-group "
@@ -802,12 +943,15 @@ def main() -> int:
         )
 
     stability = load_latest_stability()
+    nested_cv = load_latest_nested_cv()
     payload = {
         "metadata": metadata,
         "keywordRules": keyword_rules,
         "results": results,
         "selectedThreshold": threshold_choice,
+        "uncertainty": uncertainty,
         "stability": stability,
+        "nestedCv": nested_cv,
     }
     (run_dir / "results.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -822,6 +966,8 @@ def main() -> int:
         "selectedAt": metadata["generatedAt"],
         "runId": run_id,
         "bestC": best_lr["C"],
+        "bestSvcC": best_svc["C"],
+        "svcSearch": svc_search,
         "threshold": threshold_choice["threshold"],
         "thresholdSelection": threshold_choice,
         "datasetFingerprint": metadata["dataset"]["fingerprint"],
@@ -940,6 +1086,50 @@ def _render_report(payload: dict) -> str:
             f"{score['macroRecall']:.4f} | {score['macroF1']:.4f} | {score['weightedF1']:.4f} |"
         )
     lines.append("")
+    uncertainty = payload.get("uncertainty")
+    if uncertainty:
+        lines.append("### Uncertainty on this single split")
+        lines.append("")
+        lines.append(
+            f"Cluster bootstrap over the {uncertainty['groups']} template groups "
+            f"({uncertainty['resamples']:,} resamples, seed {uncertainty['seed']}). Rows inside a "
+            "group are paraphrases and are resampled together, so the interval is wider than a "
+            "naive row bootstrap."
+        )
+        lines.append("")
+        lines.append("| Method | Accuracy | 95% interval | Macro F1 | 95% interval |")
+        lines.append("| --- | ---: | ---: | ---: | ---: |")
+        for key in ("keyword", "tfidf-lr", "tfidf-svc"):
+            point = uncertainty["point"][key]
+            interval = uncertainty["intervals"][key]
+            accuracy_interval = interval["accuracy"]
+            macro_interval = interval["macroF1"]
+            lines.append(
+                f"| {results[key]['displayName']} | {point['accuracy']:.4f} | "
+                f"{accuracy_interval['lower']:.4f}–{accuracy_interval['upper']:.4f} | "
+                f"{point['macroF1']:.4f} | "
+                f"{macro_interval['lower']:.4f}–{macro_interval['upper']:.4f} |"
+            )
+        lines.append("")
+        lines.append("Paired differences from the same resamples:")
+        lines.append("")
+        lines.append("| Comparison | Accuracy difference | Macro F1 difference | P(left better) |")
+        lines.append("| --- | ---: | ---: | ---: |")
+        for name, values in uncertainty["pairedDifferences"].items():
+            accuracy = values["accuracy"]
+            macro = values["macroF1"]
+            lines.append(
+                f"| {name.replace(' vs ', ' − ')} | {accuracy['mean']:+.4f} "
+                f"[{accuracy['lower']:+.4f}, {accuracy['upper']:+.4f}] | "
+                f"{macro['mean']:+.4f} [{macro['lower']:+.4f}, {macro['upper']:+.4f}] | "
+                f"{accuracy['probabilityLeftBetter']:.1%} (accuracy) |"
+            )
+        lines.append("")
+        lines.append(
+            "A positive difference means the left method is better. Intervals that cross zero "
+            "mean this 200-row split does not establish a winner."
+        )
+        lines.append("")
     lines.append("## 3. Paraphrase set (not used for tuning)")
     lines.append("")
     lines.append("| Method | Accuracy | Macro precision | Macro recall | Macro F1 | Weighted F1 |")
@@ -1031,9 +1221,23 @@ def _render_report(payload: dict) -> str:
             f"{row['avgConfidence']:.4f} | {row['accuracy']:.4f} | {gap:.4f} |"
         )
     lines.append("")
+    lines.append("Reliability table (held-out test):")
+    lines.append("")
+    lines.append("| Bin | Rows | Mean confidence | Accuracy | Gap |")
+    lines.append("| --- | ---: | ---: | ---: | ---: |")
+    for row in results["tfidf-lr"]["sets"]["test"]["calibration"]["table"]:
+        if not row["count"]:
+            continue
+        gap = abs(row["accuracy"] - row["avgConfidence"])
+        lines.append(
+            f"| {row['lower']:.2f}–{row['upper']:.2f} | {row['count']} | "
+            f"{row['avgConfidence']:.4f} | {row['accuracy']:.4f} | {gap:.4f} |"
+        )
+    lines.append("")
     lines.append(
         "The threshold is chosen on the validation split only; calibration is reported, not "
-        "optimised, so it is a diagnostic rather than a tuning signal."
+        "optimised, so it is a diagnostic rather than a tuning signal. Several bins hold fewer "
+        "than 10 rows, so a single bin's gap is noisy."
     )
     lines.append("")
     lines.append("## 6. Per-class results — TF-IDF + Logistic Regression (held-out test)")
@@ -1093,20 +1297,33 @@ def _render_report(payload: dict) -> str:
             f"`scripts/stability.py` resamples train + validation with "
             f"{protocol['folds']}-fold StratifiedGroupKFold for seeds "
             f"{', '.join(str(seed) for seed in protocol['seeds'])}. Hyper-parameters are fixed at "
-            f"C={protocol['fixedC']}; the held-out test split is never used."
+            f"the values chosen on validation (LR C={protocol['fixedC']}, "
+            f"SVC C={protocol.get('fixedSvcC', protocol['fixedC'])}); the held-out test split is "
+            "never used."
         )
         lines.append("")
-        lines.append("| Method | Accuracy mean ± std | Accuracy min–max | Macro F1 mean ± std | Macro F1 min–max |")
-        lines.append("| --- | ---: | ---: | ---: | ---: |")
+        lines.append(
+            "**Caveat:** train + validation includes the validation rows that selected those "
+            "hyper-parameters, so this is a conditional split-variance check, not an unbiased "
+            "estimate of the tuning procedure. Section 9 reports the nested estimate."
+        )
+        lines.append("")
+        lines.append(
+            "| Method | Accuracy mean ± std | Accuracy min–max | Macro F1 mean ± std | "
+            "Macro F1 min–max | Weighted F1 mean ± std |"
+        )
+        lines.append("| --- | ---: | ---: | ---: | ---: | ---: |")
         for key, stats in stability["methods"].items():
             accuracy = stats["accuracy"]
             macro = stats["macroF1"]
+            weighted = stats["weightedF1"]
             lines.append(
                 f"| {results[key]['displayName']} | "
                 f"{accuracy['mean']:.4f} ± {accuracy['std']:.4f} | "
                 f"{accuracy['min']:.4f}–{accuracy['max']:.4f} | "
                 f"{macro['mean']:.4f} ± {macro['std']:.4f} | "
-                f"{macro['min']:.4f}–{macro['max']:.4f} |"
+                f"{macro['min']:.4f}–{macro['max']:.4f} | "
+                f"{weighted['mean']:.4f} ± {weighted['std']:.4f} |"
             )
         lines.append("")
         lines.append(
@@ -1115,7 +1332,80 @@ def _render_report(payload: dict) -> str:
             "precise estimate."
         )
         lines.append("")
-    lines.append("## 9. Hyper-parameter search (validation macro F1)")
+    nested = payload.get("nestedCv")
+    if nested:
+        protocol = nested["protocol"]
+        lines.append("## 9. Nested cross-validation (train split only)")
+        lines.append("")
+        lines.append(
+            f"`scripts/nested_cv.py` uses {protocol['outerFolds']} outer folds and "
+            f"{protocol['innerFolds']} inner folds of StratifiedGroupKFold for seeds "
+            f"{', '.join(str(seed) for seed in protocol['seedValues'])}. Data: "
+            f"{protocol['data']}. The inner loop selects C and the abstention threshold; the "
+            "outer fold is scored once with the selected configuration."
+        )
+        lines.append("")
+        lines.append(
+            "| Method | Accuracy mean ± std | Macro F1 mean ± std | Weighted F1 mean ± std | "
+            "Coverage | Selective risk |"
+        )
+        lines.append("| --- | ---: | ---: | ---: | ---: | ---: |")
+        for key, stats in nested["methods"].items():
+            accuracy = stats["pooledBySeed"]["accuracy"]
+            macro = stats["pooledBySeed"]["macroF1"]
+            weighted = stats["pooledBySeed"]["weightedF1"]
+            coverage = stats["coverage"]
+            risk = stats["selectiveRisk"]
+            lines.append(
+                f"| {results[key]['displayName']} | "
+                f"{accuracy['mean']:.4f} ± {accuracy['std']:.4f} | "
+                f"{macro['mean']:.4f} ± {macro['std']:.4f} | "
+                f"{weighted['mean']:.4f} ± {weighted['std']:.4f} | "
+                f"{coverage['mean']:.1%} | "
+                f"{'—' if risk['n'] == 0 else f'{risk['mean']:.1%}'} |"
+            )
+        lines.append("")
+        lines.append(
+            "Pooled-by-seed spreads are small because the three seeds reuse the same rows. "
+            "Per-fold spread (15 outer folds) is the more honest split-uncertainty view:"
+        )
+        lines.append("")
+        lines.append(
+            "| Method | Accuracy per fold | Macro F1 per fold | Weighted F1 per fold |"
+        )
+        lines.append("| --- | ---: | ---: | ---: |")
+        for key, stats in nested["methods"].items():
+            accuracy = stats["perFold"]["accuracy"]
+            macro = stats["perFold"]["macroF1"]
+            weighted = stats["perFold"]["weightedF1"]
+            lines.append(
+                f"| {results[key]['displayName']} | "
+                f"{accuracy['mean']:.4f} ± {accuracy['std']:.4f} | "
+                f"{macro['mean']:.4f} ± {macro['std']:.4f} | "
+                f"{weighted['mean']:.4f} ± {weighted['std']:.4f} |"
+            )
+        lines.append("")
+        selection_lines = []
+        for key, stats in nested["methods"].items():
+            frequency = stats.get("selectionFrequency") or {}
+            if frequency:
+                chosen = ", ".join(
+                    f"C={value} ×{count}" for value, count in frequency.items()
+                )
+                selection_lines.append(f"- {results[key]['displayName']}: {chosen}")
+        if selection_lines:
+            lines.append("Selected C across outer folds:")
+            lines.append("")
+            lines.extend(selection_lines)
+            lines.append("")
+        lines.append(
+            "These are procedure estimates on 992 training rows, not the production model's "
+            "score. They are expected to be lower than the held-out test score because each "
+            "outer fold trains on fewer rows. They are also the honest check against concluding "
+            "superiority from one split."
+        )
+        lines.append("")
+    lines.append("## 10. Hyper-parameter search (validation macro F1)")
     lines.append("")
     lines.append("| Model | C | Validation macro F1 | Validation accuracy |")
     lines.append("| --- | ---: | ---: | ---: |")
@@ -1125,7 +1415,7 @@ def _render_report(payload: dict) -> str:
                 f"| {name} | {point['C']} | {point['macroF1']:.4f} | {point['accuracy']:.4f} |"
             )
     lines.append("")
-    lines.append("## 10. Confusion matrices and reliability diagrams")
+    lines.append("## 11. Confusion matrices and reliability diagrams")
     lines.append("")
     lines.append(f"PNG files are in `artifacts/experiments/{metadata['runId']}/`:")
     for key in ("keyword", "tfidf-lr", "tfidf-svc"):
@@ -1134,7 +1424,7 @@ def _render_report(payload: dict) -> str:
     lines.append("- `reliability_tfidf-lr_validation.png`")
     lines.append("- `reliability_tfidf-lr_test.png`")
     lines.append("")
-    lines.append("## 11. Limitations")
+    lines.append("## 12. Limitations")
     lines.append("")
     lines.append("- All data is synthetic; absolute scores do not estimate accuracy on real users.")
     lines.append("- The paraphrase set is written by hand and shares vocabulary and label definitions with training.")
@@ -1146,6 +1436,18 @@ def _render_report(payload: dict) -> str:
     lines.append(
         "- The development-set folds are small, so the split-stability interval is wide; the held-out "
         "test score is a single draw, not a precise estimate."
+    )
+    lines.append(
+        "- The held-out test has been observed in earlier research rounds. It is not used for "
+        "selection here, but it is no longer a pristine single-use holdout."
+    )
+    lines.append(
+        "- Calibration bins are equal-width and only 200 test rows are available; several bins "
+        "hold a handful of rows. ECE and Brier are diagnostics, not precise probabilities."
+    )
+    lines.append(
+        "- Nested cross-validation uses the 992-row train split only, so it estimates a "
+        "lower-data regime and is not directly comparable to the production model's test score."
     )
     lines.append("- Feedback data from users is not yet used for training (consent-gated export exists).")
     lines.append("")

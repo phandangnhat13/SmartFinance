@@ -92,6 +92,15 @@ describe('Smart Finance API (e2e)', () => {
       .expect(403);
   });
 
+  it('rejects a simple-form content type that can bypass a CORS preflight', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/auth/login')
+      .set('Origin', 'http://localhost:5173')
+      .set('Content-Type', 'text/plain')
+      .send('{"email":"an@example.com","password":"Password123!"}')
+      .expect(415);
+  });
+
   it('registers a user and sets an HttpOnly session cookie', async () => {
     const response = await agent
       .post('/api/v1/auth/register')
@@ -99,8 +108,12 @@ describe('Smart Finance API (e2e)', () => {
       .expect(201);
 
     state.userId = response.body.user.id as string;
-    expect(response.headers['set-cookie']?.[0]).toContain('sf_access_token=');
-    expect(response.headers['set-cookie']?.[0]).toContain('HttpOnly');
+    const cookie = response.headers['set-cookie']?.[0] ?? '';
+    expect(cookie).toContain('sf_access_token=');
+    expect(cookie).toContain('HttpOnly');
+    expect(cookie).toContain('SameSite=Lax');
+    // setup-e2e sets JWT_EXPIRES_IN=1h; the cookie must not outlive the token.
+    expect(cookie).toContain('Max-Age=3600');
 
     const me = await agent.get('/api/v1/auth/me').expect(200);
     expect(me.body.user.email).toBe('an@example.com');
@@ -521,5 +534,16 @@ describe('Smart Finance API (e2e)', () => {
       code: 'VALIDATION_ERROR',
     });
     expect(typeof response.body.message).toBe('string');
+  });
+
+  it('clears the session cookie on logout', async () => {
+    const response = await agent.post('/api/v1/auth/logout').expect(200);
+    const cookie = response.headers['set-cookie']?.[0] ?? '';
+    expect(cookie).toContain('sf_access_token=;');
+    expect(cookie).toContain('Expires=Thu, 01 Jan 1970');
+
+    // The browser-side cookie is gone. JWTs are stateless, so a previously
+    // stolen token would remain valid until its exp; see the security report.
+    await agent.get('/api/v1/auth/me').expect(401);
   });
 });

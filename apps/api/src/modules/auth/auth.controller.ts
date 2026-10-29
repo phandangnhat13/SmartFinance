@@ -61,7 +61,7 @@ export class AuthController {
   private setAuthCookie(response: Response, token: string): void {
     response.cookie(ACCESS_TOKEN_COOKIE, token, {
       ...this.cookieOptions(),
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: this.authService.accessTokenTtlSeconds() * 1000,
     });
   }
 

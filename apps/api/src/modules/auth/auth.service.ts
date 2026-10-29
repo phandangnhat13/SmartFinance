@@ -50,11 +50,20 @@ export class AuthService {
     return user;
   }
 
+  /**
+   * The cookie and the JWT must expire together. Keeping one source for the
+   * TTL avoids a cookie that outlives its token (or the reverse) when
+   * JWT_EXPIRES_IN is changed.
+   */
+  accessTokenTtlSeconds(): number {
+    return parseDurationSeconds(this.configService.get<string>('JWT_EXPIRES_IN'), 7 * 86400);
+  }
+
   async issueAccessToken(user: User): Promise<string> {
     const payload: JwtPayload = { sub: user.id, email: user.email };
     return this.jwtService.signAsync(payload, {
       secret: this.configService.getOrThrow<string>('JWT_SECRET'),
-      expiresIn: parseDurationSeconds(this.configService.get<string>('JWT_EXPIRES_IN'), 7 * 86400),
+      expiresIn: this.accessTokenTtlSeconds(),
     });
   }
 

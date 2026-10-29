@@ -156,6 +156,23 @@ export class ImportsService {
     };
   }
 
+  /**
+   * Delete stale, never-committed preview batches (and their raw rows by
+   * cascade). Completed/failed batches are history and are kept. Retention is
+   * a manual/ops command, not a request path, so it cannot be triggered by a
+   * user and cannot delete a batch that is still being previewed.
+   */
+  async purgeExpiredPreviews(retentionDays: number, now: Date = new Date()): Promise<number> {
+    if (!Number.isFinite(retentionDays) || retentionDays < 1) {
+      throw new BadRequestException('Thời gian lưu preview phải là số ngày dương');
+    }
+    const cutoff = new Date(now.getTime() - retentionDays * 24 * 60 * 60 * 1000);
+    const result = await this.prisma.importBatch.deleteMany({
+      where: { status: 'PREVIEW_READY', createdAt: { lt: cutoff } },
+    });
+    return result.count;
+  }
+
   async list(userId: string) {
     const batches = await this.prisma.importBatch.findMany({
       where: { userId },
