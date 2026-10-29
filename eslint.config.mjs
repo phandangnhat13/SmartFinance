@@ -15,6 +15,8 @@ export default tseslint.config(
       '**/vitest.config.ts',
       'prisma/migrations/**',
       'apps/ai-service/**',
+      '.venv/**',
+      'venv/**',
       '.localdb/**',
       '_extracted/**',
     ],

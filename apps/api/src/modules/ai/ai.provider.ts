@@ -8,11 +8,18 @@ export interface ClassificationInput {
   type: 'INCOME' | 'EXPENSE';
 }
 
+/**
+ * Mirrors the FastAPI `ClassifyResponse`. The AI service owns the confidence
+ * threshold, so `isConfident` is authoritative; the API only falls back to its
+ * own threshold for older providers that do not send it.
+ */
 export interface RawClassification {
   label: string | null;
   confidence: number | null;
-  status: string;
-  model: { name: string; version: string };
+  isConfident?: boolean;
+  alternatives?: Array<{ label: string; confidence: number }>;
+  modelName?: string;
+  modelVersion?: string;
 }
 
 export interface AiProvider {
@@ -68,8 +75,11 @@ export class HttpAiProvider implements AiProvider {
     if (!response.ok) {
       throw new Error(`AI service responded ${response.status}`);
     }
-    const body = (await response.json()) as { items?: RawClassification[] };
-    return body.items ?? [];
+    const body = (await response.json()) as {
+      results?: RawClassification[];
+      items?: RawClassification[];
+    };
+    return body.results ?? body.items ?? [];
   }
 
   async health(): Promise<boolean> {

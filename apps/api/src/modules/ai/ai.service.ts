@@ -111,10 +111,9 @@ export class AiService {
     raw: RawClassification,
     transactionId?: string,
   ): Promise<AiSuggestionDto> {
-    const modelName = (raw.model?.name ?? 'tfidf-logreg').slice(0, 80);
+    const modelName = (raw.modelName ?? 'tfidf-char-logreg').slice(0, 80);
     const modelVersion = (
-      raw.model?.version ??
-      this.configService.get<string>('AI_MODEL_VERSION', 'baseline-tfidf-lr-v1')
+      raw.modelVersion ?? this.configService.get<string>('AI_MODEL_VERSION', 'tfidf-char-lr-v2')
     ).slice(0, 80);
 
     const label = raw.label
@@ -182,7 +181,10 @@ export class AiService {
       },
     });
 
-    const lowConfidence = confidence === null || confidence < AI_CONFIDENCE_THRESHOLD;
+    const lowConfidence =
+      typeof raw.isConfident === 'boolean'
+        ? !raw.isConfident
+        : confidence === null || confidence < AI_CONFIDENCE_THRESHOLD;
     return {
       categoryId: category.id,
       categoryName: category.name,
@@ -210,7 +212,7 @@ export class AiService {
       confidence: null,
       status: 'model_not_ready',
       predictionId: null,
-      modelVersion: this.configService.get<string>('AI_MODEL_VERSION') ?? null,
+      modelVersion: this.configService.get<string>('AI_MODEL_VERSION') ?? 'tfidf-char-lr-v2',
       message: 'AI Service chưa sẵn sàng. Bạn vẫn có thể nhập giao dịch và chọn danh mục thủ công.',
     };
   }

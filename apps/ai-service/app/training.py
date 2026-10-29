@@ -1,20 +1,27 @@
-"""Training and evaluation for the transaction classifier.
+"""Training entry point for the transaction classifier.
 
 Model: TF-IDF over character n-grams + multinomial Logistic Regression.
 Character n-grams were chosen because they handle Vietnamese diacritics,
 telex/no-diacritic typing and short merchant names without a tokenizer.
 
-Evaluation protocol: 5-fold StratifiedGroupKFold grouped by sentence template.
-The same template never appears in both train and test, so the scores measure
-generalisation to unseen phrasings instead of memorisation of surface variants.
-Metrics are computed from the pooled out-of-fold predictions. The saved model is
-then fitted once on the full dataset.
+Selection is performed by ``scripts/evaluate_models.py`` on the validation split
+(``models/selection.json``): it chooses the regularisation strength C and the
+abstention threshold. This module fits the deployable artifact on
+train + validation and never touches the held-out test split for tuning.
+
+If no selection file exists, the module falls back to grouped cross-validation
+on the supplied dataset and the default threshold from ``taxonomy.py``.
+
+The saved artifact contains the fitted pipeline, the threshold and the
+evaluation metrics, so serving code does not duplicate any constants.
 """
 
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
+import warnings
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,12 +38,17 @@ from sklearn.metrics import (
 from sklearn.model_selection import StratifiedGroupKFold, cross_val_predict
 from sklearn.pipeline import Pipeline
 
-from .taxonomy import TAXONOMY
+from .taxonomy import CONFIDENCE_THRESHOLD, TAXONOMY
+
+# scikit-learn 1.6 passes `iprint` to SciPy's lbfgs, which newer SciPy no longer
+# accepts. It is harmless but noisy, so silence only that exact message.
+warnings.filterwarnings("ignore", message="Unknown solver options: iprint")
 
 MODEL_NAME = "tfidf-char-logreg"
-MODEL_VERSION = "baseline-tfidf-lr-v1"
+MODEL_VERSION = "tfidf-char-lr-v2"
 RANDOM_STATE = 42
 CV_FOLDS = 5
+DEFAULT_C = 2.0
 
 
 @dataclass
@@ -65,7 +77,7 @@ def load_dataset(csv_path: Path) -> Dataset:
     return Dataset(descriptions, labels, groups)
 
 
-def _build_pipeline() -> Pipeline:
+def _build_pipeline(c_value: float = DEFAULT_C) -> Pipeline:
     return Pipeline(
         [
             (
@@ -81,7 +93,7 @@ def _build_pipeline() -> Pipeline:
             (
                 "clf",
                 LogisticRegression(
-                    C=2.0,
+                    C=c_value,
                     max_iter=3000,
                     class_weight="balanced",
                     random_state=RANDOM_STATE,
@@ -120,41 +132,91 @@ def compute_metrics(truth: list[str], predictions: list[str], labels: list[str])
     }
 
 
-def train_and_evaluate(csv_path: Path) -> dict:
+def load_selection(model_dir: Path) -> dict | None:
+    path = model_dir / "selection.json"
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def dataset_fingerprint(files: list[Path]) -> str | None:
+    if not files or not all(path.exists() for path in files):
+        return None
+    joined = "".join(hashlib.sha256(path.read_bytes()).hexdigest() for path in files)
+    return hashlib.sha256(joined.encode("ascii")).hexdigest()
+
+
+def train_and_evaluate(
+    csv_path: Path,
+    selection: dict | None = None,
+    dataset_files: list[Path] | None = None,
+) -> dict:
     dataset = load_dataset(csv_path)
-    labels = sorted({*dataset.labels})
-
-    cross_validation = StratifiedGroupKFold(
-        n_splits=CV_FOLDS, shuffle=True, random_state=RANDOM_STATE
-    )
-    out_of_fold = cross_val_predict(
-        _build_pipeline(),
-        dataset.descriptions,
-        dataset.labels,
-        groups=dataset.groups,
-        cv=cross_validation,
-        n_jobs=1,
-    )
-    metrics = compute_metrics(dataset.labels, list(out_of_fold), labels)
-    metrics.update(
-        {
-            "datasetSize": len(dataset.descriptions),
-            "protocol": (
-                f"{CV_FOLDS}-fold StratifiedGroupKFold by template group; "
-                "metrics from pooled out-of-fold predictions"
-            ),
-        }
+    c_value = float(selection.get("bestC", DEFAULT_C)) if selection else DEFAULT_C
+    threshold = (
+        float(selection.get("threshold", CONFIDENCE_THRESHOLD)) if selection else CONFIDENCE_THRESHOLD
     )
 
-    # Final artifact: same pipeline fitted on every available example.
-    pipeline = _build_pipeline()
+    pipeline = _build_pipeline(c_value)
     pipeline.fit(dataset.descriptions, dataset.labels)
+    labels = list(pipeline.classes_)
+
+    metrics: dict
+    if selection and selection.get("testMetrics"):
+        test_metrics = selection["testMetrics"]
+        metrics = {
+            "accuracy": test_metrics["accuracy"],
+            "macroF1": test_metrics["macroF1"],
+            "weightedF1": test_metrics["weightedF1"],
+            "protocol": (
+                "held-out template-group test split; C and threshold selected on validation "
+                "by scripts/evaluate_models.py"
+            ),
+            "datasetSize": len(dataset.descriptions),
+            "validation": selection.get("validationMetrics"),
+            "test": test_metrics,
+            "paraphrase": selection.get("paraphraseMetrics"),
+            "atSelectedThresholdOnTest": selection.get("atSelectedThresholdOnTest"),
+        }
+    else:
+        cross_validation = StratifiedGroupKFold(
+            n_splits=CV_FOLDS, shuffle=True, random_state=RANDOM_STATE
+        )
+        out_of_fold = cross_val_predict(
+            _build_pipeline(c_value),
+            dataset.descriptions,
+            dataset.labels,
+            groups=dataset.groups,
+            cv=cross_validation,
+            n_jobs=1,
+        )
+        metrics = compute_metrics(dataset.labels, list(out_of_fold), labels)
+        metrics.update(
+            {
+                "datasetSize": len(dataset.descriptions),
+                "protocol": (
+                    f"{CV_FOLDS}-fold StratifiedGroupKFold by template group; "
+                    "metrics from pooled out-of-fold predictions"
+                ),
+            }
+        )
+
     return {
         "pipeline": pipeline,
         "modelName": MODEL_NAME,
         "modelVersion": MODEL_VERSION,
         "trainedAt": datetime.now(timezone.utc).isoformat(),
-        "labels": list(pipeline.classes_),
+        "labels": labels,
+        "threshold": threshold,
+        "selectionRunId": (selection or {}).get("runId"),
+        "dataset": {
+            "fingerprint": dataset_fingerprint(dataset_files or []),
+            "splits": (selection or {}).get("datasetSplits"),
+            "size": len(dataset.descriptions),
+        },
         "metrics": metrics,
     }
 
@@ -170,6 +232,9 @@ def save_artifact(artifact: dict, model_dir: Path) -> Path:
                 "modelName": artifact["modelName"],
                 "modelVersion": artifact["modelVersion"],
                 "trainedAt": artifact["trainedAt"],
+                "threshold": artifact["threshold"],
+                "selectionRunId": artifact.get("selectionRunId"),
+                "dataset": artifact.get("dataset"),
                 "metrics": artifact["metrics"],
             },
             ensure_ascii=False,
@@ -193,7 +258,9 @@ __all__ = [
     "MODEL_NAME",
     "MODEL_VERSION",
     "compute_metrics",
+    "dataset_fingerprint",
     "load_dataset",
+    "load_selection",
     "predict_proba_for_label",
     "save_artifact",
     "train_and_evaluate",

@@ -40,7 +40,11 @@ Monorepo gồm: React SPA, NestJS REST API, PostgreSQL (Prisma), và Python Fast
 **AI phân loại giao dịch**
 
 - Mô hình TF-IDF (char n-gram) + Logistic Regression, taxonomy 11 danh mục dùng chung giữa API và UI.
+- Dataset tổng hợp chia theo template group; so sánh **3 phương pháp** (keyword baseline,
+  TF-IDF + LR, TF-IDF + calibrated LinearSVC) trên tập test held-out.
+- Ngưỡng tin cậy **0.50** chọn trên validation; gợi ý dưới ngưỡng trả `low_confidence`.
 - Gợi ý danh mục kèm độ tin cậy; giao diện cho phép **Chấp nhận** hoặc **Sửa** và ghi lại phản hồi.
+- Thu thập phản hồi chỉ khi người dùng bật `allowAiResearch`; xuất JSONL đã khử định danh.
 - API gateway trong NestJS có timeout, cache model info và **fallback** khi AI service không sẵn sàng.
 
 ---
@@ -181,18 +185,28 @@ Không commit `.env`, API key hoặc dữ liệu cá nhân.
 
 ## 6. Scripts
 
-| Lệnh                                       | Ý nghĩa                                               |
-| ------------------------------------------ | ----------------------------------------------------- |
-| `npm run dev`                              | API + web ở chế độ watch                              |
-| `npm run dev:ai`                           | AI service với uvicorn `--reload`                     |
-| `npm run build`                            | Build shared-types → API → web                        |
-| `npm run lint` / `npm run format`          | ESLint flat config / Prettier                         |
-| `npm run typecheck`                        | `tsc --noEmit` cho tất cả workspace                   |
-| `npm test`                                 | Unit test API (Jest) + web (Vitest)                   |
-| `npm run test:e2e`                         | E2E API với PostgreSQL thật (cần `TEST_DATABASE_URL`) |
-| `npm run prisma:migrate` / `prisma:deploy` | Migration ở môi trường dev / triển khai               |
-| `npm run prisma:seed`                      | System categories (+ demo nếu `SEED_DEMO=true`)       |
-| `npm run prisma:studio`                    | Prisma Studio                                         |
+| Lệnh                                            | Ý nghĩa                                               |
+| ----------------------------------------------- | ----------------------------------------------------- |
+| `npm run dev`                                   | API + web ở chế độ watch                              |
+| `npm run dev:ai`                                | AI service với uvicorn `--reload`                     |
+| `npm run build`                                 | Build shared-types → API → web                        |
+| `npm run lint` / `npm run format`               | ESLint flat config / Prettier                         |
+| `npm run typecheck`                             | `tsc --noEmit` cho tất cả workspace                   |
+| `npm test`                                      | Unit test API (Jest) + web (Vitest)                   |
+| `npm run test:e2e`                              | E2E API với PostgreSQL thật (cần `TEST_DATABASE_URL`) |
+| `npm run prisma:migrate` / `prisma:deploy`      | Migration ở môi trường dev / triển khai               |
+| `npm run prisma:seed`                           | System categories (+ demo nếu `SEED_DEMO=true`)       |
+| `npm run prisma:studio`                         | Prisma Studio                                         |
+| `npm run feedback:export -w @smart-finance/api` | Xuất feedback AI đã khử định danh (có `--dry-run`)    |
+
+Script AI (chạy trong `apps/ai-service`):
+
+| Lệnh                                 | Ý nghĩa                                                |
+| ------------------------------------ | ------------------------------------------------------ |
+| `python scripts/generate_dataset.py` | Sinh lại dataset tổng hợp (tất định theo seed)         |
+| `python scripts/validate_dataset.py` | Kiểm tra trùng/rò rỉ/độ phủ nhãn trước khi train       |
+| `python scripts/evaluate_models.py`  | So sánh 3 phương pháp, chọn ngưỡng trên validation     |
+| `python scripts/train.py`            | Huấn luyện artifact phục vụ từ `models/selection.json` |
 
 ### Kiểm thử
 
@@ -209,15 +223,39 @@ Xem chi tiết phạm vi, dữ liệu test và tiêu chí chấp nhận tại [d
 
 ## 7. AI service
 
-- Dataset sinh tổng hợp có kiểm soát trong `apps/ai-service/data/training_data.csv`.
-- Huấn luyện: `python apps/ai-service/scripts/train.py` (ghi `models/model.joblib`, `models/metrics.json`).
-- Đánh giá bằng `StratifiedGroupKFold` theo template câu để hạn chế rò rỉ dữ liệu.
-- Baseline hiện tại: TF-IDF `char_wb` 2–5 gram + Logistic Regression,
-  accuracy ≈ **0.58**, macro F1 ≈ **0.59** trên 5 fold (xem `models/metrics.json`).
-- Ngưỡng tin cậy 0.55: dưới ngưỡng, API trả `low_confidence` và UI nhắc người dùng kiểm tra.
-- Kết quả AI **chỉ là đề xuất**; giao dịch chỉ lưu danh mục sau khi người dùng xác nhận.
+- Dữ liệu tổng hợp `synthetic-v2` chia **theo template group**: 992 train / 200 validation /
+  200 test held-out / 440 paraphrase. Không có cụm mô tả nào xuất hiện ở hai split.
+- Kiểm tra dữ liệu: `python apps/ai-service/scripts/validate_dataset.py` (trùng, rò rỉ group,
+  độ phủ nhãn, sai type).
+- Đánh giá 3 phương pháp: `python apps/ai-service/scripts/evaluate_models.py` — chọn `C` và
+  ngưỡng trên **validation**, chấm test một lần, ghi confusion matrix PNG/JSON và metadata.
+- Huấn luyện artifact phục vụ: `python apps/ai-service/scripts/train.py`
+  (ghi `models/model.joblib`, `models/metrics.json`, đọc `models/selection.json`).
 
-Chi tiết taxonomy, giả thuyết và hướng cải thiện: [docs/AI_RESEARCH_PLAN.md](docs/AI_RESEARCH_PLAN.md).
+Kết quả test held-out (200 dòng):
+
+| Phương pháp                      |   Accuracy |   Macro F1 | Weighted F1 |
+| -------------------------------- | ---------: | ---------: | ----------: |
+| Keyword baseline                 |     0.3700 |     0.3202 |      0.3321 |
+| **TF-IDF + Logistic Regression** | **0.7000** | **0.7151** |  **0.7005** |
+| TF-IDF + calibrated LinearSVC    |     0.6800 |     0.6937 |      0.6781 |
+
+- Ngưỡng **0.50**: test coverage 47.0% (94/200), selective accuracy 83.0%.
+- Kết quả AI **chỉ là đề xuất**; giao dịch chỉ lưu danh mục sau khi người dùng xác nhận.
+- Đây là số liệu trên dữ liệu tổng hợp, **không phải** ước lượng độ chính xác trên người dùng thật.
+
+Chi tiết: [docs/AI_EVALUATION_REPORT.md](docs/AI_EVALUATION_REPORT.md),
+[docs/AI_MODEL_CARD.md](docs/AI_MODEL_CARD.md),
+[docs/AI_DATASET_GUIDELINES.md](docs/AI_DATASET_GUIDELINES.md).
+
+### Feedback và quyền riêng tư
+
+- Người dùng bật **Cho phép dùng phản hồi AI để nghiên cứu** trong Cài đặt (mặc định tắt).
+- `npm run feedback:export -w @smart-finance/api -- --dry-run` xem trước; bỏ `--dry-run` để ghi
+  `exports/ai-feedback-<timestamp>.jsonl` + metadata. File đã khử email/số điện thoại/số dài,
+  không chứa `userId`, email hay `predictionId`.
+- Không tự động train lại từ feedback; quy trình rà soát thủ công mô tả tại
+  [docs/AI_FEEDBACK_PIPELINE.md](docs/AI_FEEDBACK_PIPELINE.md).
 
 ---
 
@@ -245,6 +283,8 @@ account,type,amount,occurredAt,description,category,note,currency
 - Validation whitelist + `forbidNonWhitelisted`, giới hạn kích thước body/upload, helmet, rate limiting.
 - Lỗi trả về theo envelope thống nhất, không lộ stack trace.
 - CSV export escape công thức; file upload chỉ chấp nhận `.csv`.
+- Phản hồi AI chỉ được xuất khi người dùng bật `allowAiResearch`; mô tả được khử email/số điện
+  thoại/số dài, không xuất `userId`, email hay `predictionId`.
 
 Các advisory còn lại của dependencies (chủ yếu ở dev tooling) được ghi nhận tại
 [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md).
@@ -256,6 +296,8 @@ Các advisory còn lại của dependencies (chủ yếu ở dev tooling) đư�
 | Tài liệu                                                       | Nội dung                                      |
 | -------------------------------------------------------------- | --------------------------------------------- |
 | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)               | Kế hoạch và tiến độ theo phase                |
+| [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)     | Kế hoạch vòng 2 (fullstack + AI Phase 2)      |
+| [docs/IMPLEMENTATION_AUDIT.md](docs/IMPLEMENTATION_AUDIT.md)   | Kết quả audit, lỗi đã sửa, khoảng trống       |
 | [docs/PROJECT_CHARTER.md](docs/PROJECT_CHARTER.md)             | Mục tiêu, phạm vi, tiêu chí thành công        |
 | [docs/SRS.md](docs/SRS.md)                                     | Yêu cầu chức năng/phi chức năng               |
 | [docs/USE_CASES.md](docs/USE_CASES.md)                         | Use case và luồng chính                       |
@@ -263,6 +305,10 @@ Các advisory còn lại của dependencies (chủ yếu ở dev tooling) đư�
 | [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md)             | Mô hình dữ liệu, ràng buộc                    |
 | [docs/API_SPECIFICATION.md](docs/API_SPECIFICATION.md)         | Đặc tả endpoint                               |
 | [docs/AI_RESEARCH_PLAN.md](docs/AI_RESEARCH_PLAN.md)           | Taxonomy, dữ liệu, mô hình, đánh giá          |
+| [docs/AI_DATASET_GUIDELINES.md](docs/AI_DATASET_GUIDELINES.md) | Quy tắc dataset, chia split, tái tạo          |
+| [docs/AI_EVALUATION_REPORT.md](docs/AI_EVALUATION_REPORT.md)   | Kết quả đánh giá 3 phương pháp (số thật)      |
+| [docs/AI_MODEL_CARD.md](docs/AI_MODEL_CARD.md)                 | Model card, hạn chế, cân nhắc đạo đức         |
+| [docs/AI_FEEDBACK_PIPELINE.md](docs/AI_FEEDBACK_PIPELINE.md)   | Consent, khử định danh, quy trình export      |
 | [docs/TEST_PLAN.md](docs/TEST_PLAN.md)                         | Chiến lược và kết quả kiểm thử                |
 | [docs/DECISIONS.md](docs/DECISIONS.md)                         | Nhật ký quyết định                            |
 | [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | Trạng thái thực tế, lệnh đã chạy, lỗi đã biết |

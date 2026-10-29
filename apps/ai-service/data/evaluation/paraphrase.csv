@@ -1,0 +1,441 @@
+id,description,label,type,group,split,source,generator_version
+par-014ce5fa66a3,hôm qua mua tài liệu ôn thi,education,EXPENSE,eval_education_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-01646114243c,tuần trước mua đồ linh tinh,other,EXPENSE,eval_other_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-02c98de4badd,sáng nay gọi trà sữa size lớn,food,EXPENSE,eval_food_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-02d02e5ebc28,tuần trước đóng học phí học kỳ,education,EXPENSE,eval_education_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-031fd454ac1f,hôm qua đăng ký gói netflix,entertainment,EXPENSE,eval_entertainment_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-036ae0c076cc,tuan truoc uong nuoc ep trai cay,food,EXPENSE,eval_food_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-054dce5adbb3,cho thuê phòng trọ,income_other,INCOME,eval_income_other_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-05a408afb5b2,tiêm vắc xin,health,EXPENSE,eval_health_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-05fe8ba93de5,sang nay dong gop cong dong,other,EXPENSE,eval_other_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-062ba2cc84ef,mua balo đi học,shopping,EXPENSE,eval_shopping_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-068ccdbfd4a7,tuan truoc mua ve tau dien,transport,EXPENSE,eval_transport_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-06d8ee2abbdb,hôm qua thu nhập từ làm freelance,income_other,INCOME,eval_income_other_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-078b84b5bb49,tuan truoc mua ve cong vien nuoc,entertainment,EXPENSE,eval_entertainment_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-088460f9d2a7,tuần trước công ty trả lương tháng 11,salary,INCOME,eval_salary_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-0b78507eb9f9,đi cà phê nhạc sống,entertainment,EXPENSE,eval_entertainment_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-0bb16f0cc642,co tuc duoc chia,income_other,INCOME,eval_income_other_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-0d81283b6b97,sang nay tien cung ong ba,other,EXPENSE,eval_other_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-0d92ace9c052,bán hàng qua mạng,income_other,INCOME,eval_income_other_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-0e221c3d68aa,tuần trước chi phí phát sinh ngoài dự kiến,other,EXPENSE,eval_other_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-0e3a1963574e,tuần trước lãi gửi tiết kiệm,income_other,INCOME,eval_income_other_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-0fb242b473fa,ăn lẩu gia đình cuối tuần,food,EXPENSE,eval_food_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-0fe951a04f2b,mua bảo hiểm y tế tự nguyện,health,EXPENSE,eval_health_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-103042a063d8,tuần trước ủng hộ quỹ từ thiện,other,EXPENSE,eval_other_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-103ea6def265,hôm qua phí gửi xe ở trung tâm thương mại,transport,EXPENSE,eval_transport_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1060654e4629,sáng nay ăn lẩu gia đình cuối tuần,food,EXPENSE,eval_food_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-11154c34b241,tuần trước đi cà phê nhạc sống,entertainment,EXPENSE,eval_entertainment_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-11be14ff3048,phi sms bien dong so du,transfer_fee,EXPENSE,eval_transfer_fee_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-11d809d58e7b,sáng nay mua bánh ngọt ở tiệm,food,EXPENSE,eval_food_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-11dc3155dc0d,tuần trước mua áo khoác mùa đông,shopping,EXPENSE,eval_shopping_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-11e6eab5d57c,tuan truoc mua hat dinh duong,food,EXPENSE,eval_food_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-125496f2233a,sáng nay phí chung cư hàng tháng,housing,EXPENSE,eval_housing_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-12858637f713,mua vé xem phim cuối tuần,entertainment,EXPENSE,eval_entertainment_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-12861081a1ea,hom qua nhan luong qua tai khoan,salary,INCOME,eval_salary_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-12f2ad37764b,hôm qua mua bánh ngọt ở tiệm,food,EXPENSE,eval_food_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-13effa98082f,sáng nay phí chuyển tiền qua app,transfer_fee,EXPENSE,eval_transfer_fee_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-142a2dfae1d7,sáng nay công ty trả lương tháng 11,salary,INCOME,eval_salary_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-144f783f5d3c,sáng nay lắp mạng internet cáp quang,housing,EXPENSE,eval_housing_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-14818cca3f23,hôm qua đóng tiền nhà tháng này,housing,EXPENSE,eval_housing_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-15dd2744ea74,hôm qua đăng ký khóa học tiếng nhật,education,EXPENSE,eval_education_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1637641f84de,phu cap an trua,salary,INCOME,eval_salary_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-183bf3ecd4b2,mua hat dinh duong,food,EXPENSE,eval_food_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-18580456fb00,hôm qua bán điện thoại cũ,income_other,INCOME,eval_income_other_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-18588fed0c7e,hom qua phi chuyen tien qua app,transfer_fee,EXPENSE,eval_transfer_fee_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-18c43cfb99c1,hom qua phi chuyen khoan lien ngan hang,transfer_fee,EXPENSE,eval_transfer_fee_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-18cbe7039ed0,tuần trước tiền cúng ông bà,other,EXPENSE,eval_other_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-19a46838fad7,sang nay mua dong ho thong minh,shopping,EXPENSE,eval_shopping_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1a019f7b700d,tuần trước mua tài liệu ôn thi,education,EXPENSE,eval_education_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1a22a179671f,mua thuoc nho mat,health,EXPENSE,eval_health_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1a68be554f57,hom qua nhan luong chuyen khoan thang nay,salary,INCOME,eval_salary_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1a9c73386231,sang nay ban dien thoai cu,income_other,INCOME,eval_income_other_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1b4ffea96fc7,tuần trước phí duy trì tài khoản ngân hàng,transfer_fee,EXPENSE,eval_transfer_fee_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1d230357ed69,sang nay thue xe may di du lich,transport,EXPENSE,eval_transport_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1d4f2190d320,sáng nay đăng ký khóa học tiếng nhật,education,EXPENSE,eval_education_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1f030fc26502,tuan truoc phi chuyen tien qua app,transfer_fee,EXPENSE,eval_transfer_fee_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-1febaef955e6,hôm qua ăn sáng bánh xèo,food,EXPENSE,eval_food_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-218a3320aa51,phí chuyển tiền qua app,transfer_fee,EXPENSE,eval_transfer_fee_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-21cff18b0b89,ăn sáng bánh xèo,food,EXPENSE,eval_food_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-21dae405b37f,tuan truoc khoa hoc ky nang mem,education,EXPENSE,eval_education_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-23708d0c6f38,sáng nay ủng hộ quỹ từ thiện,other,EXPENSE,eval_other_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-27be64d596af,sáng nay lì xì cho trẻ con,other,EXPENSE,eval_other_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-296f0b8dc116,tuần trước phí sms biến động số dư,transfer_fee,EXPENSE,eval_transfer_fee_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-29edfaa5e6e8,hom qua chi tieu khong ro muc dich,other,EXPENSE,eval_other_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-2b82af819035,sang nay mua ve cong vien nuoc,entertainment,EXPENSE,eval_entertainment_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-2c053ed870e4,sáng nay mua thuốc cảm cúm,health,EXPENSE,eval_health_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-2cd18f5f19a0,sáng nay đặt sushi giao tận nhà,food,EXPENSE,eval_food_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-2e73354afd3c,hôm qua đổ dầu xe tải,transport,EXPENSE,eval_transport_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-2f06bb6f21dd,sang nay mua ca phe mang di o winmart,food,EXPENSE,eval_food_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-2fe094a601ba,hôm qua cho thuê phòng trọ,income_other,INCOME,eval_income_other_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-2fe233cc4611,ăn bún bò ở tiệm cơm chay,food,EXPENSE,eval_food_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-30436e879c6c,tuần trước sửa cửa nhà bị hỏng,housing,EXPENSE,eval_housing_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-314193efde1d,hom qua mua may do huyet ap,health,EXPENSE,eval_health_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3144b8534ad2,sáng nay mừng sinh nhật đồng nghiệp,other,EXPENSE,eval_other_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-31ad22b5005b,hom qua phi duy tri tai khoan ngan hang,transfer_fee,EXPENSE,eval_transfer_fee_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-31dee423efc6,tuần trước nhận lương qua tài khoản,salary,INCOME,eval_salary_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-31ec9309460d,hôm qua mua thuốc nhỏ mắt,health,EXPENSE,eval_health_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-31f67a3a0b78,hôm qua mua đồ linh tinh,other,EXPENSE,eval_other_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-32a3ff62894a,hôm qua phí mở thẻ tín dụng,transfer_fee,EXPENSE,eval_transfer_fee_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-33019ab0b246,lì xì cho trẻ con,other,EXPENSE,eval_other_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-336f2ffb11c9,mua cà phê mang đi ở bách hóa xanh,food,EXPENSE,eval_food_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-352d9ab3ed4f,đi vật lý trị liệu vai,health,EXPENSE,eval_health_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-361bb65ec526,sáng nay phí duy trì tài khoản ngân hàng,transfer_fee,EXPENSE,eval_transfer_fee_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-368bedd336bc,tuần trước điều trị viêm họng,health,EXPENSE,eval_health_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-369ee71c155d,mua sach tham khao,education,EXPENSE,eval_education_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-39d361508e8f,ăn tối ở quán nướng,food,EXPENSE,eval_food_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-39fdc0cd43ed,sáng nay mua áo khoác mùa đông,shopping,EXPENSE,eval_shopping_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3a4c84816209,mua ao khoac mua dong,shopping,EXPENSE,eval_shopping_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3ae6787bc7e3,sang nay tien nuoc sinh hoat,housing,EXPENSE,eval_housing_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3b5c2229aeba,hoc phi mam non,education,EXPENSE,eval_education_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3c8a06c74e3c,sáng nay mua giày chạy bộ,shopping,EXPENSE,eval_shopping_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3cea6dfc2ae3,tuần trước mua bảo hiểm y tế tự nguyện,health,EXPENSE,eval_health_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3d365ad57e13,tuần trước đặt sushi giao tận nhà,food,EXPENSE,eval_food_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3e4339dfdf02,phí chuyển khoản liên ngân hàng,transfer_fee,EXPENSE,eval_transfer_fee_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3f87a77eab12,sáng nay mua máy ảnh cũ,shopping,EXPENSE,eval_shopping_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-3fe6c2e9fc0a,hôm qua thuê xe máy đi du lịch,transport,EXPENSE,eval_transport_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-40be9d73bece,mua sac du phong,shopping,EXPENSE,eval_shopping_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-41fda4b01096,sáng nay phí thường niên thẻ ghi nợ,transfer_fee,EXPENSE,eval_transfer_fee_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-430c4b2f1160,hôm qua nhận tiền bảo hiểm,income_other,INCOME,eval_income_other_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-43519343d864,tuần trước đăng ký khóa học tiếng nhật,education,EXPENSE,eval_education_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-45011e60e1ed,hôm qua lệ phí thi chứng chỉ tin học,education,EXPENSE,eval_education_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-46ed7ffea018,sang nay mua do linh tinh,other,EXPENSE,eval_other_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-47dbfa49d2ff,tuan truoc mua laptop phuc vu hoc tap,education,EXPENSE,eval_education_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-48383b2d5e50,sang nay xet nghiem mau tong quat,health,EXPENSE,eval_health_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-497b95dc635e,sang nay phi chuyen khoan lien ngan hang,transfer_fee,EXPENSE,eval_transfer_fee_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-49a0b8b105ba,sang nay mua ve xem phim cuoi tuan,entertainment,EXPENSE,eval_entertainment_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-49b4b992fb81,tuần trước phí thường niên thẻ ghi nợ,transfer_fee,EXPENSE,eval_transfer_fee_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-49eaedce1758,thu nhập từ làm freelance,income_other,INCOME,eval_income_other_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-49ec9c433282,mua lốp xe mới,transport,EXPENSE,eval_transport_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-4ad14a4e6757,chi phí phát sinh ngoài dự kiến,other,EXPENSE,eval_other_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-4c4f7e3d30d1,hôm qua mua bảo hiểm y tế tự nguyện,health,EXPENSE,eval_health_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-4c79daa5d4d1,tuan truoc an bun bo o tiem com chay,food,EXPENSE,eval_food_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-4cbbb829eb9c,sáng nay mua thuốc nhỏ mắt,health,EXPENSE,eval_health_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-4d263862e4cc,sáng nay tiền lãi từ quỹ đầu tư,income_other,INCOME,eval_income_other_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-4f6620a6b462,tuần trước mua máy ảnh cũ,shopping,EXPENSE,eval_shopping_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-4f725f3ff956,hôm qua sửa cửa nhà bị hỏng,housing,EXPENSE,eval_housing_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-50e36b353891,tuần trước phí chung cư hàng tháng,housing,EXPENSE,eval_housing_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-511b95b3f51c,sang nay di taxi tu san bay ve nha,transport,EXPENSE,eval_transport_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-51bd3a7028c1,hôm qua đi vật lý trị liệu vai,health,EXPENSE,eval_health_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-5209ba7ada2c,hôm qua xét nghiệm máu tổng quát,health,EXPENSE,eval_health_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-53f09ba7ae24,tiền lãi từ quỹ đầu tư,income_other,INCOME,eval_income_other_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-5418827c38ad,sáng nay lãi gửi tiết kiệm,income_other,INCOME,eval_income_other_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-54b201b7121d,gọi trà sữa size lớn,food,EXPENSE,eval_food_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-54cca30d7a0d,sáng nay ăn bún bò ở tiệm cơm chay,food,EXPENSE,eval_food_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-55e62903d114,hôm qua tiêm vắc xin,health,EXPENSE,eval_health_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-576590e25090,sáng nay thuê phòng hát,entertainment,EXPENSE,eval_entertainment_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-58b2eb1a1b53,tuần trước bán điện thoại cũ,income_other,INCOME,eval_income_other_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-5b23fc705747,hom qua mua lop xe moi,transport,EXPENSE,eval_transport_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-5ba3e72afbd5,phí mở thẻ tín dụng,transfer_fee,EXPENSE,eval_transfer_fee_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-5c8dc1613270,phí chung cư hàng tháng,housing,EXPENSE,eval_housing_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-5cc6fddef181,tuan truoc co tuc duoc chia,income_other,INCOME,eval_income_other_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-5dd30d474728,hôm qua đặt son môi trên mạng,shopping,EXPENSE,eval_shopping_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-5e7cfdef6d11,hôm qua bán quần áo cũ,income_other,INCOME,eval_income_other_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-60a8fb99152a,sáng nay tiền lương làm thêm giờ,salary,INCOME,eval_salary_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-612d4761634e,hôm qua đặt tour du lịch,entertainment,EXPENSE,eval_entertainment_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-620ca5ac302d,lắp mạng internet cáp quang,housing,EXPENSE,eval_housing_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6257920813cd,mua máy ảnh cũ,shopping,EXPENSE,eval_shopping_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6335b95ca014,khóa học kỹ năng mềm,education,EXPENSE,eval_education_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-63b8e4bdb7a0,sáng nay mua tài liệu ôn thi,education,EXPENSE,eval_education_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-64d3823b8753,tuần trước thưởng cuối năm,salary,INCOME,eval_salary_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6575f810a93b,hôm qua bắt xe ôm công nghệ,transport,EXPENSE,eval_transport_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-658e0c92dd76,sáng nay uống nước ép trái cây,food,EXPENSE,eval_food_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-65ca279b60ef,ban dien thoai cu,income_other,INCOME,eval_income_other_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6615ed09fc24,mua bánh ngọt ở tiệm,food,EXPENSE,eval_food_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-664abec53b5f,dat sushi giao tan nha,food,EXPENSE,eval_food_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-674350b79abc,tuần trước đổ dầu xe tải,transport,EXPENSE,eval_transport_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6780d8a34313,hôm qua uống nước ép trái cây,food,EXPENSE,eval_food_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-67b5cd3ab5ed,tuan truoc thay may bom nuoc,housing,EXPENSE,eval_housing_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6806f3766408,tuần trước mua giày chạy bộ,shopping,EXPENSE,eval_shopping_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-68a90de79cf7,hôm qua phụ cấp ăn trưa,salary,INCOME,eval_salary_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-68e4f245dc20,sáng nay phí mở thẻ tín dụng,transfer_fee,EXPENSE,eval_transfer_fee_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-68f519cc43af,sáng nay mua vé tàu điện,transport,EXPENSE,eval_transport_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-692ff7db8a5b,sáng nay đơn hàng mỹ phẩm,shopping,EXPENSE,eval_shopping_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-693f98d08116,sáng nay mua quần áo cho con,shopping,EXPENSE,eval_shopping_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6a30e9b3e9cb,sang nay thu nhap cong viec chinh,salary,INCOME,eval_salary_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6ab3bb263263,lệ phí thi chứng chỉ tin học,education,EXPENSE,eval_education_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6b475f337d00,hom qua dat sushi giao tan nha,food,EXPENSE,eval_food_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6b5d763590b8,hôm qua phí sms biến động số dư,transfer_fee,EXPENSE,eval_transfer_fee_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6ba8bf884b6e,sáng nay phí rút tiền tại cây atm,transfer_fee,EXPENSE,eval_transfer_fee_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6c4566b8b3ea,đi hát karaoke với đồng nghiệp,entertainment,EXPENSE,eval_entertainment_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6d23ad14a31e,mua giay chay bo,shopping,EXPENSE,eval_shopping_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6d988088198c,tuần trước nhận tiền bảo hiểm,income_other,INCOME,eval_income_other_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6e11f6dec12e,hôm qua thuê gia sư toán,education,EXPENSE,eval_education_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6e5a6c6b7f11,hom qua phi chuyen tien nhanh,transfer_fee,EXPENSE,eval_transfer_fee_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6eed9c70b436,tuần trước bắt xe ôm công nghệ,transport,EXPENSE,eval_transport_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-6f15580e78e9,mung sinh nhat dong nghiep,other,EXPENSE,eval_other_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-70689a233316,mua bình nóng lạnh,housing,EXPENSE,eval_housing_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-70cb75cef1ac,hôm qua mua quần áo cho con,shopping,EXPENSE,eval_shopping_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7110f3f53ed3,mua vé xem bóng đá,entertainment,EXPENSE,eval_entertainment_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7195829494b1,bán quần áo cũ,income_other,INCOME,eval_income_other_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7235c7deb06f,sang nay nhan tien hoan tu shopee,income_other,INCOME,eval_income_other_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-734e2c59104a,tuan truoc don dep nha cua,housing,EXPENSE,eval_housing_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-737e23190e15,nhận tiền bảo hiểm,income_other,INCOME,eval_income_other_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-739cc0dac9ff,hóa đơn điện sinh hoạt,housing,EXPENSE,eval_housing_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-74fc3174c542,tuan truoc mua ve xem bong da,entertainment,EXPENSE,eval_entertainment_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-750180967319,sửa cửa nhà bị hỏng,housing,EXPENSE,eval_housing_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7503675c1e90,hôm qua điều trị viêm họng,health,EXPENSE,eval_health_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-75753065aa0b,điều trị viêm họng,health,EXPENSE,eval_health_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-763bf49c372a,hom qua goi tra sua size lon,food,EXPENSE,eval_food_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-763db2ea8f13,đặt son môi trên mạng,shopping,EXPENSE,eval_shopping_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7644d7bef946,sáng nay bán hàng qua mạng,income_other,INCOME,eval_income_other_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7665fc58a370,hôm qua phí rút tiền tại cây atm,transfer_fee,EXPENSE,eval_transfer_fee_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-767fd472cd71,sáng nay điều trị viêm họng,health,EXPENSE,eval_health_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-77c8a4c95602,tuần trước mua đồ trang trí nhà,shopping,EXPENSE,eval_shopping_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-78447d4aeefe,đi xe buýt tuyến số 5,transport,EXPENSE,eval_transport_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7a0897248a45,hom qua phi giao dich quoc te,transfer_fee,EXPENSE,eval_transfer_fee_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7a54ceec31ec,hôm qua đi hát karaoke với đồng nghiệp,entertainment,EXPENSE,eval_entertainment_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7ab1700878c1,mua vé công viên nước,entertainment,EXPENSE,eval_entertainment_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7ad7713a9e0d,tuần trước cho thuê phòng trọ,income_other,INCOME,eval_income_other_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7aef9ceeae4a,sang nay mua ve pha,transport,EXPENSE,eval_transport_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7b88cca3e7c6,sửa phanh xe đạp,transport,EXPENSE,eval_transport_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7d9819e8e235,sang nay sua cua nha bi hong,housing,EXPENSE,eval_housing_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7e89d2364feb,hôm qua tiền cúng ông bà,other,EXPENSE,eval_other_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7ecb3f6bdf5d,sáng nay đóng học phí học kỳ,education,EXPENSE,eval_education_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7f549165ecfe,tuần trước đặt son môi trên mạng,shopping,EXPENSE,eval_shopping_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-7f8e8bf7f4a1,mua đồ linh tinh,other,EXPENSE,eval_other_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-801b6636b94f,hôm qua mua vé xem bóng đá,entertainment,EXPENSE,eval_entertainment_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-80b9e2dd5440,sáng nay nhận lương qua tài khoản,salary,INCOME,eval_salary_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8154ae40cf88,sáng nay đi cà phê nhạc sống,entertainment,EXPENSE,eval_entertainment_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-81bc553eacd3,mua bàn ghế phòng ăn,housing,EXPENSE,eval_housing_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-820fe9c5765a,sang nay phi sms bien dong so du,transfer_fee,EXPENSE,eval_transfer_fee_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8252be7ae0d6,phong bì đám cưới,other,EXPENSE,eval_other_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-82abb5f265f3,thuê gia sư toán,education,EXPENSE,eval_education_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-84712422ac05,hôm qua phí thường niên thẻ ghi nợ,transfer_fee,EXPENSE,eval_transfer_fee_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-869e63531adf,tuan truoc lap mang internet cap quang,housing,EXPENSE,eval_housing_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-86cb0333e672,sáng nay thu nhập từ làm freelance,income_other,INCOME,eval_income_other_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-870ade36e6db,hôm qua ăn lẩu gia đình cuối tuần,food,EXPENSE,eval_food_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-87283a1a44bb,hôm qua thưởng doanh số quý,salary,INCOME,eval_salary_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-88239befea23,hôm qua khám da liễu,health,EXPENSE,eval_health_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-885412484336,hôm qua mừng sinh nhật đồng nghiệp,other,EXPENSE,eval_other_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8865b0a533be,hôm qua dọn dẹp nhà cửa,housing,EXPENSE,eval_housing_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-893745251294,đóng học phí học kỳ,education,EXPENSE,eval_education_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8963a3f7fed6,mua thuoc cam cum,health,EXPENSE,eval_health_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8a00dbf6f95d,tuan truoc tien nuoc sinh hoat,housing,EXPENSE,eval_housing_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8a575a684554,hôm qua đóng học phí học kỳ,education,EXPENSE,eval_education_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8b1d282ea53a,mua quan ao cho con,shopping,EXPENSE,eval_shopping_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8b952dce44b2,tuần trước đi vật lý trị liệu vai,health,EXPENSE,eval_health_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8cfdd6463628,tuần trước mua sạc dự phòng,shopping,EXPENSE,eval_shopping_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8dcbab2d90fa,thuê phòng hát,entertainment,EXPENSE,eval_entertainment_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8e0eeb716077,hôm qua mua truyện tranh mới,entertainment,EXPENSE,eval_entertainment_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8e3d0fa91c0f,hôm qua mua bình nóng lạnh,housing,EXPENSE,eval_housing_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8e7208c80af8,quy lop dong gop,other,EXPENSE,eval_other_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8ecd75b27c17,tuần trước gọi trà sữa size lớn,food,EXPENSE,eval_food_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8f7591f8f41d,hôm qua sửa phanh xe đạp,transport,EXPENSE,eval_transport_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8f9f3b60ff4e,mua laptop phục vụ học tập,education,EXPENSE,eval_education_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8fac9dbb9ed9,hôm qua thưởng cuối năm,salary,INCOME,eval_salary_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-8fd0669f1dea,tiền lương làm thêm giờ,salary,INCOME,eval_salary_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9019c581d2dd,tuần trước tiền lương làm thêm giờ,salary,INCOME,eval_salary_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-90336798b795,hôm qua bán hàng qua mạng,income_other,INCOME,eval_income_other_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-91fb7e3da4f1,hom qua phi chung cu hang thang,housing,EXPENSE,eval_housing_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-92cc936c58f5,hôm qua lắp mạng internet cáp quang,housing,EXPENSE,eval_housing_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-936dfdc56a09,đăng ký gói netflix,entertainment,EXPENSE,eval_entertainment_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-944582ee1d68,tuan truoc thu nhap cong viec chinh,salary,INCOME,eval_salary_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9498bc77c5d7,hôm qua khóa học kỹ năng mềm,education,EXPENSE,eval_education_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-95139e653c6b,tuan truoc mua balo di hoc,shopping,EXPENSE,eval_shopping_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9528a434f8c9,tien cung ong ba,other,EXPENSE,eval_other_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-96bffbbf1441,sáng nay mua vé xem bóng đá,entertainment,EXPENSE,eval_entertainment_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-979e3abbebe4,tuần trước phí chuyển khoản liên ngân hàng,transfer_fee,EXPENSE,eval_transfer_fee_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-990458957794,tuần trước phí chuyển tiền nhanh,transfer_fee,EXPENSE,eval_transfer_fee_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-991167586186,sáng nay mua bút vở cho con,education,EXPENSE,eval_education_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9970bada4e46,sáng nay khóa học kỹ năng mềm,education,EXPENSE,eval_education_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9a09af4125b5,phí rút tiền tại cây atm,transfer_fee,EXPENSE,eval_transfer_fee_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9b04fde2f0b4,mua bút vở cho con,education,EXPENSE,eval_education_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9bc3a0e0f042,sáng nay mua máy đo huyết áp,health,EXPENSE,eval_health_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9c8107b67175,nạp tiền game mobile,entertainment,EXPENSE,eval_entertainment_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9db8cc565d69,hôm qua thuê phòng hát,entertainment,EXPENSE,eval_entertainment_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9e11956f6e35,hôm qua lương thử việc,salary,INCOME,eval_salary_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9e41364a824f,hom qua li xi cho tre con,other,EXPENSE,eval_other_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9e4cf63b2e86,đơn hàng mỹ phẩm,shopping,EXPENSE,eval_shopping_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9e5db8003c60,tuần trước mua bánh ngọt ở tiệm,food,EXPENSE,eval_food_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-9ee2367090c0,tuần trước hóa đơn điện sinh hoạt,housing,EXPENSE,eval_housing_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a05b81e6b62c,hôm qua lương theo hợp đồng,salary,INCOME,eval_salary_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a0784f995511,sang nay phong bi dam cuoi,other,EXPENSE,eval_other_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a17453eebaa3,sáng nay tiêm vắc xin,health,EXPENSE,eval_health_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a1d43c84ca20,tuần trước thưởng doanh số quý,salary,INCOME,eval_salary_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a1dfbaf67a35,hôm qua lãi gửi tiết kiệm,income_other,INCOME,eval_income_other_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a2c0c97c16bb,tuan truoc mua ca phe mang di o family mart,food,EXPENSE,eval_food_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a2d63365f551,sáng nay chi tiêu không rõ mục đích,other,EXPENSE,eval_other_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a42884c90dbd,sáng nay chi phí phát sinh ngoài dự kiến,other,EXPENSE,eval_other_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a4bdadccd406,tuần trước nhận tiền hoàn từ shopee,income_other,INCOME,eval_income_other_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a53625648b5d,dang ky khoa hoc tieng nhat,education,EXPENSE,eval_education_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a63cf5c84f08,hôm qua mua sách tham khảo,education,EXPENSE,eval_education_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a66ecade75ff,sáng nay mua truyện tranh mới,entertainment,EXPENSE,eval_entertainment_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a7181ba66c7b,lãi gửi tiết kiệm,income_other,INCOME,eval_income_other_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a7c2d01e5e09,tuan truoc mua but vo cho con,education,EXPENSE,eval_education_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-a86850be2b73,sáng nay đăng ký gói netflix,entertainment,EXPENSE,eval_entertainment_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-aa4c8760b1f0,phí giao dịch quốc tế,transfer_fee,EXPENSE,eval_transfer_fee_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-aa6236c73465,hôm qua đi taxi từ sân bay về nhà,transport,EXPENSE,eval_transport_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-aa765630633c,hôm qua đơn hàng mỹ phẩm,shopping,EXPENSE,eval_shopping_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-aadeefbd0e4f,hôm qua thay máy bơm nước,housing,EXPENSE,eval_housing_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-aaeb38f80ffc,thay máy bơm nước,housing,EXPENSE,eval_housing_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ab513231f1e1,tuần trước mua thuốc cảm cúm,health,EXPENSE,eval_health_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-abf3d0bfea72,tuan truoc mua dong ho thong minh,shopping,EXPENSE,eval_shopping_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ac1ebc1d91d1,hôm qua mua áo khoác mùa đông,shopping,EXPENSE,eval_shopping_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ac623d9d7d15,tuan truoc mua sach tham khao,education,EXPENSE,eval_education_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ac949d1328eb,tuan truoc phu cap an trua,salary,INCOME,eval_salary_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ace01b07fce7,tuần trước lệ phí thi chứng chỉ tin học,education,EXPENSE,eval_education_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ad80f3b89296,sáng nay đi vật lý trị liệu vai,health,EXPENSE,eval_health_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-adca36e0c152,tuan truoc dong gop cong dong,other,EXPENSE,eval_other_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ae1189dd0ec8,tuần trước quỹ lớp đóng góp,other,EXPENSE,eval_other_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-af9a5552aef2,tuần trước học phí mầm non,education,EXPENSE,eval_education_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-afc457ceec3c,khám da liễu,health,EXPENSE,eval_health_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b007dd2ce865,thuê xe máy đi du lịch,transport,EXPENSE,eval_transport_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b01a43dd07c1,hôm qua phí rút tiền mặt tại quầy,transfer_fee,EXPENSE,eval_transfer_fee_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b0358857f36e,tuần trước lương thử việc,salary,INCOME,eval_salary_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b0c51704c5ba,hôm qua mua máy ảnh cũ,shopping,EXPENSE,eval_shopping_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b0d0254c7dd4,sáng nay phí gửi xe ở trung tâm thương mại,transport,EXPENSE,eval_transport_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b17eff46117f,hom qua hoc phi mam non,education,EXPENSE,eval_education_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b19dccfa1763,tuần trước đi hát karaoke với đồng nghiệp,entertainment,EXPENSE,eval_entertainment_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b24485c2e7a6,đặt tour du lịch,entertainment,EXPENSE,eval_entertainment_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b27d85f59894,hôm qua mua sạc dự phòng,shopping,EXPENSE,eval_shopping_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b307f1cbeb7e,sáng nay cổ tức được chia,income_other,INCOME,eval_income_other_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b3635b60b9b5,hom qua mua giay chay bo,shopping,EXPENSE,eval_shopping_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b3edbd012fe7,mua truyện tranh mới,entertainment,EXPENSE,eval_entertainment_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b405937dac79,mua máy đo huyết áp,health,EXPENSE,eval_health_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b42e0c989cb6,hom qua tien nuoc sinh hoat,housing,EXPENSE,eval_housing_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b4a8b6541315,tuan truoc mua quan ao cho con,shopping,EXPENSE,eval_shopping_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b56cfceb29a3,tuần trước đi xe buýt tuyến số 5,transport,EXPENSE,eval_transport_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b57ecf42054c,khám răng tại nha khoa,health,EXPENSE,eval_health_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b5a2eefd148f,sáng nay mua lốp xe mới,transport,EXPENSE,eval_transport_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b6d594624a62,tuần trước phí giao dịch quốc tế,transfer_fee,EXPENSE,eval_transfer_fee_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b6eb3e74a084,hôm qua mua vé phà,transport,EXPENSE,eval_transport_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b6f689e4975e,mua vé phà,transport,EXPENSE,eval_transport_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b6f77121f710,tuần trước mua thuốc nhỏ mắt,health,EXPENSE,eval_health_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b74519c8f8ad,sáng nay mua sạc dự phòng,shopping,EXPENSE,eval_shopping_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b758949a39a6,mua ve tau dien,transport,EXPENSE,eval_transport_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b7b9e4e56329,tuần trước đóng tiền nhà tháng này,housing,EXPENSE,eval_housing_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b7d891b1cba0,phí thường niên thẻ ghi nợ,transfer_fee,EXPENSE,eval_transfer_fee_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-b8f7c66b49d2,hom qua mua balo di hoc,shopping,EXPENSE,eval_shopping_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ba6da16321d5,don dep nha cua,housing,EXPENSE,eval_housing_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ba76cf3eeb2b,sáng nay đặt tour du lịch,entertainment,EXPENSE,eval_entertainment_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bb089a512942,sáng nay phí chuyển tiền nhanh,transfer_fee,EXPENSE,eval_transfer_fee_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bb5f7ef39f05,sáng nay mua balo đi học,shopping,EXPENSE,eval_shopping_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bb951041ca6f,công ty trả lương tháng 11,salary,INCOME,eval_salary_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bbaaf178906f,tuan truoc mua lop xe moi,transport,EXPENSE,eval_transport_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bc43ccef88c7,dong tien nha thang nay,housing,EXPENSE,eval_housing_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bc8ab6800491,sang nay luong thu viec,salary,INCOME,eval_salary_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bccc9a29213a,bat xe om cong nghe,transport,EXPENSE,eval_transport_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bd18d2210e92,sáng nay học phí mầm non,education,EXPENSE,eval_education_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bddefd1069e8,đi taxi từ sân bay về nhà,transport,EXPENSE,eval_transport_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-be208ceb94d2,sáng nay mua hạt dinh dưỡng,food,EXPENSE,eval_food_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bf45bd238204,sang nay an sang banh xeo,food,EXPENSE,eval_food_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bf82f0c0c6f9,luong theo hop dong,salary,INCOME,eval_salary_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-bfe2214913eb,đóng góp cộng đồng,other,EXPENSE,eval_other_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c09b9fa0ae04,hôm qua đi cà phê nhạc sống,entertainment,EXPENSE,eval_entertainment_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c0cbe812f200,thu nhập công việc chính,salary,INCOME,eval_salary_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c0f1605d0f3e,sáng nay phụ cấp ăn trưa,salary,INCOME,eval_salary_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c10bc2e1c097,hôm qua hóa đơn điện sinh hoạt,housing,EXPENSE,eval_housing_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c1ffe7987c4d,hôm qua cổ tức được chia,income_other,INCOME,eval_income_other_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c2c42073fc7e,uống nước ép trái cây,food,EXPENSE,eval_food_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c2f22956b187,hôm qua tiền lãi từ quỹ đầu tư,income_other,INCOME,eval_income_other_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c4e7d6883af4,mua dong ho thong minh,shopping,EXPENSE,eval_shopping_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c665b83c622e,sáng nay hóa đơn điện sinh hoạt,housing,EXPENSE,eval_housing_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c6790546b2aa,phí gửi xe ở trung tâm thương mại,transport,EXPENSE,eval_transport_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c70eea12432b,hôm qua mua laptop phục vụ học tập,education,EXPENSE,eval_education_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c8807abf1768,hôm qua mua cà phê mang đi ở circle k,food,EXPENSE,eval_food_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c8ebf59cc853,hom qua mua hat dinh duong,food,EXPENSE,eval_food_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c8eea513e430,tuần trước mua truyện tranh mới,entertainment,EXPENSE,eval_entertainment_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-c9e527ca01c5,hom qua phong bi dam cuoi,other,EXPENSE,eval_other_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ca7b328fdaf4,hôm qua đóng góp cộng đồng,other,EXPENSE,eval_other_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cafb2b0d85c2,hôm qua ủng hộ quỹ từ thiện,other,EXPENSE,eval_other_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cb9a948e5bed,sáng nay nhận lương chuyển khoản tháng này,salary,INCOME,eval_salary_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cc20228acd86,tuần trước xét nghiệm máu tổng quát,health,EXPENSE,eval_health_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cc566a354982,sáng nay bán quần áo cũ,income_other,INCOME,eval_income_other_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cd2f3df3a4df,hôm qua mua bút vở cho con,education,EXPENSE,eval_education_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cd3ddfb85c61,tuần trước mua bàn ghế phòng ăn,housing,EXPENSE,eval_housing_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cd7470f91a96,tuan truoc thu nhap tu lam freelance,income_other,INCOME,eval_income_other_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cdb19f1afc8d,hôm qua quỹ lớp đóng góp,other,EXPENSE,eval_other_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cde1626f61d1,chi tieu khong ro muc dich,other,EXPENSE,eval_other_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ce4a93baa330,phí chuyển tiền nhanh,transfer_fee,EXPENSE,eval_transfer_fee_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cfa1f584a170,sáng nay thay máy bơm nước,housing,EXPENSE,eval_housing_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cfcc755ad546,sang nay dat son moi tren mang,shopping,EXPENSE,eval_shopping_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-cfd3cbcb00e2,tuần trước phí gửi xe ở trung tâm thương mại,transport,EXPENSE,eval_transport_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d0978dc53956,lương thử việc,salary,INCOME,eval_salary_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d0c0bbd52e83,sang nay nhan tien bao hiem,income_other,INCOME,eval_income_other_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d10bb709470f,tuần trước sửa phanh xe đạp,transport,EXPENSE,eval_transport_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d2ed99f44c51,đổ dầu xe tải,transport,EXPENSE,eval_transport_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d396506856d8,tuần trước mua vé xem phim cuối tuần,entertainment,EXPENSE,eval_entertainment_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d3a35e83bd6e,tuần trước bán hàng qua mạng,income_other,INCOME,eval_income_other_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d3aadb8c1a70,hom qua mua ve cong vien nuoc,entertainment,EXPENSE,eval_entertainment_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d3c03751272e,tuần trước khám răng tại nha khoa,health,EXPENSE,eval_health_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d44109c42f82,tuần trước đặt tour du lịch,entertainment,EXPENSE,eval_entertainment_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d50381a9dad2,sáng nay lệ phí thi chứng chỉ tin học,education,EXPENSE,eval_education_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d52ed297e952,phí duy trì tài khoản ngân hàng,transfer_fee,EXPENSE,eval_transfer_fee_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d54d6b4a5a7d,tuần trước tiêm vắc xin,health,EXPENSE,eval_health_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d5a2019b1497,tuan truoc an lau gia dinh cuoi tuan,food,EXPENSE,eval_food_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d5ac22ecf651,tuần trước chi tiêu không rõ mục đích,other,EXPENSE,eval_other_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d673c1506c63,tuan truoc phong bi dam cuoi,other,EXPENSE,eval_other_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d86862866e5d,nhận lương chuyển khoản tháng này,salary,INCOME,eval_salary_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d8cf9a40308b,tuần trước mừng sinh nhật đồng nghiệp,other,EXPENSE,eval_other_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-d90b12ad8f63,tuần trước mua máy đo huyết áp,health,EXPENSE,eval_health_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-db238d4298fa,hôm qua mua đồ trang trí nhà,shopping,EXPENSE,eval_shopping_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-dba6d9df2fa7,sáng nay đi xe buýt tuyến số 5,transport,EXPENSE,eval_transport_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-dca68aa3adb8,sáng nay phí rút tiền mặt tại quầy,transfer_fee,EXPENSE,eval_transfer_fee_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ddd1a3a7cc97,hom qua mua dong ho thong minh,shopping,EXPENSE,eval_shopping_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ddf05b970fed,hôm qua chi phí phát sinh ngoài dự kiến,other,EXPENSE,eval_other_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-de52219c21c9,hom qua tien luong lam them gio,salary,INCOME,eval_salary_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-df5dedc816b5,sáng nay mua bàn ghế phòng ăn,housing,EXPENSE,eval_housing_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e0463f8d695d,hôm qua thu nhập công việc chính,salary,INCOME,eval_salary_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e0e8535d5514,thuong doanh so quy,salary,INCOME,eval_salary_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e100b1647478,sáng nay ăn tối ở quán nướng,food,EXPENSE,eval_food_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e135ded7bed0,hom qua an toi o quan nuong,food,EXPENSE,eval_food_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e158f1804e1f,thưởng cuối năm,salary,INCOME,eval_salary_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e1b03ac8a389,tuần trước nhận lương chuyển khoản tháng này,salary,INCOME,eval_salary_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e1d9f523f187,sáng nay bắt xe ôm công nghệ,transport,EXPENSE,eval_transport_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e227ddc0ea8e,sang nay thuong doanh so quy,salary,INCOME,eval_salary_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e26fab924bbc,sáng nay phí giao dịch quốc tế,transfer_fee,EXPENSE,eval_transfer_fee_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e2884d459c98,sáng nay mua laptop phục vụ học tập,education,EXPENSE,eval_education_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e2e65d5e2dfd,sáng nay đổ dầu xe tải,transport,EXPENSE,eval_transport_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e3014f949150,xét nghiệm máu tổng quát,health,EXPENSE,eval_health_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e36320719f27,tuần trước đơn hàng mỹ phẩm,shopping,EXPENSE,eval_shopping_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e4478acb0706,sáng nay thưởng cuối năm,salary,INCOME,eval_salary_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e4b60a00fb30,tuần trước phí mở thẻ tín dụng,transfer_fee,EXPENSE,eval_transfer_fee_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e5443a4f9b70,tuan truoc mua ve pha,transport,EXPENSE,eval_transport_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e8462d6e80b8,tuan truoc mua binh nong lanh,housing,EXPENSE,eval_housing_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e8806935092c,tuần trước phí rút tiền tại cây atm,transfer_fee,EXPENSE,eval_transfer_fee_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e8cbe1e3853f,hôm qua ăn bún bò ở quán bà tư,food,EXPENSE,eval_food_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-e9bc865233f9,sáng nay đi hát karaoke với đồng nghiệp,entertainment,EXPENSE,eval_entertainment_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ea6909f2d74b,sáng nay sửa phanh xe đạp,transport,EXPENSE,eval_transport_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ea7f133d409a,phí rút tiền mặt tại quầy,transfer_fee,EXPENSE,eval_transfer_fee_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ec53863005b7,sáng nay thuê gia sư toán,education,EXPENSE,eval_education_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ecdcd2aa50c8,sang nay nap tien game mobile,entertainment,EXPENSE,eval_entertainment_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ed665f0a2fac,sáng nay cho thuê phòng trọ,income_other,INCOME,eval_income_other_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-eda9dbbbf05a,tuần trước phí rút tiền mặt tại quầy,transfer_fee,EXPENSE,eval_transfer_fee_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-edac0dc76e64,tuần trước ăn tối ở quán nướng,food,EXPENSE,eval_food_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-edc20df4d130,hôm qua khám răng tại nha khoa,health,EXPENSE,eval_health_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-edc27bb6248a,sáng nay lương theo hợp đồng,salary,INCOME,eval_salary_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ee15a975538d,tuần trước tiền lãi từ quỹ đầu tư,income_other,INCOME,eval_income_other_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-eeb9789c9eb8,nhận tiền hoàn từ shopee,income_other,INCOME,eval_income_other_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ef37736879d0,sáng nay quỹ lớp đóng góp,other,EXPENSE,eval_other_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f0a7d65bb3f9,sáng nay khám da liễu,health,EXPENSE,eval_health_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f10c9809c1fe,tuần trước thuê xe máy đi du lịch,transport,EXPENSE,eval_transport_3,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f11e47f191c8,tuần trước thuê phòng hát,entertainment,EXPENSE,eval_entertainment_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f16340981552,tuần trước bán quần áo cũ,income_other,INCOME,eval_income_other_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f1ab74606c76,tuan truoc kham da lieu,health,EXPENSE,eval_health_6,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f1b1f53a961e,hom qua mua ve xem phim cuoi tuan,entertainment,EXPENSE,eval_entertainment_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f290d47e7fc8,sáng nay khám răng tại nha khoa,health,EXPENSE,eval_health_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f339a7453955,hôm qua đi xe buýt tuyến số 5,transport,EXPENSE,eval_transport_7,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f364ad742015,hôm qua công ty trả lương tháng 11,salary,INCOME,eval_salary_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f3ae5b1dd03f,hôm qua nạp tiền game mobile,entertainment,EXPENSE,eval_entertainment_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f3d488114f68,sang nay mua binh nong lanh,housing,EXPENSE,eval_housing_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f41c5421966a,hôm qua mua bàn ghế phòng ăn,housing,EXPENSE,eval_housing_5,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f5a3680dd0ab,sang nay mua sach tham khao,education,EXPENSE,eval_education_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f5bdd5e4b211,sáng nay mua bảo hiểm y tế tự nguyện,health,EXPENSE,eval_health_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f5c03798367d,tuan truoc luong theo hop dong,salary,INCOME,eval_salary_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f643bd9f7ca1,tuan truoc li xi cho tre con,other,EXPENSE,eval_other_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f643cdb10838,tuần trước đi taxi từ sân bay về nhà,transport,EXPENSE,eval_transport_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f6c2261acd57,tuần trước nạp tiền game mobile,entertainment,EXPENSE,eval_entertainment_4,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f6e5778a1d37,tuan truoc an sang banh xeo,food,EXPENSE,eval_food_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f70fac0df399,nhan luong qua tai khoan,salary,INCOME,eval_salary_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f7ca78db4ed2,hôm qua nhận tiền hoàn từ shopee,income_other,INCOME,eval_income_other_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f7f658cd16fd,mua tài liệu ôn thi,education,EXPENSE,eval_education_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-f8e4ac3f396b,sang nay mua do trang tri nha,shopping,EXPENSE,eval_shopping_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-fa315b52b9de,tuan truoc dang ky goi netflix,entertainment,EXPENSE,eval_entertainment_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-fa537fb3343b,mua đồ trang trí nhà,shopping,EXPENSE,eval_shopping_8,paraphrase,synthetic-paraphrase,synthetic-v2
+par-fb0ab07c4025,tiền nước sinh hoạt,housing,EXPENSE,eval_housing_2,paraphrase,synthetic-paraphrase,synthetic-v2
+par-fcacd1a06f79,hôm qua mua vé tàu điện,transport,EXPENSE,eval_transport_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-fd4dbdcbde29,hôm qua mua thuốc cảm cúm,health,EXPENSE,eval_health_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-fd5a84312bc5,sang nay dong tien nha thang nay,housing,EXPENSE,eval_housing_0,paraphrase,synthetic-paraphrase,synthetic-v2
+par-fe025edadaf9,ủng hộ quỹ từ thiện,other,EXPENSE,eval_other_1,paraphrase,synthetic-paraphrase,synthetic-v2
+par-fee1d58d03bc,sang nay don dep nha cua,housing,EXPENSE,eval_housing_9,paraphrase,synthetic-paraphrase,synthetic-v2
+par-ff45984320e0,tuần trước thuê gia sư toán,education,EXPENSE,eval_education_5,paraphrase,synthetic-paraphrase,synthetic-v2

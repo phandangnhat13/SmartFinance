@@ -11,6 +11,8 @@ coverage/
 
 .localdb/
 _extracted/
+exports/
+*.jsonl
 *.log
 
 # Python
@@ -22,6 +24,7 @@ venv/
 .ruff_cache/
 apps/ai-service/artifacts/*.joblib
 apps/ai-service/artifacts/*.json
+apps/ai-service/artifacts/experiments/
 
 # Editor / OS
 .DS_Store

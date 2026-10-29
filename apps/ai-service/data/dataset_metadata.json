@@ -1,0 +1,23 @@
+{
+  "datasetVersion": "synthetic-v2-20261029",
+  "generatorVersion": "synthetic-v2",
+  "generatedAt": "2026-10-29T18:33:00.230135+00:00",
+  "seeds": {
+    "core": 20261029,
+    "paraphrase": 20261030
+  },
+  "splits": {
+    "train": 992,
+    "validation": 200,
+    "test": 200,
+    "paraphrase": 440
+  },
+  "files": {
+    "training_data.csv": "ae659a56c7f4871e66739ee4a00e61437a3de3d1bf9477f0a17a3c4e63e72d7b",
+    "training/train.csv": "e95bd6f9c8342bb0c765a1deaf7ccf7739cb1f793d2e0ee492671fee9a73163d",
+    "validation/validation.csv": "7c9cdb1f41474f111bf3fb4afb0cb291d427c2482366e27793b00e139040b2e3",
+    "evaluation/test.csv": "bfcab622dd81b90cb50d8142b28d81a1932362c3fc101e92b70eaf87774e7816",
+    "evaluation/paraphrase.csv": "1bf2df2dc4b64c1036ded6ddafd73caef92ae0e3f1c4e5c007fac4c84e3c2861"
+  },
+  "notes": "Fully synthetic Vietnamese transaction descriptions. The core bank is split by whole template group into train/validation/test; the paraphrase set uses a separate template bank and seed and is reported separately."
+}

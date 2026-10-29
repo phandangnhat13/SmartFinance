@@ -8,6 +8,7 @@ export function toUserDto(user: User): UserDto {
     displayName: user.displayName,
     defaultCurrency: user.defaultCurrency,
     timezone: user.timezone,
+    allowAiResearch: user.allowAiResearch,
     createdAt: user.createdAt.toISOString(),
   };
 }

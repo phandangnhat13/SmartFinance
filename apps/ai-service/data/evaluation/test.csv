@@ -1,0 +1,201 @@
+id,description,label,type,group,split,source,generator_version
+tes-001278bb1708,tháng này sửa máy điều hòa,housing,EXPENSE,housing_14,test,synthetic-core,synthetic-v2
+tes-0041f0a9ceed,tuần này chữa răng khôn,health,EXPENSE,health_8,test,synthetic-core,synthetic-v2
+tes-00cb84943644,mua rau cu qua o winmart,food,EXPENSE,food_13,test,synthetic-core,synthetic-v2
+tes-013c1f288300,tuần này lương part time,salary,INCOME,salary_8,test,synthetic-core,synthetic-v2
+tes-0389987fcd3d,tuan truoc phi bao hiem suc khoe,health,EXPENSE,health_14,test,synthetic-core,synthetic-v2
+tes-053b49f0eeb0,chiều nay dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8,test,synthetic-core,synthetic-v2
+tes-05b1a8e76206,sáng nay bồi thường bảo hiểm,income_other,INCOME,income_other_8,test,synthetic-core,synthetic-v2
+tes-06f103cdf80c,tuan truoc mua do lat vat,other,EXPENSE,other_13,test,synthetic-core,synthetic-v2
+tes-0a0c3906b7fa,tháng này ăn nhậu với bạn ở căn tin công ty,food,EXPENSE,food_8,test,synthetic-core,synthetic-v2
+tes-0a96a1a54cea,tuan nay khoa lap trinh marketing,education,EXPENSE,education_8,test,synthetic-core,synthetic-v2
+tes-0cb2a7a1c62c,chiều nay mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14,test,synthetic-core,synthetic-v2
+tes-0d0f1d268238,hôm nay phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2,test,synthetic-core,synthetic-v2
+tes-0dcd789428bf,tuần trước mua rau củ quả ở siêu thị coopmart,food,EXPENSE,food_13,test,synthetic-core,synthetic-v2
+tes-10624d635fe4,hôm qua mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8,test,synthetic-core,synthetic-v2
+tes-1077aa2bb511,chieu nay phi bao hiem suc khoe,health,EXPENSE,health_14,test,synthetic-core,synthetic-v2
+tes-13e74dbb508a,mua giay katinat,shopping,EXPENSE,shopping_2,test,synthetic-core,synthetic-v2
+tes-15a172a3c737,tháng này mua đồ lặt vặt,other,EXPENSE,other_13,test,synthetic-core,synthetic-v2
+tes-16ef753acfaa,chiều nay ăn sáng xôi mặn,food,EXPENSE,food_19,test,synthetic-core,synthetic-v2
+tes-17655916db71,thang nay khoa dao tao nghe,education,EXPENSE,education_14,test,synthetic-core,synthetic-v2
+tes-19794589135f,chiều nay khóa lập trình kế toán,education,EXPENSE,education_8,test,synthetic-core,synthetic-v2
+tes-1b8cc2edea35,sáng nay khóa lập trình kế toán,education,EXPENSE,education_8,test,synthetic-core,synthetic-v2
+tes-1c40f3877f44,luong part time,salary,INCOME,salary_8,test,synthetic-core,synthetic-v2
+tes-1f03ca7313a0,sang nay mua tui xach hang hieu,shopping,EXPENSE,shopping_12,test,synthetic-core,synthetic-v2
+tes-209c582d7347,thang nay phi bao hiem suc khoe,health,EXPENSE,health_14,test,synthetic-core,synthetic-v2
+tes-219525f6899c,hom qua tien luong cong ty tra,salary,INCOME,salary_13,test,synthetic-core,synthetic-v2
+tes-2228fd998d61,hôm qua thu nhập ngoài giờ,income_other,INCOME,income_other_13,test,synthetic-core,synthetic-v2
+tes-23731b81d0e5,thang nay mua qua tang sinh nhat,shopping,EXPENSE,shopping_8,test,synthetic-core,synthetic-v2
+tes-2411964bc101,hôm nay mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14,test,synthetic-core,synthetic-v2
+tes-2538aadaccc4,tháng này khóa lập trình python,education,EXPENSE,education_8,test,synthetic-core,synthetic-v2
+tes-256ce67b4436,tuan nay mua giay starbucks,shopping,EXPENSE,shopping_2,test,synthetic-core,synthetic-v2
+tes-26362d292ced,hôm qua khóa đào tạo nghề,education,EXPENSE,education_14,test,synthetic-core,synthetic-v2
+tes-27948571a1be,sáng nay phí dịch vụ chuyển tiền,transfer_fee,EXPENSE,transfer_fee_8,test,synthetic-core,synthetic-v2
+tes-2aa80f6723c8,sang nay phi bao hiem suc khoe,health,EXPENSE,health_14,test,synthetic-core,synthetic-v2
+tes-2ca8e9b13212,chiều nay đặt xe công nghệ đi làm,transport,EXPENSE,transport_12,test,synthetic-core,synthetic-v2
+tes-2d93e65a88a2,hom qua mua ve xem ca nhac,entertainment,EXPENSE,entertainment_14,test,synthetic-core,synthetic-v2
+tes-2ec33caea00e,tuần này đặt xe công nghệ đi làm,transport,EXPENSE,transport_12,test,synthetic-core,synthetic-v2
+tes-30458d0a2304,chiều nay chữa răng khôn,health,EXPENSE,health_8,test,synthetic-core,synthetic-v2
+tes-309814d66c42,tuần này mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14,test,synthetic-core,synthetic-v2
+tes-333f9ac76285,chiều nay phí dịch vụ chuyển tiền,transfer_fee,EXPENSE,transfer_fee_8,test,synthetic-core,synthetic-v2
+tes-350a3a8e4263,tuan nay boi thuong bao hiem,income_other,INCOME,income_other_8,test,synthetic-core,synthetic-v2
+tes-3a7ab7564560,sáng nay sửa máy điều hòa,housing,EXPENSE,housing_14,test,synthetic-core,synthetic-v2
+tes-3ac7b0f66951,tuần trước mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14,test,synthetic-core,synthetic-v2
+tes-3b5d2e80ab12,hôm qua mua giày starbucks,shopping,EXPENSE,shopping_2,test,synthetic-core,synthetic-v2
+tes-3c35e39fe674,be car ra sân bay,transport,EXPENSE,transport_2,test,synthetic-core,synthetic-v2
+tes-3c8f88b6e330,hôm qua đóng quỹ lớp,other,EXPENSE,other_8,test,synthetic-core,synthetic-v2
+tes-3d34990cf0de,hôm nay phí dịch vụ chuyển tiền,transfer_fee,EXPENSE,transfer_fee_8,test,synthetic-core,synthetic-v2
+tes-3d9e29874b51,hôm nay tiền lương công ty trả,salary,INCOME,salary_13,test,synthetic-core,synthetic-v2
+tes-3e30e5848b7b,hôm nay mua đồ lặt vặt,other,EXPENSE,other_13,test,synthetic-core,synthetic-v2
+tes-3f2b6ee26326,tuần trước mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8,test,synthetic-core,synthetic-v2
+tes-3fba329058b0,dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8,test,synthetic-core,synthetic-v2
+tes-40537bc81183,phí bảo hiểm sức khỏe,health,EXPENSE,health_14,test,synthetic-core,synthetic-v2
+tes-40595548e566,tuần trước bar beer với bạn,entertainment,EXPENSE,entertainment_8,test,synthetic-core,synthetic-v2
+tes-456a5c29082b,tuần này phí bảo hiểm sức khỏe,health,EXPENSE,health_14,test,synthetic-core,synthetic-v2
+tes-46f137fba03f,tuần này mua túi xách hàng hiệu,shopping,EXPENSE,shopping_12,test,synthetic-core,synthetic-v2
+tes-48a1b09f791c,tuan nay bar beer voi ban,entertainment,EXPENSE,entertainment_8,test,synthetic-core,synthetic-v2
+tes-48e2945041e5,tuan nay phi dich vu chuyen tien,transfer_fee,EXPENSE,transfer_fee_8,test,synthetic-core,synthetic-v2
+tes-499b903fd613,sửa máy điều hòa,housing,EXPENSE,housing_14,test,synthetic-core,synthetic-v2
+tes-4b06e179e558,chieu nay be car ra san bay,transport,EXPENSE,transport_2,test,synthetic-core,synthetic-v2
+tes-4b43e2171e87,tuần này thu nhập ngoài giờ,income_other,INCOME,income_other_13,test,synthetic-core,synthetic-v2
+tes-4c3717f96458,chiều nay phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2,test,synthetic-core,synthetic-v2
+tes-4c8ab40e1a0a,tuan truoc dong quy lop,other,EXPENSE,other_8,test,synthetic-core,synthetic-v2
+tes-4cc849f5e5e0,ăn nhậu với bạn ở quán gần nhà,food,EXPENSE,food_8,test,synthetic-core,synthetic-v2
+tes-4dc1343edb7e,tháng này lương part time,salary,INCOME,salary_8,test,synthetic-core,synthetic-v2
+tes-4f04882a334b,thu nhập ngoài giờ,income_other,INCOME,income_other_13,test,synthetic-core,synthetic-v2
+tes-503476ac6372,chiều nay tiền lương công ty trả,salary,INCOME,salary_13,test,synthetic-core,synthetic-v2
+tes-5186101ac41b,khóa lập trình thiết kế,education,EXPENSE,education_8,test,synthetic-core,synthetic-v2
+tes-51c63e6ff6b2,hôm nay đặt xe công nghệ đi làm,transport,EXPENSE,transport_12,test,synthetic-core,synthetic-v2
+tes-520bc72218ca,hôm qua đặt xe công nghệ đi làm,transport,EXPENSE,transport_12,test,synthetic-core,synthetic-v2
+tes-528ee3b36879,hôm qua taxi katinat,transport,EXPENSE,transport_8,test,synthetic-core,synthetic-v2
+tes-5303e410ae56,tháng này mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14,test,synthetic-core,synthetic-v2
+tes-5329ba679218,sang nay an sang xoi man,food,EXPENSE,food_19,test,synthetic-core,synthetic-v2
+tes-53f74c168472,chiều nay sửa máy điều hòa,housing,EXPENSE,housing_14,test,synthetic-core,synthetic-v2
+tes-5435fe93d758,tuần trước khóa đào tạo nghề,education,EXPENSE,education_14,test,synthetic-core,synthetic-v2
+tes-559ce4d03c70,hôm nay ăn nhậu với bạn ở nhà hàng trung tâm,food,EXPENSE,food_8,test,synthetic-core,synthetic-v2
+tes-55cf6e16b85e,hôm nay lương part time,salary,INCOME,salary_8,test,synthetic-core,synthetic-v2
+tes-56b11aad736c,hôm nay khóa lập trình marketing,education,EXPENSE,education_8,test,synthetic-core,synthetic-v2
+tes-574204e1d1af,sang nay dong quy lop,other,EXPENSE,other_8,test,synthetic-core,synthetic-v2
+tes-5859234ec372,thang nay mua giay starbucks,shopping,EXPENSE,shopping_2,test,synthetic-core,synthetic-v2
+tes-5907ea65c815,tháng này tiền lương công ty trả,salary,INCOME,salary_13,test,synthetic-core,synthetic-v2
+tes-5971e1f61819,chiều nay mua giày highlands,shopping,EXPENSE,shopping_2,test,synthetic-core,synthetic-v2
+tes-59d4b4577e70,hom nay dong quy lop,other,EXPENSE,other_8,test,synthetic-core,synthetic-v2
+tes-5a48751eb660,hôm qua lương part time,salary,INCOME,salary_8,test,synthetic-core,synthetic-v2
+tes-5d8bb3f2831d,tháng này thu nhập ngoài giờ,income_other,INCOME,income_other_13,test,synthetic-core,synthetic-v2
+tes-5e62153ca424,tháng này đóng quỹ lớp,other,EXPENSE,other_8,test,synthetic-core,synthetic-v2
+tes-5f75c13cbfe2,hôm nay khóa đào tạo nghề,education,EXPENSE,education_14,test,synthetic-core,synthetic-v2
+tes-61dd0eb290be,hôm nay mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8,test,synthetic-core,synthetic-v2
+tes-641b3f6d1b65,tháng này đặt xe công nghệ đi làm,transport,EXPENSE,transport_12,test,synthetic-core,synthetic-v2
+tes-6814b27f9518,hôm qua dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8,test,synthetic-core,synthetic-v2
+tes-69197902ed9e,tuần này tiền lương công ty trả,salary,INCOME,salary_13,test,synthetic-core,synthetic-v2
+tes-69a1d9a2035b,thang nay boi thuong bao hiem,income_other,INCOME,income_other_8,test,synthetic-core,synthetic-v2
+tes-69b418fe0eea,hom qua chua rang khon,health,EXPENSE,health_8,test,synthetic-core,synthetic-v2
+tes-69ed04ca5010,tuần trước lương part time,salary,INCOME,salary_8,test,synthetic-core,synthetic-v2
+tes-6a7675889352,tuần trước đặt xe công nghệ đi làm,transport,EXPENSE,transport_12,test,synthetic-core,synthetic-v2
+tes-6e0edadab952,phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2,test,synthetic-core,synthetic-v2
+tes-6e3cc3e24e73,sáng nay mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14,test,synthetic-core,synthetic-v2
+tes-6ef992d2bfb6,tuần này dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8,test,synthetic-core,synthetic-v2
+tes-6f2665968a62,chiều nay mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8,test,synthetic-core,synthetic-v2
+tes-72f6a0f6d915,tuần trước mua túi xách hàng hiệu,shopping,EXPENSE,shopping_12,test,synthetic-core,synthetic-v2
+tes-73b0eb54dd77,tháng này phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2,test,synthetic-core,synthetic-v2
+tes-73f35f8590e2,tuan truoc chua rang khon,health,EXPENSE,health_8,test,synthetic-core,synthetic-v2
+tes-743882b06f7c,hôm qua ăn sáng xôi mặn,food,EXPENSE,food_19,test,synthetic-core,synthetic-v2
+tes-745d1bf3ecda,hôm nay mua rau củ quả ở siêu thị coopmart,food,EXPENSE,food_13,test,synthetic-core,synthetic-v2
+tes-77d004135e55,tuần trước tiền lương công ty trả,salary,INCOME,salary_13,test,synthetic-core,synthetic-v2
+tes-77f1bab17228,tuần trước mua giày starbucks,shopping,EXPENSE,shopping_2,test,synthetic-core,synthetic-v2
+tes-791c2220a860,hôm nay bar beer với bạn,entertainment,EXPENSE,entertainment_8,test,synthetic-core,synthetic-v2
+tes-7b690c55eb97,sáng nay lương part time,salary,INCOME,salary_8,test,synthetic-core,synthetic-v2
+tes-7e2448d0c9c1,an sang xoi man,food,EXPENSE,food_19,test,synthetic-core,synthetic-v2
+tes-7f64588f38e1,hom qua bar beer voi ban,entertainment,EXPENSE,entertainment_8,test,synthetic-core,synthetic-v2
+tes-7f8103e91655,tuần này mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8,test,synthetic-core,synthetic-v2
+tes-7f8f9eb4404b,hom nay sua may dieu hoa,housing,EXPENSE,housing_14,test,synthetic-core,synthetic-v2
+tes-80774724d9f7,hôm qua phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2,test,synthetic-core,synthetic-v2
+tes-8325a7166427,tuần trước ăn nhậu với bạn ở nhà hàng trung tâm,food,EXPENSE,food_8,test,synthetic-core,synthetic-v2
+tes-8487b7bc2864,khóa đào tạo nghề,education,EXPENSE,education_14,test,synthetic-core,synthetic-v2
+tes-891d059e62ed,sang nay phi giao dich ngan hang,transfer_fee,EXPENSE,transfer_fee_2,test,synthetic-core,synthetic-v2
+tes-8d6ce4241af6,chữa răng khôn,health,EXPENSE,health_8,test,synthetic-core,synthetic-v2
+tes-8e08d56bdcda,hôm nay bồi thường bảo hiểm,income_other,INCOME,income_other_8,test,synthetic-core,synthetic-v2
+tes-8f6fd5ae7f9f,hôm qua be car ra sân bay,transport,EXPENSE,transport_2,test,synthetic-core,synthetic-v2
+tes-902fef081a0e,sang nay taxi phuc long,transport,EXPENSE,transport_8,test,synthetic-core,synthetic-v2
+tes-92c78eb24795,tháng này chữa răng khôn,health,EXPENSE,health_8,test,synthetic-core,synthetic-v2
+tes-97fde07ed7b3,tháng này taxi starbucks,transport,EXPENSE,transport_8,test,synthetic-core,synthetic-v2
+tes-98fb80c321e2,tuần này phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2,test,synthetic-core,synthetic-v2
+tes-9a614311d334,chieu nay thu nhap ngoai gio,income_other,INCOME,income_other_13,test,synthetic-core,synthetic-v2
+tes-9c0ae8539da8,hôm qua khóa lập trình toán,education,EXPENSE,education_8,test,synthetic-core,synthetic-v2
+tes-9cff2278528a,tuan nay taxi katinat,transport,EXPENSE,transport_8,test,synthetic-core,synthetic-v2
+tes-9ed280fc0dff,tuần trước phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2,test,synthetic-core,synthetic-v2
+tes-a1c9d6e492e3,sang nay mua qua tang sinh nhat,shopping,EXPENSE,shopping_8,test,synthetic-core,synthetic-v2
+tes-a38a7b051c88,chiều nay bar beer với bạn,entertainment,EXPENSE,entertainment_8,test,synthetic-core,synthetic-v2
+tes-a4ba6b639ad1,hôm qua ăn nhậu với bạn ở quán gần nhà,food,EXPENSE,food_8,test,synthetic-core,synthetic-v2
+tes-a5a33cbf428a,hôm qua mua đồ lặt vặt,other,EXPENSE,other_13,test,synthetic-core,synthetic-v2
+tes-a631a1449c33,sáng nay mua đồ lặt vặt,other,EXPENSE,other_13,test,synthetic-core,synthetic-v2
+tes-a6c5f0ac88c9,sáng nay đặt xe công nghệ đi làm,transport,EXPENSE,transport_12,test,synthetic-core,synthetic-v2
+tes-a791f7362b2d,chiều nay mua đồ lặt vặt,other,EXPENSE,other_13,test,synthetic-core,synthetic-v2
+tes-a83894d6c1a9,sáng nay tiền lương công ty trả,salary,INCOME,salary_13,test,synthetic-core,synthetic-v2
+tes-a9c8e5ba1d80,hôm nay thu nhập ngoài giờ,income_other,INCOME,income_other_13,test,synthetic-core,synthetic-v2
+tes-aa4658c99c16,mua túi xách hàng hiệu,shopping,EXPENSE,shopping_12,test,synthetic-core,synthetic-v2
+tes-aab7e19ff07b,taxi the coffee house,transport,EXPENSE,transport_8,test,synthetic-core,synthetic-v2
+tes-ac2f21b113c6,mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14,test,synthetic-core,synthetic-v2
+tes-acec359db612,chieu nay boi thuong bao hiem,income_other,INCOME,income_other_8,test,synthetic-core,synthetic-v2
+tes-b044941fcb0e,tuần trước sửa máy điều hòa,housing,EXPENSE,housing_14,test,synthetic-core,synthetic-v2
+tes-b087df5585a2,chiều nay taxi phúc long,transport,EXPENSE,transport_8,test,synthetic-core,synthetic-v2
+tes-b41f06d9577e,chiều nay đóng quỹ lớp,other,EXPENSE,other_8,test,synthetic-core,synthetic-v2
+tes-b4d5614119c9,chieu nay an nhau voi ban o quan hai san,food,EXPENSE,food_8,test,synthetic-core,synthetic-v2
+tes-b53a203303af,tuần này đóng quỹ lớp,other,EXPENSE,other_8,test,synthetic-core,synthetic-v2
+tes-b688c26bd2cc,tháng này phí dịch vụ chuyển tiền,transfer_fee,EXPENSE,transfer_fee_8,test,synthetic-core,synthetic-v2
+tes-b6d4e04d5e3c,tuần trước taxi katinat,transport,EXPENSE,transport_8,test,synthetic-core,synthetic-v2
+tes-ba3c55fdc548,chiều nay mua rau củ quả ở siêu thị coopmart,food,EXPENSE,food_13,test,synthetic-core,synthetic-v2
+tes-bbb5874d3cfa,chieu nay mua tui xach hang hieu,shopping,EXPENSE,shopping_12,test,synthetic-core,synthetic-v2
+tes-bd2dfdcac78a,chiều nay khóa đào tạo nghề,education,EXPENSE,education_14,test,synthetic-core,synthetic-v2
+tes-beca1d210990,phí dịch vụ chuyển tiền,transfer_fee,EXPENSE,transfer_fee_8,test,synthetic-core,synthetic-v2
+tes-c00d2303f8ea,hôm qua mua rau củ quả ở winmart,food,EXPENSE,food_13,test,synthetic-core,synthetic-v2
+tes-c0e5b04ec870,hôm nay be car ra sân bay,transport,EXPENSE,transport_2,test,synthetic-core,synthetic-v2
+tes-c3094f327e98,hôm qua sửa máy điều hòa,housing,EXPENSE,housing_14,test,synthetic-core,synthetic-v2
+tes-c652748c2527,hôm nay mua túi xách hàng hiệu,shopping,EXPENSE,shopping_12,test,synthetic-core,synthetic-v2
+tes-c68bc9d25658,hôm nay ăn sáng xôi mặn,food,EXPENSE,food_19,test,synthetic-core,synthetic-v2
+tes-c7fe0fe310ba,tuần này be car ra sân bay,transport,EXPENSE,transport_2,test,synthetic-core,synthetic-v2
+tes-c8dd71f0832c,tháng này dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8,test,synthetic-core,synthetic-v2
+tes-ca93235d13d1,tuần trước phí dịch vụ chuyển tiền,transfer_fee,EXPENSE,transfer_fee_8,test,synthetic-core,synthetic-v2
+tes-cb95a7619127,hôm nay phí bảo hiểm sức khỏe,health,EXPENSE,health_14,test,synthetic-core,synthetic-v2
+tes-cb95c4745544,tuần này mua đồ lặt vặt,other,EXPENSE,other_13,test,synthetic-core,synthetic-v2
+tes-cd177c0a8ea0,sáng nay chữa răng khôn,health,EXPENSE,health_8,test,synthetic-core,synthetic-v2
+tes-cd95033047f3,hôm qua mua túi xách hàng hiệu,shopping,EXPENSE,shopping_12,test,synthetic-core,synthetic-v2
+tes-cd9c7f857af8,mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8,test,synthetic-core,synthetic-v2
+tes-cf895e0bdc86,sáng nay khóa đào tạo nghề,education,EXPENSE,education_14,test,synthetic-core,synthetic-v2
+tes-d234a5de706a,tháng này mua rau củ quả ở winmart,food,EXPENSE,food_13,test,synthetic-core,synthetic-v2
+tes-d386f6a54e9a,thang nay be car ra san bay,transport,EXPENSE,transport_2,test,synthetic-core,synthetic-v2
+tes-d3cd41b27708,mua do lat vat,other,EXPENSE,other_13,test,synthetic-core,synthetic-v2
+tes-d4e9bbb148ca,tháng này ăn sáng xôi mặn,food,EXPENSE,food_19,test,synthetic-core,synthetic-v2
+tes-d7342d2ea511,tien luong cong ty tra,salary,INCOME,salary_13,test,synthetic-core,synthetic-v2
+tes-d99db921660d,sáng nay be car ra sân bay,transport,EXPENSE,transport_2,test,synthetic-core,synthetic-v2
+tes-daabeb15316b,tuần này sửa máy điều hòa,housing,EXPENSE,housing_14,test,synthetic-core,synthetic-v2
+tes-db81c4dc1f68,tuần này ăn nhậu với bạn ở căn tin công ty,food,EXPENSE,food_8,test,synthetic-core,synthetic-v2
+tes-dc7812509098,sang nay mua giay highlands,shopping,EXPENSE,shopping_2,test,synthetic-core,synthetic-v2
+tes-dca8b10edf2e,tuần trước bồi thường bảo hiểm,income_other,INCOME,income_other_8,test,synthetic-core,synthetic-v2
+tes-dee9eeec9f90,hôm qua bồi thường bảo hiểm,income_other,INCOME,income_other_8,test,synthetic-core,synthetic-v2
+tes-df0737826be2,hôm nay taxi katinat,transport,EXPENSE,transport_8,test,synthetic-core,synthetic-v2
+tes-df8efed5d310,tuần này khóa đào tạo nghề,education,EXPENSE,education_14,test,synthetic-core,synthetic-v2
+tes-df9301c41527,tuần trước thu nhập ngoài giờ,income_other,INCOME,income_other_13,test,synthetic-core,synthetic-v2
+tes-e01d1c8f8fa4,hom nay mua giay katinat,shopping,EXPENSE,shopping_2,test,synthetic-core,synthetic-v2
+tes-e059d5a1ad55,sáng nay dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8,test,synthetic-core,synthetic-v2
+tes-e2cadd81b44c,sáng nay mua rau củ quả ở chợ thái bình,food,EXPENSE,food_13,test,synthetic-core,synthetic-v2
+tes-e3b769c97e73,tháng này mua túi xách hàng hiệu,shopping,EXPENSE,shopping_12,test,synthetic-core,synthetic-v2
+tes-e4101c17e40f,hom qua phi dich vu chuyen tien,transfer_fee,EXPENSE,transfer_fee_8,test,synthetic-core,synthetic-v2
+tes-e70bb3b7d711,hôm qua phí bảo hiểm sức khỏe,health,EXPENSE,health_14,test,synthetic-core,synthetic-v2
+tes-e84960290f9e,tuan truoc be car ra san bay,transport,EXPENSE,transport_2,test,synthetic-core,synthetic-v2
+tes-eadc3642f535,tuần này mua rau củ quả ở chợ bến thành,food,EXPENSE,food_13,test,synthetic-core,synthetic-v2
+tes-ee3d84679ae5,dong quy lop,other,EXPENSE,other_8,test,synthetic-core,synthetic-v2
+tes-ef5055e1e58e,boi thuong bao hiem,income_other,INCOME,income_other_8,test,synthetic-core,synthetic-v2
+tes-f0e8afb42664,tuần trước ăn sáng xôi mặn,food,EXPENSE,food_19,test,synthetic-core,synthetic-v2
+tes-f24c12f38ebb,dat xe cong nghe di lam,transport,EXPENSE,transport_12,test,synthetic-core,synthetic-v2
+tes-f438e8586aaa,tuần trước dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8,test,synthetic-core,synthetic-v2
+tes-f61d891d2448,bar beer với bạn,entertainment,EXPENSE,entertainment_8,test,synthetic-core,synthetic-v2
+tes-f7111e475f93,sang nay an nhau voi ban o quan gan nha,food,EXPENSE,food_8,test,synthetic-core,synthetic-v2
+tes-fa6449ce3010,sáng nay thu nhập ngoài giờ,income_other,INCOME,income_other_13,test,synthetic-core,synthetic-v2
+tes-fc6604a47268,chiều nay lương part time,salary,INCOME,salary_8,test,synthetic-core,synthetic-v2
+tes-fce050f81393,tuần trước khóa lập trình kế toán,education,EXPENSE,education_8,test,synthetic-core,synthetic-v2
+tes-fdaca807b05f,tháng này bar beer với bạn,entertainment,EXPENSE,entertainment_8,test,synthetic-core,synthetic-v2
+tes-fdc681919a16,sáng nay bar beer với bạn,entertainment,EXPENSE,entertainment_8,test,synthetic-core,synthetic-v2
+tes-ff1413ec8e50,hôm nay chữa răng khôn,health,EXPENSE,health_8,test,synthetic-core,synthetic-v2
+tes-ff2189dc2418,tuan nay an sang xoi man,food,EXPENSE,food_19,test,synthetic-core,synthetic-v2
+tes-ff8e7d94ab90,hôm nay dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8,test,synthetic-core,synthetic-v2

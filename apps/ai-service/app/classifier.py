@@ -42,6 +42,12 @@ class Classifier:
             self.error = str(error)
             logger.exception("Classifier could not be initialised")
 
+    @property
+    def threshold(self) -> float:
+        if self.artifact is None:
+            return CONFIDENCE_THRESHOLD
+        return float(self.artifact.get("threshold", CONFIDENCE_THRESHOLD))
+
     def predict(self, description: str, transaction_type: str) -> dict:
         if self.artifact is None:
             raise RuntimeError("model_not_ready")
@@ -66,7 +72,7 @@ class Classifier:
         return {
             "label": label,
             "confidence": round(confidence, 4),
-            "isConfident": confidence >= CONFIDENCE_THRESHOLD,
+            "isConfident": confidence >= self.threshold,
             "alternatives": alternatives,
             "modelName": self.artifact["modelName"],
             "modelVersion": self.artifact["modelVersion"],
@@ -78,8 +84,10 @@ class Classifier:
                 "modelName": None,
                 "modelVersion": None,
                 "trainedAt": None,
+                "threshold": CONFIDENCE_THRESHOLD,
                 "labels": [],
                 "metrics": None,
+                "dataset": None,
                 "ready": False,
                 "error": self.error,
             }
@@ -87,8 +95,10 @@ class Classifier:
             "modelName": self.artifact["modelName"],
             "modelVersion": self.artifact["modelVersion"],
             "trainedAt": self.artifact["trainedAt"],
+            "threshold": self.threshold,
             "labels": self.artifact["labels"],
-            "metrics": self.artifact["metrics"],
+            "metrics": self.artifact.get("metrics"),
+            "dataset": self.artifact.get("dataset"),
             "ready": True,
             "error": None,
         }

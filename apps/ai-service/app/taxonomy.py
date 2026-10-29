@@ -22,4 +22,7 @@ LABELS: list[str] = list(TAXONOMY.keys())
 INCOME_LABELS = [slug for slug, meta in TAXONOMY.items() if meta["type"] == "INCOME"]
 EXPENSE_LABELS = [slug for slug, meta in TAXONOMY.items() if meta["type"] == "EXPENSE"]
 
-CONFIDENCE_THRESHOLD = 0.55
+# Selected on the validation split by scripts/evaluate_models.py (run
+# 20261029T183303Z): highest coverage with selective accuracy >= 0.80.
+# This is only a fallback; the model artifact stores its own threshold.
+CONFIDENCE_THRESHOLD = 0.50

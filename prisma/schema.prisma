@@ -73,6 +73,8 @@ model User {
   displayName     String
   defaultCurrency String   @default("VND") @db.VarChar(3)
   timezone        String   @default("Asia/Ho_Chi_Minh")
+  /// Explicit opt-in: anonymized AI feedback may be exported for model research.
+  allowAiResearch Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

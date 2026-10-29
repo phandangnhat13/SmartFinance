@@ -1,9 +1,20 @@
-"""Generate a synthetic Vietnamese transaction-description dataset.
+"""Generate synthetic Vietnamese transaction datasets with isolated splits.
 
-The dataset is written to apps/ai-service/data/training_data.csv and is fully
-synthetic: it contains no real user data. Each row carries a `group` column
-(the template it came from) so that the training script can split by template
-and avoid leaking the same phrasing into both train and test sets.
+Outputs (all fully synthetic, no real user data):
+    data/training_data.csv          train + validation rows (legacy path)
+    data/training/train.csv         training split
+    data/validation/validation.csv  validation split (threshold + hyper-parameters)
+    data/evaluation/test.csv        held-out template groups (independent test)
+    data/evaluation/paraphrase.csv       separate template bank (paraphrase set)
+    data/dataset_metadata.json      seeds, counts and SHA-256 fingerprints
+
+Splitting rules
+---------------
+* The core bank is split by whole template group into train/validation/test, so
+  a phrasing never appears in more than one split.
+* The paraphrase set is generated from a *separate* template bank and seed; it is
+  reported separately and is never used for tuning or for the headline claim.
+* Exact duplicates (normalised) are dropped inside a split and across splits.
 
 Usage:
     python apps/ai-service/scripts/generate_dataset.py
@@ -12,17 +23,24 @@ Usage:
 from __future__ import annotations
 
 import csv
+import hashlib
+import json
 import random
 import re
 import unicodedata
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "data" / "training_data.csv"
+DATA_DIR = ROOT / "data"
+GENERATOR_VERSION = "synthetic-v2"
+TRAIN_SEED = 20261029
+EVAL_SEED = 20261030
 
-# Template groups per label. Several templates per label deliberately share
-# domain vocabulary (phim, thuốc, lương, vé, ...) so that holding out a whole
-# template still leaves useful signal in the training split.
+# ---------------------------------------------------------------------------
+# Training template bank (same phrasings as the original dataset, so existing
+# behaviour and the previous baseline remain comparable).
+# ---------------------------------------------------------------------------
 TEMPLATES: dict[str, list[str]] = {
     "food": [
         "ăn sáng {food}",
@@ -237,65 +255,363 @@ POOLS: dict[str, list[str]] = {
     "subject": ["tiếng anh", "python", "toán", "thiết kế", "kế toán", "marketing"],
 }
 
+# ---------------------------------------------------------------------------
+# Independent evaluation bank. Phrasings are deliberately different from the
+# training bank, and slots use different values, to reduce template leakage.
+# ---------------------------------------------------------------------------
+EVAL_TEMPLATES: dict[str, list[str]] = {
+    "food": [
+        "ăn lẩu gia đình cuối tuần",
+        "mua cà phê mang đi ở {eval_shop}",
+        "đặt sushi giao tận nhà",
+        "ăn bún bò ở {eval_place}",
+        "mua bánh ngọt ở tiệm",
+        "uống nước ép trái cây",
+        "ăn tối ở quán nướng",
+        "mua hạt dinh dưỡng",
+        "gọi trà sữa size lớn",
+        "ăn sáng bánh xèo",
+    ],
+    "transport": [
+        "đi taxi từ sân bay về nhà",
+        "mua vé tàu điện",
+        "đổ dầu xe tải",
+        "thuê xe máy đi du lịch",
+        "phí gửi xe ở trung tâm thương mại",
+        "bắt xe ôm công nghệ",
+        "mua lốp xe mới",
+        "đi xe buýt tuyến số 5",
+        "sửa phanh xe đạp",
+        "mua vé phà",
+    ],
+    "shopping": [
+        "mua áo khoác mùa đông",
+        "đặt son môi trên mạng",
+        "mua máy ảnh cũ",
+        "mua balo đi học",
+        "đơn hàng mỹ phẩm",
+        "mua đồng hồ thông minh",
+        "mua giày chạy bộ",
+        "mua quần áo cho con",
+        "mua đồ trang trí nhà",
+        "mua sạc dự phòng",
+    ],
+    "housing": [
+        "đóng tiền nhà tháng này",
+        "hóa đơn điện sinh hoạt",
+        "tiền nước sinh hoạt",
+        "lắp mạng internet cáp quang",
+        "thay máy bơm nước",
+        "mua bàn ghế phòng ăn",
+        "phí chung cư hàng tháng",
+        "sửa cửa nhà bị hỏng",
+        "mua bình nóng lạnh",
+        "dọn dẹp nhà cửa",
+    ],
+    "health": [
+        "mua thuốc cảm cúm",
+        "khám răng tại nha khoa",
+        "mua bảo hiểm y tế tự nguyện",
+        "đi vật lý trị liệu vai",
+        "xét nghiệm máu tổng quát",
+        "mua thuốc nhỏ mắt",
+        "khám da liễu",
+        "mua máy đo huyết áp",
+        "tiêm vắc xin",
+        "điều trị viêm họng",
+    ],
+    "entertainment": [
+        "mua vé xem phim cuối tuần",
+        "đăng ký gói netflix",
+        "đi hát karaoke với đồng nghiệp",
+        "mua vé công viên nước",
+        "nạp tiền game mobile",
+        "đặt tour du lịch",
+        "thuê phòng hát",
+        "mua vé xem bóng đá",
+        "đi cà phê nhạc sống",
+        "mua truyện tranh mới",
+    ],
+    "education": [
+        "đóng học phí học kỳ",
+        "mua sách tham khảo",
+        "đăng ký khóa học tiếng nhật",
+        "mua bút vở cho con",
+        "lệ phí thi chứng chỉ tin học",
+        "thuê gia sư toán",
+        "mua laptop phục vụ học tập",
+        "học phí mầm non",
+        "mua tài liệu ôn thi",
+        "khóa học kỹ năng mềm",
+    ],
+    "transfer_fee": [
+        "phí chuyển tiền qua app",
+        "phí rút tiền tại cây atm",
+        "phí thường niên thẻ ghi nợ",
+        "phí chuyển khoản liên ngân hàng",
+        "phí duy trì tài khoản ngân hàng",
+        "phí giao dịch quốc tế",
+        "phí sms biến động số dư",
+        "phí rút tiền mặt tại quầy",
+        "phí mở thẻ tín dụng",
+        "phí chuyển tiền nhanh",
+    ],
+    "other": [
+        "chi tiêu không rõ mục đích",
+        "ủng hộ quỹ từ thiện",
+        "phong bì đám cưới",
+        "mừng sinh nhật đồng nghiệp",
+        "quỹ lớp đóng góp",
+        "tiền cúng ông bà",
+        "chi phí phát sinh ngoài dự kiến",
+        "mua đồ linh tinh",
+        "lì xì cho trẻ con",
+        "đóng góp cộng đồng",
+    ],
+    "salary": [
+        "nhận lương chuyển khoản tháng này",
+        "công ty trả lương tháng 11",
+        "thưởng cuối năm",
+        "tiền lương làm thêm giờ",
+        "thu nhập công việc chính",
+        "lương thử việc",
+        "thưởng doanh số quý",
+        "phụ cấp ăn trưa",
+        "lương theo hợp đồng",
+        "nhận lương qua tài khoản",
+    ],
+    "income_other": [
+        "bán điện thoại cũ",
+        "nhận tiền hoàn từ shopee",
+        "lãi gửi tiết kiệm",
+        "cổ tức được chia",
+        "thu nhập từ làm freelance",
+        "bán quần áo cũ",
+        "cho thuê phòng trọ",
+        "nhận tiền bảo hiểm",
+        "bán hàng qua mạng",
+        "tiền lãi từ quỹ đầu tư",
+    ],
+}
 
-def fill(template: str, rng: random.Random) -> str:
+EVAL_POOLS: dict[str, list[str]] = {
+    "eval_shop": ["circle k", "family mart", "bách hóa xanh", "winmart"],
+    "eval_place": ["quán bà tư", "nhà hàng sen", "quán ven đường", "tiệm cơm chay"],
+    "eval_destination": ["huế", "quy nhơn", "phú quốc", "vũng tàu"],
+    "eval_subject": ["tiếng nhật", "excel", "đồ họa", "data"],
+    "eval_n": ["tháng này", "kỳ trước", "quý này", "năm nay"],
+    "eval_person": ["đồng nghiệp", "bạn thân", "người thân", "hàng xóm"],
+}
+
+TYPE_BY_LABEL = {slug: ("INCOME" if slug in {"salary", "income_other"} else "EXPENSE") for slug in TEMPLATES}
+
+# Label-neutral time markers used to create distinct surface forms of a template.
+TRAIN_PREFIXES = [
+    "",
+    "hôm nay ",
+    "sáng nay ",
+    "chiều nay ",
+    "tuần này ",
+    "hôm qua ",
+    "tuần trước ",
+    "tháng này ",
+]
+EVAL_PREFIXES = ["", "hôm qua ", "sáng nay ", "tuần trước "]
+
+
+def fill(template: str, pools: dict[str, list[str]], rng: random.Random) -> str:
     def replace(match: re.Match[str]) -> str:
         key = match.group(1)
-        return rng.choice(POOLS.get(key, ["misc"]))
+        return rng.choice(pools.get(key, ["misc"]))
 
     return re.sub(r"\{(\w+)\}", replace, template)
 
 
 def remove_diacritics(text: str) -> str:
-    """Simulate users typing Vietnamese without accents (very common on phones)."""
+    """Simulate users typing Vietnamese without accents (common on phones)."""
     decomposed = unicodedata.normalize("NFD", text)
     without_marks = "".join(char for char in decomposed if not unicodedata.combining(char))
     return without_marks.replace("đ", "d").replace("Đ", "D")
 
 
-def main() -> None:
-    rng = random.Random(20261029)
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+def normalize(text: str) -> str:
+    """Exact duplicate key: case, spacing and punctuation folded, accents kept."""
+    text = text.lower()
+    text = re.sub(r"[^\w\s]", " ", text, flags=re.UNICODE)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def normalize_loose(text: str) -> str:
+    """Near-duplicate key: as above but accent-insensitive (for leakage reports)."""
+    return normalize(remove_diacritics(text))
+
+
+def stable_id(split: str, description: str) -> str:
+    digest = hashlib.sha1(f"{split}:{normalize(description)}".encode("utf-8")).hexdigest()
+    return f"{split[:3]}-{digest[:12]}"
+
+
+def surface_variants(
+    base: str, rng: random.Random, count: int, prefixes: list[str]
+) -> list[str]:
+    """Build distinct surface forms using a rotating time prefix and accent drops."""
+    variants: list[str] = []
+    for index in range(count):
+        text = prefixes[index % len(prefixes)] + fill(base, POOLS, rng)
+        roll = rng.random()
+        variants.append(remove_diacritics(text) if roll < 0.25 else text)
+    return variants
+
+
+def assign_core_splits(groups: list[str]) -> dict[str, str]:
+    """Assign whole groups per label to train/validation/test (~70/15/15)."""
+    ordered = sorted(groups)
+    total = len(ordered)
+    if total < 3:
+        return {group: "train" for group in ordered}
+    wanted_validation = max(1, round(total * 0.15))
+    wanted_test = max(1, round(total * 0.15))
+    wanted = min(total - 1, wanted_validation + wanted_test)
+    indices = sorted(
+        {min(total - 1, ((2 * index + 1) * total) // (2 * wanted)) for index in range(wanted)}
+    )
+    split_by_group: dict[str, str] = {}
+    for position, index in enumerate(indices):
+        split_by_group[ordered[index]] = "validation" if position % 2 == 0 else "test"
+    for group in ordered:
+        split_by_group.setdefault(group, "train")
+    return split_by_group
+
+
+def build_core_rows(rng: random.Random) -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
+    seen: set[str] = set()
     for slug, templates in TEMPLATES.items():
-        label_type = "INCOME" if slug in {"salary", "income_other"} else "EXPENSE"
+        label_type = TYPE_BY_LABEL[slug]
+        groups = [f"{slug}_{index}" for index in range(len(templates))]
+        split_by_group = assign_core_splits(groups)
         for template_index, template in enumerate(templates):
             group = f"{slug}_{template_index}"
-            # Several surface variants per template. Case and spacing variations
-            # mimic how people type descriptions quickly.
-            variants = [fill(template, rng) for _ in range(5)]
-            for description in variants:
-                surface = description
-                roll = rng.random()
-                if roll < 0.15:
-                    surface = description.upper()
-                elif roll < 0.3:
-                    surface = description.replace(" ", "  ")
+            split = split_by_group[group]
+            for description in surface_variants(template, rng, 8, TRAIN_PREFIXES):
+                key = normalize(description)
+                if not key or key in seen:
+                    continue
+                seen.add(key)
                 rows.append(
                     {
-                        "description": surface,
+                        "id": stable_id(split, description),
+                        "description": description,
                         "label": slug,
                         "type": label_type,
                         "group": group,
+                        "split": split,
+                        "source": "synthetic-core",
+                        "generator_version": GENERATOR_VERSION,
                     }
                 )
-                # Accent-free copy of the same sentence, same group/variant.
-                if rng.random() < 0.35:
-                    rows.append(
-                        {
-                            "description": remove_diacritics(surface),
-                            "label": slug,
-                            "type": label_type,
-                            "group": group,
-                        }
-                    )
-    rng.shuffle(rows)
-    with OUTPUT.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["description", "label", "type", "group"])
+    return rows
+
+
+def build_paraphrase_rows(rng: random.Random) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for slug, templates in EVAL_TEMPLATES.items():
+        label_type = TYPE_BY_LABEL[slug]
+        for template_index, template in enumerate(templates):
+            group = f"eval_{slug}_{template_index}"
+            for index in range(4):
+                description = EVAL_PREFIXES[index % len(EVAL_PREFIXES)] + fill(template, EVAL_POOLS, rng)
+                if rng.random() < 0.25:
+                    description = remove_diacritics(description)
+                key = normalize(description)
+                if not key or key in seen:
+                    continue
+                seen.add(key)
+                rows.append(
+                    {
+                        "id": stable_id("paraphrase", description),
+                        "description": description,
+                        "label": slug,
+                        "type": label_type,
+                        "group": group,
+                        "split": "paraphrase",
+                        "source": "synthetic-paraphrase",
+                        "generator_version": GENERATOR_VERSION,
+                    }
+                )
+    return rows
+
+
+def write_csv(path: Path, rows: list[dict[str, str]], fieldnames: list[str]) -> str:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    ordered = sorted(rows, key=lambda row: row["id"])
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(rows)
-    print(f"Wrote {len(rows)} rows to {OUTPUT}")
+        writer.writerows(ordered)
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main() -> None:
+    rng = random.Random(TRAIN_SEED)
+    core_rows = build_core_rows(rng)
+    paraphrase_rng = random.Random(EVAL_SEED)
+    paraphrase_rows = build_paraphrase_rows(paraphrase_rng)
+
+    # Global duplicate guard across every split.
+    known: dict[str, str] = {}
+    for row in core_rows + paraphrase_rows:
+        key = normalize(row["description"])
+        if key in known:
+            raise SystemExit(
+                f"Duplicate description across dataset: {row['description']!r} "
+                f"({row['split']} vs {known[key]})"
+            )
+        known[key] = row["split"]
+
+    fields = ["id", "description", "label", "type", "group", "split", "source", "generator_version"]
+    train = [row for row in core_rows if row["split"] == "train"]
+    validation = [row for row in core_rows if row["split"] == "validation"]
+    test = [row for row in core_rows if row["split"] == "test"]
+    train_and_validation = train + validation
+
+    hashes = {
+        "training_data.csv": write_csv(DATA_DIR / "training_data.csv", train_and_validation, fields),
+        "training/train.csv": write_csv(DATA_DIR / "training" / "train.csv", train, fields),
+        "validation/validation.csv": write_csv(
+            DATA_DIR / "validation" / "validation.csv", validation, fields
+        ),
+        "evaluation/test.csv": write_csv(DATA_DIR / "evaluation" / "test.csv", test, fields),
+        "evaluation/paraphrase.csv": write_csv(
+            DATA_DIR / "evaluation" / "paraphrase.csv", paraphrase_rows, fields
+        ),
+    }
+    metadata = {
+        "datasetVersion": f"{GENERATOR_VERSION}-{datetime.now(timezone.utc).strftime('%Y%m%d')}",
+        "generatorVersion": GENERATOR_VERSION,
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
+        "seeds": {"core": TRAIN_SEED, "paraphrase": EVAL_SEED},
+        "splits": {
+            "train": len(train),
+            "validation": len(validation),
+            "test": len(test),
+            "paraphrase": len(paraphrase_rows),
+        },
+        "files": hashes,
+        "notes": (
+            "Fully synthetic Vietnamese transaction descriptions. The core bank is split "
+            "by whole template group into train/validation/test; the paraphrase set uses a "
+            "separate template bank and seed and is reported separately."
+        ),
+    }
+    (DATA_DIR / "dataset_metadata.json").write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(json.dumps(metadata["splits"], ensure_ascii=False))
+    print(f"Wrote metadata to {DATA_DIR / 'dataset_metadata.json'}")
 
 
 if __name__ == "__main__":
     main()
+

@@ -14,6 +14,7 @@ const profileSchema = z.object({
   displayName: z.string().trim().min(1, 'Nhập tên hiển thị').max(80, 'Tối đa 80 ký tự'),
   timezone: z.string().trim().min(1, 'Chọn múi giờ').max(64),
   defaultCurrency: z.string().regex(/^[A-Z]{3}$/, 'Tiền tệ phải là 3 ký tự, ví dụ VND'),
+  allowAiResearch: z.boolean(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -52,6 +53,7 @@ export function SettingsPage() {
       displayName: user?.displayName ?? '',
       timezone: user?.timezone ?? 'Asia/Ho_Chi_Minh',
       defaultCurrency: user?.defaultCurrency ?? 'VND',
+      allowAiResearch: user?.allowAiResearch ?? false,
     },
   });
 
@@ -173,6 +175,27 @@ export function SettingsPage() {
               <FieldError message={profileForm.formState.errors.defaultCurrency?.message} />
             </div>
           </div>
+          <label
+            htmlFor="allowAiResearch"
+            className="flex cursor-pointer items-start gap-3 rounded-xl bg-slate-50 p-4"
+          >
+            <input
+              id="allowAiResearch"
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 rounded border-slate-300"
+              {...profileForm.register('allowAiResearch')}
+            />
+            <span className="text-sm text-slate-600">
+              <span className="font-medium text-slate-800">
+                Cho phép dùng phản hồi AI đã ẩn danh để cải thiện mô hình
+              </span>
+              <span className="mt-1 block">
+                Khi bật, mô tả giao dịch bạn đã chấp nhận hoặc sửa danh mục có thể được xuất để huấn
+                luyện. Email, số điện thoại và số tài khoản được loại bỏ trước khi xuất. Mặc định
+                tắt.
+              </span>
+            </span>
+          </label>
           <div className="flex justify-end">
             <button
               type="submit"

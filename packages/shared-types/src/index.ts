@@ -37,7 +37,9 @@ export const AI_TAXONOMY: readonly AiTaxonomyLabel[] = [
   { slug: 'income_other', name: 'Thu nhập khác', type: 'INCOME' },
 ] as const;
 
-export const AI_CONFIDENCE_THRESHOLD = 0.55;
+// Fallback only: the AI service returns `isConfident` using the threshold
+// selected on its validation split (currently 0.50).
+export const AI_CONFIDENCE_THRESHOLD = 0.5;
 
 export interface UserDto {
   id: string;
@@ -45,6 +47,7 @@ export interface UserDto {
   displayName: string;
   defaultCurrency: string;
   timezone: string;
+  allowAiResearch: boolean;
   createdAt: string;
 }
 

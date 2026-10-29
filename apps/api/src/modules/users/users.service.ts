@@ -30,6 +30,7 @@ export class UsersService {
         ...(dto.displayName !== undefined ? { displayName: dto.displayName.trim() } : {}),
         ...(dto.timezone !== undefined ? { timezone: dto.timezone } : {}),
         ...(dto.defaultCurrency !== undefined ? { defaultCurrency: dto.defaultCurrency } : {}),
+        ...(dto.allowAiResearch !== undefined ? { allowAiResearch: dto.allowAiResearch } : {}),
       },
     });
   }
@@ -74,6 +75,7 @@ export class UsersService {
         displayName: user.displayName,
         defaultCurrency: user.defaultCurrency,
         timezone: user.timezone,
+        allowAiResearch: user.allowAiResearch,
         createdAt: user.createdAt,
       },
       accounts,

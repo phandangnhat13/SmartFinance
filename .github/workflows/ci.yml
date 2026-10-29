@@ -104,8 +104,17 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Validate dataset splits
+        run: python scripts/validate_dataset.py
+
       - name: Run pytest
         run: pytest
+
+      - name: Train serving artifact from selection.json
+        run: python scripts/train.py
+
+      - name: Evaluation smoke (keyword + LR + calibrated SVC)
+        run: python scripts/evaluate_models.py --no-report
 
   docker:
     name: Docker images build
