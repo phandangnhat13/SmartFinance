@@ -1,0 +1,39 @@
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+.localdb/
+_extracted/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+apps/ai-service/artifacts/*.joblib
+apps/ai-service/artifacts/*.json
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# Documentation: publish only the root README, keep other Markdown local
+*.md
+!/README.md

@@ -1,0 +1,298 @@
+// Smart Finance - Prisma schema
+// Decision log: see docs/DECISIONS.md (money as Decimal(18,2), transfers as two linked rows,
+// system categories are global rows with a stable slug, all timestamps stored as UTC).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  CASH
+  BANK
+  E_WALLET
+  OTHER
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum TransferDirection {
+  OUT
+  IN
+}
+
+enum BudgetPeriodType {
+  MONTHLY
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum ImportStatus {
+  UPLOADED
+  PREVIEW_READY
+  IMPORTING
+  COMPLETED
+  FAILED
+}
+
+enum ImportRowStatus {
+  VALID
+  INVALID
+  IMPORTED
+  SKIPPED_DUPLICATE
+}
+
+enum AiPredictionStatus {
+  SUGGESTED
+  ACCEPTED
+  CORRECTED
+  REJECTED
+}
+
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+  email           String   @unique
+  passwordHash    String
+  displayName     String
+  defaultCurrency String   @default("VND") @db.VarChar(3)
+  timezone        String   @default("Asia/Ho_Chi_Minh")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  accounts       Account[]
+  categories     Category[]
+  transactions   Transaction[]
+  budgets        Budget[]
+  savingsGoals   SavingsGoal[]
+  importBatches  ImportBatch[]
+  aiPredictions  AiPrediction[]
+  goalContributions GoalContribution[]
+
+  @@map("users")
+}
+
+model Account {
+  id             String      @id @default(uuid()) @db.Uuid
+  userId         String      @db.Uuid
+  name           String
+  type           AccountType
+  initialBalance Decimal     @default(0) @db.Decimal(18, 2)
+  currency       String      @default("VND") @db.VarChar(3)
+  isArchived     Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId, isArchived])
+  @@map("accounts")
+}
+
+model Category {
+  id         String       @id @default(uuid()) @db.Uuid
+  userId     String?      @db.Uuid
+  name       String
+  // Stable key used by the AI taxonomy for system categories (e.g. "food").
+  slug       String?      @unique
+  type       CategoryType
+  isSystem   Boolean      @default(false)
+  isArchived Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  user              User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+  budgets           Budget[]
+  predictionsAsPredicted AiPrediction[] @relation("PredictedCategory")
+  predictionsAsAccepted  AiPrediction[] @relation("AcceptedCategory")
+
+  @@unique([userId, type, name])
+  @@index([userId, type, isArchived])
+  @@map("categories")
+}
+
+model Transaction {
+  id                 String             @id @default(uuid()) @db.Uuid
+  userId             String             @db.Uuid
+  accountId          String             @db.Uuid
+  categoryId         String?            @db.Uuid
+  type               TransactionType
+  amount             Decimal            @db.Decimal(18, 2)
+  currency           String             @default("VND") @db.VarChar(3)
+  description        String
+  note               String?
+  occurredAt         DateTime           @db.Timestamptz(3)
+  // Transfers are stored as two TRANSFER rows sharing a transferGroupId.
+  transferGroupId    String?            @db.Uuid
+  transferDirection  TransferDirection?
+  importBatchId      String?            @db.Uuid
+  importRowNumber    Int?
+  // SHA-256 fingerprint used to make CSV imports idempotent per user.
+  importHash         String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account     Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  importBatch ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  aiPredictions AiPrediction[]
+
+  @@unique([userId, importHash])
+  @@index([userId, occurredAt(sort: Desc)])
+  @@index([userId, type, occurredAt(sort: Desc)])
+  @@index([userId, categoryId, occurredAt(sort: Desc)])
+  @@index([userId, accountId, occurredAt(sort: Desc)])
+  @@index([transferGroupId])
+  @@map("transactions")
+}
+
+model Budget {
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String           @db.Uuid
+  categoryId        String?          @db.Uuid
+  // "ALL" for an overall budget, or the category id. Used for the uniqueness rule.
+  scopeKey          String
+  name              String
+  periodType        BudgetPeriodType @default(MONTHLY)
+  periodStart       DateTime         @db.Date
+  periodEnd         DateTime         @db.Date
+  limitAmount       Decimal          @db.Decimal(18, 2)
+  warningThresholds Int[]            @default([80, 100])
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  alerts   BudgetAlert[]
+
+  @@unique([userId, scopeKey, periodStart])
+  @@index([userId, periodStart, periodEnd])
+  @@map("budgets")
+}
+
+model BudgetAlert {
+  id          String   @id @default(uuid()) @db.Uuid
+  budgetId    String   @db.Uuid
+  threshold   Int
+  periodStart DateTime @db.Date
+  createdAt   DateTime @default(now())
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@unique([budgetId, threshold, periodStart])
+  @@map("budget_alerts")
+}
+
+model SavingsGoal {
+  id           String     @id @default(uuid()) @db.Uuid
+  userId       String     @db.Uuid
+  name         String
+  targetAmount Decimal    @db.Decimal(18, 2)
+  targetDate   DateTime?  @db.Date
+  status       GoalStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions GoalContribution[]
+
+  @@index([userId, status])
+  @@map("savings_goals")
+}
+
+model GoalContribution {
+  id            String   @id @default(uuid()) @db.Uuid
+  goalId        String   @db.Uuid
+  userId        String   @db.Uuid
+  amount        Decimal  @db.Decimal(18, 2)
+  contributedAt DateTime @db.Timestamptz(3)
+  note          String?
+  createdAt     DateTime @default(now())
+
+  goal SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([goalId, contributedAt(sort: Desc)])
+  @@map("goal_contributions")
+}
+
+model ImportBatch {
+  id             String       @id @default(uuid()) @db.Uuid
+  userId         String       @db.Uuid
+  fileName       String
+  status         ImportStatus @default(UPLOADED)
+  totalRows      Int          @default(0)
+  validRows      Int          @default(0)
+  invalidRows    Int          @default(0)
+  importedRows   Int          @default(0)
+  duplicateRows  Int          @default(0)
+  errorMessage   String?
+  createdAt      DateTime     @default(now())
+  completedAt    DateTime?
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rows          ImportRow[]
+  transactions  Transaction[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("import_batches")
+}
+
+model ImportRow {
+  id        String          @id @default(uuid()) @db.Uuid
+  batchId   String          @db.Uuid
+  rowNumber  Int
+  rawData    Json
+  parsedData Json?
+  status     ImportRowStatus
+  errors     Json
+  createdAt  DateTime        @default(now())
+
+  batch ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, rowNumber])
+  @@map("import_rows")
+}
+
+model AiPrediction {
+  id                  String             @id @default(uuid()) @db.Uuid
+  userId              String             @db.Uuid
+  transactionId       String?            @db.Uuid
+  inputDescription    String
+  modelName           String
+  modelVersion        String
+  predictedSlug       String?
+  predictedCategoryId String?            @db.Uuid
+  confidence          Decimal?           @db.Decimal(5, 4)
+  status              AiPredictionStatus @default(SUGGESTED)
+  acceptedCategoryId  String?            @db.Uuid
+  createdAt           DateTime           @default(now())
+
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction        Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  predictedCategory  Category?   @relation("PredictedCategory", fields: [predictedCategoryId], references: [id], onDelete: SetNull)
+  acceptedCategory   Category?   @relation("AcceptedCategory", fields: [acceptedCategoryId], references: [id], onDelete: SetNull)
+
+  @@index([transactionId, createdAt(sort: Desc)])
+  @@index([userId, status])
+  @@map("ai_predictions")
+}

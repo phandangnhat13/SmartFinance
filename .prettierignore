@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+package-lock.json
+.localdb
+_extracted
+apps/ai-service/data
+apps/ai-service/artifacts
+apps/ai-service/models
+prisma/migrations
+*.log

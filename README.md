@@ -1,0 +1,275 @@
+# Smart Finance
+
+Ứng dụng web quản lý tài chính cá nhân: ghi chép thu/chi, ngân sách, mục tiêu tiết kiệm,
+báo cáo trực quan, nhập/xuất CSV và **phân loại giao dịch bằng AI** (đề xuất, người dùng xác nhận).
+
+Monorepo gồm: React SPA, NestJS REST API, PostgreSQL (Prisma), và Python FastAPI cho mô hình phân loại.
+
+> Tài liệu thiết kế và trạng thái triển khai: [docs/](docs/).
+
+---
+
+## 1. Tính năng
+
+**Tài khoản & giao dịch**
+
+- Đăng ký/đăng nhập bằng email + mật khẩu; phiên JWT lưu trong cookie **HttpOnly**.
+- Nhiều tài khoản (tiền mặt, ngân hàng, ví điện tử) với số dư ban đầu và số dư hiện tại.
+- Ghi chép giao dịch thu/chi, danh mục mặc định (system) + danh mục tùy chỉnh.
+- Chuyển khoản nội bộ giữa hai tài khoản được lưu thành **hai bút toán liên kết**, không tính vào thu nhập/chi tiêu.
+- Lọc theo loại, khoảng thời gian, tài khoản, danh mục, từ khóa; phân trang.
+
+**Ngân sách & mục tiêu**
+
+- Ngân sách theo tháng (tổng hoặc theo danh mục), ngưỡng cảnh báo tùy chỉnh (ví dụ 80%, 100%).
+- Cảnh báo chỉ ghi nhận một lần cho mỗi ngưỡng trong tháng.
+- Mục tiêu tiết kiệm với số tiền mục tiêu, hạn chót và các lần đóng góp.
+
+**Báo cáo**
+
+- Tổng thu/chi/số dư theo khoảng thời gian và người dùng.
+- Phân bố chi tiêu theo danh mục, xu hướng theo ngày/tuần/tháng.
+- So sánh với kỳ trước tương đương.
+
+**Nhập / xuất CSV**
+
+- Tải file mẫu, upload CSV, **xem trước** từng dòng (hợp lệ/không hợp lệ/trùng lặp) trước khi xác nhận.
+- Chống trùng bằng SHA-256 trên nội dung nghiệp vụ của giao dịch.
+- Xuất CSV có chống **CSV formula injection** (ô bắt đầu bằng `= + - @` được escape).
+
+**AI phân loại giao dịch**
+
+- Mô hình TF-IDF (char n-gram) + Logistic Regression, taxonomy 11 danh mục dùng chung giữa API và UI.
+- Gợi ý danh mục kèm độ tin cậy; giao diện cho phép **Chấp nhận** hoặc **Sửa** và ghi lại phản hồi.
+- API gateway trong NestJS có timeout, cache model info và **fallback** khi AI service không sẵn sàng.
+
+---
+
+## 2. Kiến trúc
+
+```text
+┌──────────────┐     /api/v1 (cookie HttpOnly)     ┌──────────────┐
+│  React SPA   │ ────────────────────────────────▶ │  NestJS API  │
+│ Vite + TS    │ ◀──────────────────────────────── │  (REST)      │
+└──────────────┘                                   └──────┬───────┘
+                                                          │ Prisma
+                                                   ┌──────▼───────┐
+                                                   │ PostgreSQL 16│
+                                                   └──────────────┘
+                                                          │ HTTP (timeout + fallback)
+                                                   ┌──────▼───────┐
+                                                   │   FastAPI    │
+                                                   │ TF-IDF + LR  │
+                                                   └──────────────┘
+```
+
+| Thành phần              | Công nghệ                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `apps/web`              | React 18, TypeScript, Vite, Tailwind CSS, React Router, TanStack Query, React Hook Form, Zod, Recharts |
+| `apps/api`              | NestJS 11, Prisma 6, PostgreSQL 16, class-validator, Swagger, JWT cookie, helmet, throttling           |
+| `apps/ai-service`       | Python 3.13, FastAPI, scikit-learn, joblib                                                             |
+| `packages/shared-types` | Kiểu dữ liệu và taxonomy dùng chung (build CJS + ESM)                                                  |
+| Hạ tầng                 | Docker Compose, GitHub Actions, ESLint, Prettier, Jest/Supertest, Vitest, Pytest                       |
+
+---
+
+## 3. Cấu trúc repository
+
+```text
+apps/
+  api/              NestJS API, Prisma client, e2e tests
+  web/              React SPA
+  ai-service/       FastAPI classifier, dataset, model artifacts
+packages/
+  shared-types/     DTO types + AI taxonomy dùng chung
+prisma/
+  schema.prisma     Mô hình dữ liệu
+  migrations/       Migration SQL
+  seed.ts           System categories + demo data (opt-in)
+deploy/             entrypoint API, cấu hình nginx
+docs/               Tài liệu dự án
+```
+
+---
+
+## 4. Chạy nhanh bằng Docker Compose
+
+Yêu cầu: Docker Desktop (Compose v2).
+
+```bash
+cp .env.example .env
+# Sinh JWT secret rồi dán vào .env:
+node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+
+docker compose up --build
+```
+
+| Dịch vụ    | URL                                                      |
+| ---------- | -------------------------------------------------------- |
+| Web        | http://localhost:5173                                    |
+| API        | http://localhost:3000/api/v1                             |
+| Swagger    | http://localhost:3000/api/docs                           |
+| AI service | http://localhost:8000/docs                               |
+| PostgreSQL | `localhost:5432` (user/password mặc định `smartfinance`) |
+
+Tạo dữ liệu demo (tùy chọn, có thể chạy lại an toàn):
+
+```bash
+docker compose --profile tools run --rm seed
+```
+
+Tài khoản demo được tạo khi `SEED_DEMO=true`: `demo@smartfinance.local` / `Demo1234!`
+(có thể đổi bằng `DEMO_EMAIL` / `DEMO_PASSWORD`). **Không bật seed demo trên môi trường công khai.**
+
+Dừng và xóa toàn bộ dữ liệu Docker (thao tác phá hủy, chỉ dùng khi bạn chắc chắn):
+
+```bash
+docker compose down -v
+```
+
+---
+
+## 5. Phát triển cục bộ (không Docker)
+
+Yêu cầu: Node.js ≥ 20, npm ≥ 9, PostgreSQL ≥ 16, Python 3.12+.
+
+```bash
+npm install                     # cài workspace + build shared-types
+cp .env.example .env            # sửa DATABASE_URL trỏ tới PostgreSQL của bạn
+
+npx prisma generate             # tạo Prisma Client (cần làm sau khi cài dependency)
+npx prisma migrate deploy       # hoặc: npx prisma migrate dev khi phát triển schema
+npm run prisma:seed             # tạo 11 system categories (không tạo demo data)
+```
+
+Chạy song song API và web:
+
+```bash
+npm run dev                     # API :3000, web :5173 (Vite proxy /api → :3000)
+```
+
+Chạy AI service:
+
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate — macOS/Linux: source .venv/bin/activate
+pip install -r apps/ai-service/requirements.txt
+python -m uvicorn app.main:app --app-dir apps/ai-service --reload --port 8000
+```
+
+Nếu AI service chưa chạy, API vẫn hoạt động: endpoint gợi ý trả `model_not_ready` và UI
+cho phép chọn danh mục thủ công.
+
+### Biến môi trường
+
+Xem [.env.example](.env.example). Các biến quan trọng:
+
+| Biến                              | Mô tả                                                        |
+| --------------------------------- | ------------------------------------------------------------ |
+| `DATABASE_URL`                    | Chuỗi kết nối PostgreSQL của ứng dụng                        |
+| `TEST_DATABASE_URL`               | Database riêng cho e2e (bị truncate giữa các test)           |
+| `JWT_SECRET`                      | Bắt buộc, tối thiểu 32 ký tự                                 |
+| `JWT_EXPIRES_IN`                  | Thời hạn phiên, mặc định `7d`                                |
+| `WEB_ORIGIN`                      | Origin được phép gọi API / gửi cookie (CSRF)                 |
+| `COOKIE_SECURE`                   | `true` khi chạy sau HTTPS (bắt buộc ở `NODE_ENV=production`) |
+| `AI_SERVICE_URL`, `AI_TIMEOUT_MS` | Địa chỉ và timeout của AI service                            |
+| `SEED_DEMO`                       | `true` để tạo dữ liệu demo (mặc định tắt)                    |
+
+Không commit `.env`, API key hoặc dữ liệu cá nhân.
+
+---
+
+## 6. Scripts
+
+| Lệnh                                       | Ý nghĩa                                               |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `npm run dev`                              | API + web ở chế độ watch                              |
+| `npm run dev:ai`                           | AI service với uvicorn `--reload`                     |
+| `npm run build`                            | Build shared-types → API → web                        |
+| `npm run lint` / `npm run format`          | ESLint flat config / Prettier                         |
+| `npm run typecheck`                        | `tsc --noEmit` cho tất cả workspace                   |
+| `npm test`                                 | Unit test API (Jest) + web (Vitest)                   |
+| `npm run test:e2e`                         | E2E API với PostgreSQL thật (cần `TEST_DATABASE_URL`) |
+| `npm run prisma:migrate` / `prisma:deploy` | Migration ở môi trường dev / triển khai               |
+| `npm run prisma:seed`                      | System categories (+ demo nếu `SEED_DEMO=true`)       |
+| `npm run prisma:studio`                    | Prisma Studio                                         |
+
+### Kiểm thử
+
+```bash
+npm run typecheck && npm run lint
+npm test                       # API unit + web unit
+npm run test:e2e               # cần database test đã migrate
+cd apps/ai-service && pytest   # AI service
+```
+
+Xem chi tiết phạm vi, dữ liệu test và tiêu chí chấp nhận tại [docs/TEST_PLAN.md](docs/TEST_PLAN.md).
+
+---
+
+## 7. AI service
+
+- Dataset sinh tổng hợp có kiểm soát trong `apps/ai-service/data/training_data.csv`.
+- Huấn luyện: `python apps/ai-service/scripts/train.py` (ghi `models/model.joblib`, `models/metrics.json`).
+- Đánh giá bằng `StratifiedGroupKFold` theo template câu để hạn chế rò rỉ dữ liệu.
+- Baseline hiện tại: TF-IDF `char_wb` 2–5 gram + Logistic Regression,
+  accuracy ≈ **0.58**, macro F1 ≈ **0.59** trên 5 fold (xem `models/metrics.json`).
+- Ngưỡng tin cậy 0.55: dưới ngưỡng, API trả `low_confidence` và UI nhắc người dùng kiểm tra.
+- Kết quả AI **chỉ là đề xuất**; giao dịch chỉ lưu danh mục sau khi người dùng xác nhận.
+
+Chi tiết taxonomy, giả thuyết và hướng cải thiện: [docs/AI_RESEARCH_PLAN.md](docs/AI_RESEARCH_PLAN.md).
+
+---
+
+## 8. Định dạng CSV
+
+Tải mẫu tại `GET /api/v1/imports/template.csv`. Cột:
+
+```csv
+account,type,amount,occurredAt,description,category,note,currency
+"Tiền mặt",EXPENSE,65000,2026-10-25,Highlands Coffee,Ăn uống,,VND
+```
+
+- `type`: `INCOME` hoặc `EXPENSE` (chuyển khoản không nhập qua CSV).
+- `occurredAt`: `YYYY-MM-DD` hoặc ISO datetime.
+- `account` và `category` được khớp theo tên (không phân biệt hoa thường); dòng không khớp bị đánh dấu lỗi.
+- Dòng trùng (cùng tài khoản, loại, số tiền, thời điểm, mô tả) bị bỏ qua khi commit.
+
+---
+
+## 9. Bảo mật
+
+- Mật khẩu băm bằng bcrypt (cost 12); không log mật khẩu, token hay mô tả giao dịch.
+- JWT trong cookie `HttpOnly`, `SameSite=Lax`; kiểm tra `Origin` cho các request ghi (CSRF).
+- Mọi truy vấn đều lọc theo `userId` lấy từ token — không tin `userId` từ client.
+- Validation whitelist + `forbidNonWhitelisted`, giới hạn kích thước body/upload, helmet, rate limiting.
+- Lỗi trả về theo envelope thống nhất, không lộ stack trace.
+- CSV export escape công thức; file upload chỉ chấp nhận `.csv`.
+
+Các advisory còn lại của dependencies (chủ yếu ở dev tooling) được ghi nhận tại
+[docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md).
+
+---
+
+## 10. Tài liệu
+
+| Tài liệu                                                       | Nội dung                                      |
+| -------------------------------------------------------------- | --------------------------------------------- |
+| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)               | Kế hoạch và tiến độ theo phase                |
+| [docs/PROJECT_CHARTER.md](docs/PROJECT_CHARTER.md)             | Mục tiêu, phạm vi, tiêu chí thành công        |
+| [docs/SRS.md](docs/SRS.md)                                     | Yêu cầu chức năng/phi chức năng               |
+| [docs/USE_CASES.md](docs/USE_CASES.md)                         | Use case và luồng chính                       |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                   | Kiến trúc, quyết định kỹ thuật                |
+| [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md)             | Mô hình dữ liệu, ràng buộc                    |
+| [docs/API_SPECIFICATION.md](docs/API_SPECIFICATION.md)         | Đặc tả endpoint                               |
+| [docs/AI_RESEARCH_PLAN.md](docs/AI_RESEARCH_PLAN.md)           | Taxonomy, dữ liệu, mô hình, đánh giá          |
+| [docs/TEST_PLAN.md](docs/TEST_PLAN.md)                         | Chiến lược và kết quả kiểm thử                |
+| [docs/DECISIONS.md](docs/DECISIONS.md)                         | Nhật ký quyết định                            |
+| [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | Trạng thái thực tế, lệnh đã chạy, lỗi đã biết |
+
+---
+
+## 11. Phạm vi
+
+Đây là đồ án học thuật. Ứng dụng **không** thực hiện thanh toán, chuyển tiền thật hay kết nối
+ngân hàng. Dữ liệu người dùng chỉ nằm trong PostgreSQL của bạn.

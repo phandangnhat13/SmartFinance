@@ -1,0 +1,51 @@
+{
+  "name": "smart-finance",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Smart Finance - personal finance management and AI-assisted analytics",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "postinstall": "npm run build -w @smart-finance/shared-types",
+    "build:types": "npm run build -w @smart-finance/shared-types",
+    "build": "npm run build:types && npm run build -w @smart-finance/api && npm run build -w @smart-finance/web",
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @smart-finance/api\" \"npm run dev -w @smart-finance/web\"",
+    "dev:ai": "python -m uvicorn app.main:app --app-dir apps/ai-service --reload --port 8000",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "npm run test:e2e -w @smart-finance/api",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
+    "prisma:studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.2",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "prisma": "^6.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "overrides": {
+    "multer": "2.5.0"
+  }
+}

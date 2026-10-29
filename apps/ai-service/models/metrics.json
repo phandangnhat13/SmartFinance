@@ -1,0 +1,251 @@
+{
+  "modelName": "tfidf-char-logreg",
+  "modelVersion": "baseline-tfidf-lr-v1",
+  "trainedAt": "2026-10-29T15:17:55.112764+00:00",
+  "metrics": {
+    "accuracy": 0.5803,
+    "macroF1": 0.5873,
+    "weightedF1": 0.5767,
+    "perClass": [
+      {
+        "label": "education",
+        "precision": 0.6911,
+        "recall": 0.8095,
+        "f1": 0.7456,
+        "support": 105
+      },
+      {
+        "label": "entertainment",
+        "precision": 0.5375,
+        "recall": 0.3874,
+        "f1": 0.4503,
+        "support": 111
+      },
+      {
+        "label": "food",
+        "precision": 0.5333,
+        "recall": 0.6875,
+        "f1": 0.6007,
+        "support": 128
+      },
+      {
+        "label": "health",
+        "precision": 0.5111,
+        "recall": 0.4071,
+        "f1": 0.4532,
+        "support": 113
+      },
+      {
+        "label": "housing",
+        "precision": 0.5422,
+        "recall": 0.4245,
+        "f1": 0.4762,
+        "support": 106
+      },
+      {
+        "label": "income_other",
+        "precision": 0.4158,
+        "recall": 0.42,
+        "f1": 0.4179,
+        "support": 100
+      },
+      {
+        "label": "other",
+        "precision": 0.75,
+        "recall": 0.4333,
+        "f1": 0.5493,
+        "support": 90
+      },
+      {
+        "label": "salary",
+        "precision": 0.8916,
+        "recall": 0.8043,
+        "f1": 0.8457,
+        "support": 92
+      },
+      {
+        "label": "shopping",
+        "precision": 0.3452,
+        "recall": 0.4567,
+        "f1": 0.3932,
+        "support": 127
+      },
+      {
+        "label": "transfer_fee",
+        "precision": 0.7816,
+        "recall": 0.8395,
+        "f1": 0.8095,
+        "support": 81
+      },
+      {
+        "label": "transport",
+        "precision": 0.6617,
+        "recall": 0.7857,
+        "f1": 0.7184,
+        "support": 112
+      }
+    ],
+    "confusionMatrix": {
+      "labels": [
+        "education",
+        "entertainment",
+        "food",
+        "health",
+        "housing",
+        "income_other",
+        "other",
+        "salary",
+        "shopping",
+        "transfer_fee",
+        "transport"
+      ],
+      "matrix": [
+        [
+          85,
+          0,
+          0,
+          9,
+          0,
+          6,
+          1,
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          6,
+          43,
+          14,
+          13,
+          0,
+          13,
+          0,
+          0,
+          6,
+          0,
+          16
+        ],
+        [
+          1,
+          2,
+          88,
+          2,
+          0,
+          8,
+          0,
+          1,
+          24,
+          0,
+          2
+        ],
+        [
+          6,
+          4,
+          5,
+          46,
+          9,
+          1,
+          5,
+          1,
+          28,
+          0,
+          8
+        ],
+        [
+          5,
+          6,
+          13,
+          2,
+          45,
+          6,
+          7,
+          0,
+          9,
+          8,
+          5
+        ],
+        [
+          12,
+          0,
+          5,
+          11,
+          0,
+          42,
+          0,
+          7,
+          11,
+          7,
+          5
+        ],
+        [
+          0,
+          0,
+          5,
+          5,
+          12,
+          7,
+          39,
+          0,
+          22,
+          0,
+          0
+        ],
+        [
+          5,
+          0,
+          1,
+          0,
+          0,
+          11,
+          0,
+          74,
+          0,
+          0,
+          1
+        ],
+        [
+          3,
+          18,
+          29,
+          0,
+          11,
+          0,
+          0,
+          0,
+          58,
+          0,
+          8
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          5,
+          7,
+          0,
+          0,
+          0,
+          68,
+          0
+        ],
+        [
+          0,
+          7,
+          4,
+          2,
+          1,
+          0,
+          0,
+          0,
+          6,
+          4,
+          88
+        ]
+      ]
+    },
+    "datasetSize": 1165,
+    "protocol": "5-fold StratifiedGroupKFold by template group; metrics from pooled out-of-fold predictions"
+  }
+}

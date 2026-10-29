@@ -1,0 +1,1166 @@
+description,label,type,group
+vé tàu đi đà lạt,transport,EXPENSE,transport_7
+mua đồ lặt vặt,other,EXPENSE,other_13
+đi chợ siêu thị coopmart mua đồ ăn,food,EXPENSE,food_3
+dat pizza shopeefood,food,EXPENSE,food_10
+KHAM BENH PHONG KHAM GIA DINH,health,EXPENSE,health_1
+bảo dưỡng xe máy,transport,EXPENSE,transport_15
+mua rau củ quả ở chợ bến thành,food,EXPENSE,food_13
+mua  nuoc  hoa,shopping,EXPENSE,shopping_14
+đám cưới phong bì,other,EXPENSE,other_6
+thuê phòng xem bóng đá,entertainment,EXPENSE,entertainment_10
+đi  chợ  chợ  bến  thành  mua  đồ  ăn,food,EXPENSE,food_3
+phí duy trì tài khoản,transfer_fee,EXPENSE,transfer_fee_5
+ăn sáng cơm tấm,food,EXPENSE,food_0
+mua giày starbucks,shopping,EXPENSE,shopping_2
+mua do choi cho em be,shopping,EXPENSE,shopping_10
+di kham bac si,health,EXPENSE,health_13
+đi chợ chợ bến thành mua đồ ăn,food,EXPENSE,food_3
+phụ cấp làm thêm,salary,INCOME,salary_7
+tiệc sinh nhật ở nhà hàng,food,EXPENSE,food_14
+tiệc  sinh  nhật  ở  nhà  hàng,food,EXPENSE,food_14
+đi xe khách về quê,transport,EXPENSE,transport_14
+tiền lì xì,other,EXPENSE,other_10
+mua quần áo mới,shopping,EXPENSE,shopping_16
+khóa lập trình marketing,education,EXPENSE,education_8
+thay nhớt xe máy petrolimex,transport,EXPENSE,transport_5
+tai nghe bluetooth,shopping,EXPENSE,shopping_5
+phí rút tiền mặt,transfer_fee,EXPENSE,transfer_fee_11
+do xang petrolimex,transport,EXPENSE,transport_0
+đặt  xe  công  nghệ  đi  làm,transport,EXPENSE,transport_12
+bánh  mì  quán  hải  sản,food,EXPENSE,food_6
+giao trinh dai hoc,education,EXPENSE,education_7
+tai nghe bluetooth,shopping,EXPENSE,shopping_5
+buffet toi phuc long,food,EXPENSE,food_7
+tai nghe bluetooth,shopping,EXPENSE,shopping_5
+mua đồ gia dụng,shopping,EXPENSE,shopping_6
+quy den,other,EXPENSE,other_1
+lương cơ bản,salary,INCOME,salary_10
+buffet toi starbucks,food,EXPENSE,food_7
+rua xe may,transport,EXPENSE,transport_6
+công viên giải trí,entertainment,EXPENSE,entertainment_7
+đơn hàng lazada LD9981,shopping,EXPENSE,shopping_7
+mua do dien tu,shopping,EXPENSE,shopping_17
+phi dich vu chuyen tien,transfer_fee,EXPENSE,transfer_fee_8
+PHÍ GIAO DỊCH NGÂN HÀNG,transfer_fee,EXPENSE,transfer_fee_2
+MUA SACH GIAO KHOA,education,EXPENSE,education_13
+tiền nhà hàng tháng,housing,EXPENSE,housing_12
+đặt hàng tiki OD776,shopping,EXPENSE,shopping_11
+gọi cơm giao tận nơi,food,EXPENSE,food_17
+MUA TUI XACH HANG HIEU,shopping,EXPENSE,shopping_12
+khóa đào tạo nghề,education,EXPENSE,education_14
+xét nghiệm máu,health,EXPENSE,health_3
+khám sức khỏe định kỳ,health,EXPENSE,health_7
+mừng tuổi,other,EXPENSE,other_7
+mua nuoc hoa,shopping,EXPENSE,shopping_14
+lệ phí thi chứng chỉ,education,EXPENSE,education_4
+co tuc co phieu,income_other,INCOME,income_other_4
+cho thue nha,income_other,INCOME,income_other_7
+giáo trình đại học,education,EXPENSE,education_7
+lương cơ bản,salary,INCOME,salary_10
+vé  tham  quan  bảo  tàng,entertainment,EXPENSE,entertainment_12
+MUA SẮM ONLINE,shopping,EXPENSE,shopping_15
+đóng quỹ lớp,other,EXPENSE,other_8
+hoc phi khoa toan,education,EXPENSE,education_0
+đóng quỹ lớp,other,EXPENSE,other_8
+phí sms banking,transfer_fee,EXPENSE,transfer_fee_9
+hoàn tiền shopee,income_other,INCOME,income_other_2
+đặt phòng khách sạn đi du lịch,entertainment,EXPENSE,entertainment_13
+mua khau trang,health,EXPENSE,health_10
+phí thường niên thẻ tín dụng,transfer_fee,EXPENSE,transfer_fee_3
+an sang bun cha,food,EXPENSE,food_0
+cổ  tức  cổ  phiếu,income_other,INCOME,income_other_4
+mỹ phẩm phúc long,shopping,EXPENSE,shopping_3
+vé tàu đi sài gòn,transport,EXPENSE,transport_7
+thuê gia sư,education,EXPENSE,education_9
+THANH TOÁN LƯƠNG THÁNG 4,salary,INCOME,salary_5
+thu nhập lương tháng,salary,INCOME,salary_12
+MUA MAY LOC NUOC,housing,EXPENSE,housing_11
+taxi the coffee house,transport,EXPENSE,transport_8
+quần  jeans  đặt  trên  shopee,shopping,EXPENSE,shopping_1
+quần  jeans  đặt  trên  shopee,shopping,EXPENSE,shopping_1
+lệ phí nhập học,education,EXPENSE,education_11
+phi chuyen khoan nhanh 247,transfer_fee,EXPENSE,transfer_fee_6
+DU LICH HA NOI,entertainment,EXPENSE,entertainment_4
+vật  lý  trị  liệu,health,EXPENSE,health_9
+mua  trai  cay  cho  ben  thanh,food,EXPENSE,food_9
+mua đồ chơi cho em bé,shopping,EXPENSE,shopping_10
+mua sách marketing,education,EXPENSE,education_1
+gọi cơm giao tận nơi,food,EXPENSE,food_17
+xét  nghiệm  máu,health,EXPENSE,health_3
+mua  khẩu  trang,health,EXPENSE,health_10
+thưởng tết,salary,INCOME,salary_3
+MUA NƯỚC HOA,shopping,EXPENSE,shopping_14
+dat xe cong nghe di lam,transport,EXPENSE,transport_12
+mua quần áo mới,shopping,EXPENSE,shopping_16
+thanh toán lương tháng 6,salary,INCOME,salary_5
+tien dien thang 10,housing,EXPENSE,housing_1
+mua điện thoại mới,shopping,EXPENSE,shopping_4
+PHÍ CHUYỂN TIỀN QUỐC TẾ,transfer_fee,EXPENSE,transfer_fee_4
+mua do khong ro loai,other,EXPENSE,other_4
+mua đồ gia dụng,shopping,EXPENSE,shopping_6
+tien thuong ngoai luong,income_other,INCOME,income_other_11
+tai nghe bluetooth,shopping,EXPENSE,shopping_5
+thưởng tết,salary,INCOME,salary_3
+mua thực phẩm ở siêu thị,food,EXPENSE,food_18
+boi thuong bao hiem,income_other,INCOME,income_other_8
+chi phí không ghi chú,other,EXPENSE,other_9
+ship do an qua befood,food,EXPENSE,food_5
+mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8
+mua áo katinat,shopping,EXPENSE,shopping_0
+khám sức khỏe định kỳ,health,EXPENSE,health_7
+tiền rác tháng 4,housing,EXPENSE,housing_9
+đổi  bình  gas,housing,EXPENSE,housing_7
+chơi bowling,entertainment,EXPENSE,entertainment_9
+be  car  ra  sân  bay,transport,EXPENSE,transport_2
+cà  phê  starbucks,food,EXPENSE,food_1
+be  car  ra  san  bay,transport,EXPENSE,transport_2
+ăn nhậu với bạn ở quán gần nhà,food,EXPENSE,food_8
+PHÍ NAPAS,transfer_fee,EXPENSE,transfer_fee_10
+mua máy lọc nước,housing,EXPENSE,housing_11
+ship đồ ăn qua befood,food,EXPENSE,food_5
+đặt xe công nghệ đi làm,transport,EXPENSE,transport_12
+nạp game online,entertainment,EXPENSE,entertainment_6
+SƠN LẠI TƯỜNG NHÀ,housing,EXPENSE,housing_10
+grab bike đi làm,transport,EXPENSE,transport_1
+mua sam online,shopping,EXPENSE,shopping_15
+mua đồ chơi cho em bé,shopping,EXPENSE,shopping_10
+đóng bảo hiểm y tế,health,EXPENSE,health_4
+đi nha sĩ,health,EXPENSE,health_2
+cơm  trưa  quán  gần  nhà,food,EXPENSE,food_2
+TIỀN LÌ XÌ,other,EXPENSE,other_10
+bar beer với bạn,entertainment,EXPENSE,entertainment_8
+spotify  premium,entertainment,EXPENSE,entertainment_2
+bán  đồ  cũ,income_other,INCOME,income_other_0
+sửa xe đạp,transport,EXPENSE,transport_9
+cơm  trưa  quán  gần  nhà,food,EXPENSE,food_2
+mua vitamin,health,EXPENSE,health_6
+phí quản lý chung cư,housing,EXPENSE,housing_4
+mua  vitamin,health,EXPENSE,health_6
+ban co phieu,income_other,INCOME,income_other_9
+phí sinh hoạt gia đình,housing,EXPENSE,housing_15
+MUA VALI DU LỊCH,shopping,EXPENSE,shopping_9
+THANH TOAN LUONG THANG 4,salary,INCOME,salary_5
+cước internet wifi,housing,EXPENSE,housing_3
+DU LỊCH HÀ NỘI,entertainment,EXPENSE,entertainment_4
+nạp game online,entertainment,EXPENSE,entertainment_6
+thưởng dự án,salary,INCOME,salary_2
+gọi cơm giao tận nơi,food,EXPENSE,food_17
+tiền  điện  tháng  1,housing,EXPENSE,housing_1
+đơn hàng lazada TK2026,shopping,EXPENSE,shopping_7
+kham benh benh vien dai hoc y,health,EXPENSE,health_1
+PHÍ THUÊ BAO NETFLIX,entertainment,EXPENSE,entertainment_1
+mua nhiệt kế,health,EXPENSE,health_15
+PHÍ CHUYỂN KHOẢN NHANH 247,transfer_fee,EXPENSE,transfer_fee_6
+sửa ống nước,housing,EXPENSE,housing_5
+ăn  vặt  ngoài  đường,food,EXPENSE,food_15
+mua túi xách hàng hiệu,shopping,EXPENSE,shopping_12
+đổ xăng petrolimex,transport,EXPENSE,transport_0
+lương  tháng  12,salary,INCOME,salary_0
+thu nhập ngoài giờ,income_other,INCOME,income_other_13
+cho thuê nhà,income_other,INCOME,income_other_7
+taxi the coffee house,transport,EXPENSE,transport_8
+đóng góp quỹ từ thiện,other,EXPENSE,other_11
+ăn sáng bánh cuốn,food,EXPENSE,food_0
+spotify premium,entertainment,EXPENSE,entertainment_2
+tiền thưởng ngoài lương,income_other,INCOME,income_other_11
+mua áo starbucks,shopping,EXPENSE,shopping_0
+mua sách python,education,EXPENSE,education_1
+nạp tiền xe bus,transport,EXPENSE,transport_10
+PHÍ RÚT TIỀN ATM,transfer_fee,EXPENSE,transfer_fee_1
+luong co ban,salary,INCOME,salary_10
+tien thue nha thang 5,housing,EXPENSE,housing_0
+chi khác,other,EXPENSE,other_12
+TAXI KATINAT,transport,EXPENSE,transport_8
+luong co ban,salary,INCOME,salary_10
+VAT LY TRI LIEU,health,EXPENSE,health_9
+mua đồ không rõ loại,other,EXPENSE,other_4
+mua  văn  phòng  phẩm,education,EXPENSE,education_5
+ban  do  cu,income_other,INCOME,income_other_0
+dong quy lop,other,EXPENSE,other_8
+thuong nong,salary,INCOME,salary_11
+cơm trưa quán gần nhà,food,EXPENSE,food_2
+BUFFET TỐI STARBUCKS,food,EXPENSE,food_7
+sửa máy điều hòa,housing,EXPENSE,housing_14
+tiền nước tháng 1,housing,EXPENSE,housing_2
+BÁNH MÌ NHÀ HÀNG TRUNG TÂM,food,EXPENSE,food_6
+mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8
+ĐI NHA SĨ,health,EXPENSE,health_2
+tiền  rác  tháng  10,housing,EXPENSE,housing_9
+phí thuê bao netflix,entertainment,EXPENSE,entertainment_1
+thu nhập lương tháng,salary,INCOME,salary_12
+thu nhập ngoài giờ,income_other,INCOME,income_other_13
+phí phát sinh,other,EXPENSE,other_5
+cổ  tức  cổ  phiếu,income_other,INCOME,income_other_4
+đổ xăng cây xăng đầu ngõ,transport,EXPENSE,transport_0
+bán cổ phiếu,income_other,INCOME,income_other_9
+VAT LY TRI LIEU,health,EXPENSE,health_9
+bán cổ phiếu,income_other,INCOME,income_other_9
+lương chuyển khoản,salary,INCOME,salary_4
+tiền học thêm cho con,education,EXPENSE,education_3
+hoàn tiền shopee,income_other,INCOME,income_other_2
+ĐẶT HÀNG TIKI OD776,shopping,EXPENSE,shopping_11
+choi game o quan net,entertainment,EXPENSE,entertainment_15
+ĐẶT HÀNG TIKI SP123,shopping,EXPENSE,shopping_11
+phí cầu đường hà nội,transport,EXPENSE,transport_11
+mua  thực  phẩm  ở  siêu  thị,food,EXPENSE,food_18
+mua thuốc bổ,health,EXPENSE,health_12
+đóng quỹ lớp,other,EXPENSE,other_8
+mua sách giáo khoa,education,EXPENSE,education_13
+phụ cấp làm thêm,salary,INCOME,salary_7
+đơn hàng lazada SP123,shopping,EXPENSE,shopping_7
+HỌC TIẾNG ANH TRUNG TÂM,education,EXPENSE,education_6
+phụ cấp làm thêm,salary,INCOME,salary_7
+MUA NỘI THẤT PHÒNG KHÁCH,housing,EXPENSE,housing_6
+nap  tien  xe  bus,transport,EXPENSE,transport_10
+dat xe cong nghe di lam,transport,EXPENSE,transport_12
+tiec  sinh  nhat  o  nha  hang,food,EXPENSE,food_14
+buffet toi katinat,food,EXPENSE,food_7
+phi  rut  tien  atm,transfer_fee,EXPENSE,transfer_fee_1
+đặt pizza giao hàng tiết kiệm,food,EXPENSE,food_10
+thue gia su,education,EXPENSE,education_9
+don hang lazada OD776,shopping,EXPENSE,shopping_7
+mua may tinh cho viec hoc,education,EXPENSE,education_10
+PHÍ CHUYỂN TIỀN QUỐC TẾ,transfer_fee,EXPENSE,transfer_fee_4
+tiêm phòng cúm,health,EXPENSE,health_11
+bán  đồ  cũ,income_other,INCOME,income_other_0
+MUA NỘI THẤT PHÒNG KHÁCH,housing,EXPENSE,housing_6
+tien luong cong ty tra,salary,INCOME,salary_13
+my pham starbucks,shopping,EXPENSE,shopping_3
+giao trinh dai hoc,education,EXPENSE,education_7
+XET NGHIEM MAU,health,EXPENSE,health_3
+mua giay starbucks,shopping,EXPENSE,shopping_2
+mua  do  lat  vat,other,EXPENSE,other_13
+MUA NUOC HOA,shopping,EXPENSE,shopping_14
+tiền  nước  tháng  9,housing,EXPENSE,housing_2
+phi phat sinh,other,EXPENSE,other_5
+mua nước hoa,shopping,EXPENSE,shopping_14
+rửa xe máy,transport,EXPENSE,transport_6
+mua đồng hồ đeo tay,shopping,EXPENSE,shopping_13
+quỹ đen,other,EXPENSE,other_1
+KHÓA LẬP TRÌNH PYTHON,education,EXPENSE,education_8
+PHÍ DỊCH VỤ CHUYỂN TIỀN,transfer_fee,EXPENSE,transfer_fee_8
+trà sữa highlands,food,EXPENSE,food_4
+nhận lương công ty starbucks,salary,INCOME,salary_1
+vé  concert  katinat,entertainment,EXPENSE,entertainment_3
+đặt phòng khách sạn đi du lịch,entertainment,EXPENSE,entertainment_13
+mua thực phẩm ở siêu thị,food,EXPENSE,food_18
+phí bảo hiểm sức khỏe,health,EXPENSE,health_14
+karaoke cuoi tuan,entertainment,EXPENSE,entertainment_5
+trung xo so,income_other,INCOME,income_other_6
+MUA SÁCH GIÁO KHOA,education,EXPENSE,education_13
+chi tiêu linh tinh,other,EXPENSE,other_0
+mua khẩu trang,health,EXPENSE,health_10
+vé xem phim quán hải sản,entertainment,EXPENSE,entertainment_0
+DỊCH VỤ VỆ SINH NHÀ,housing,EXPENSE,housing_8
+bảo dưỡng xe máy,transport,EXPENSE,transport_15
+MUA ĐỒNG HỒ ĐEO TAY,shopping,EXPENSE,shopping_13
+mua may tinh cho viec hoc,education,EXPENSE,education_10
+karaoke cuối tuần,entertainment,EXPENSE,entertainment_5
+học tiếng anh trung tâm,education,EXPENSE,education_6
+mua do lat vat,other,EXPENSE,other_13
+mua  xăng  xe,transport,EXPENSE,transport_16
+trúng xổ số,income_other,INCOME,income_other_6
+buffet tối phúc long,food,EXPENSE,food_7
+xét  nghiệm  máu,health,EXPENSE,health_3
+dong bao hiem y te,health,EXPENSE,health_4
+KHÁM SỨC KHỎE ĐỊNH KỲ,health,EXPENSE,health_7
+phí  duy  trì  tài  khoản,transfer_fee,EXPENSE,transfer_fee_5
+gọi cơm giao tận nơi,food,EXPENSE,food_17
+tiền nhà hàng tháng,housing,EXPENSE,housing_12
+PHI CHUYEN KHOAN NGAN HANG,transfer_fee,EXPENSE,transfer_fee_0
+ủng hộ từ thiện,other,EXPENSE,other_2
+sửa xe đạp,transport,EXPENSE,transport_9
+phí  rút  tiền  atm,transfer_fee,EXPENSE,transfer_fee_1
+trà  sữa  phúc  long,food,EXPENSE,food_4
+lương cơ bản,salary,INCOME,salary_10
+phí cầu đường sài gòn,transport,EXPENSE,transport_11
+PHI NAPAS,transfer_fee,EXPENSE,transfer_fee_10
+dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8
+mua sách python,education,EXPENSE,education_1
+MUA TRÁI CÂY CHỢ THÁI BÌNH,food,EXPENSE,food_9
+lương part time,salary,INCOME,salary_8
+sửa máy điều hòa,housing,EXPENSE,housing_14
+lãi tiết kiệm ngân hàng,income_other,INCOME,income_other_3
+phu cap lam them,salary,INCOME,salary_7
+PHÍ PHÁT SINH,other,EXPENSE,other_5
+mua sach giao khoa,education,EXPENSE,education_13
+KHAM SUC KHOE DINH KY,health,EXPENSE,health_7
+mua quan ao moi,shopping,EXPENSE,shopping_16
+mua xăng xe,transport,EXPENSE,transport_16
+thưởng hiệu suất quý,salary,INCOME,salary_6
+ĂN PHỞ QUÁN GẦN NHÀ,food,EXPENSE,food_11
+SPOTIFY PREMIUM,entertainment,EXPENSE,entertainment_2
+giáo trình đại học,education,EXPENSE,education_7
+ăn phở quán gần nhà,food,EXPENSE,food_11
+mua dien thoai moi,shopping,EXPENSE,shopping_4
+chơi bowling,entertainment,EXPENSE,entertainment_9
+phi quan ly chung cu,housing,EXPENSE,housing_4
+thưởng nóng,salary,INCOME,salary_11
+phí chuyển khoản nhanh 247,transfer_fee,EXPENSE,transfer_fee_6
+mua truyen tranh,entertainment,EXPENSE,entertainment_11
+ve concert the coffee house,entertainment,EXPENSE,entertainment_3
+vé tham quan bảo tàng,entertainment,EXPENSE,entertainment_12
+vé  concert  phúc  long,entertainment,EXPENSE,entertainment_3
+banh mi can tin cong ty,food,EXPENSE,food_6
+dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8
+mua thuc pham o sieu thi,food,EXPENSE,food_18
+ăn nhậu với bạn ở căn tin công ty,food,EXPENSE,food_8
+vé  tàu  đi  sài  gòn,transport,EXPENSE,transport_7
+ban co phieu,income_other,INCOME,income_other_9
+rửa xe máy,transport,EXPENSE,transport_6
+MUA MÁY LỌC NƯỚC,housing,EXPENSE,housing_11
+cong vien giai tri,entertainment,EXPENSE,entertainment_7
+thu  nhập  từ  công  việc  chính,salary,INCOME,salary_9
+cổ tức cổ phiếu,income_other,INCOME,income_other_4
+phí phát sinh,other,EXPENSE,other_5
+đặt xe công nghệ đi làm,transport,EXPENSE,transport_12
+phi quan ly chung cu,housing,EXPENSE,housing_4
+PHI CHUYEN TIEN QUOC TE,transfer_fee,EXPENSE,transfer_fee_4
+phí đỗ xe,transport,EXPENSE,transport_17
+phí  phát  sinh,other,EXPENSE,other_5
+sửa ống nước,housing,EXPENSE,housing_5
+mung tuoi,other,EXPENSE,other_7
+mua đồ chơi cho em bé,shopping,EXPENSE,shopping_10
+di kham bac si,health,EXPENSE,health_13
+phí quản lý chung cư,housing,EXPENSE,housing_4
+phi quan ly chung cu,housing,EXPENSE,housing_4
+mua vé xe buýt tháng,transport,EXPENSE,transport_3
+giáo trình đại học,education,EXPENSE,education_7
+KHÁM BỆNH PHÒNG KHÁM GIA ĐÌNH,health,EXPENSE,health_1
+thưởng tết,salary,INCOME,salary_3
+LƯƠNG PART TIME,salary,INCOME,salary_8
+be car ra sân bay,transport,EXPENSE,transport_2
+mua truyện tranh,entertainment,EXPENSE,entertainment_11
+phí  rút  tiền  mặt,transfer_fee,EXPENSE,transfer_fee_11
+đổ  xăng  cây  xăng  đầu  ngõ,transport,EXPENSE,transport_0
+ĂN NHẬU VỚI BẠN Ở NHÀ HÀNG TRUNG TÂM,food,EXPENSE,food_8
+chữa răng khôn,health,EXPENSE,health_8
+đi khám bác sĩ,health,EXPENSE,health_13
+mua máy tính cho việc học,education,EXPENSE,education_10
+gọi cơm giao tận nơi,food,EXPENSE,food_17
+mua áo katinat,shopping,EXPENSE,shopping_0
+BUFFET TOI STARBUCKS,food,EXPENSE,food_7
+mua đồng hồ đeo tay,shopping,EXPENSE,shopping_13
+phi phat sinh,other,EXPENSE,other_5
+được tặng tiền,income_other,INCOME,income_other_1
+thưởng nóng,salary,INCOME,salary_11
+tien nuoc thang 1,housing,EXPENSE,housing_2
+bảo  dưỡng  xe  máy,transport,EXPENSE,transport_15
+mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14
+mua vitamin,health,EXPENSE,health_6
+chữa răng khôn,health,EXPENSE,health_8
+mua sắm online,shopping,EXPENSE,shopping_15
+đặt xe công nghệ đi làm,transport,EXPENSE,transport_12
+học tiếng anh trung tâm,education,EXPENSE,education_6
+mua khau trang,health,EXPENSE,health_10
+thưởng  dự  án,salary,INCOME,salary_2
+đóng học phí cho con,education,EXPENSE,education_12
+mua rau cu qua o sieu thi coopmart,food,EXPENSE,food_13
+mua truyện tranh,entertainment,EXPENSE,entertainment_11
+phí  sms  banking,transfer_fee,EXPENSE,transfer_fee_9
+mua vali du lịch,shopping,EXPENSE,shopping_9
+thưởng dự án,salary,INCOME,salary_2
+mua vitamin,health,EXPENSE,health_6
+mua  túi  xách  hàng  hiệu,shopping,EXPENSE,shopping_12
+MUA THUOC PHARMACITY,health,EXPENSE,health_0
+mung tuoi,other,EXPENSE,other_7
+TIEN THUE NHA THANG 11,housing,EXPENSE,housing_0
+PHI RUT TIEN MAT,transfer_fee,EXPENSE,transfer_fee_11
+PHÍ BẢO HIỂM SỨC KHỎE,health,EXPENSE,health_14
+phí sms banking,transfer_fee,EXPENSE,transfer_fee_9
+KHÁM SỨC KHỎE ĐỊNH KỲ,health,EXPENSE,health_7
+đóng quỹ lớp,other,EXPENSE,other_8
+đặt  hàng  tiki  LD9981,shopping,EXPENSE,shopping_11
+bar beer voi ban,entertainment,EXPENSE,entertainment_8
+xet nghiem mau,health,EXPENSE,health_3
+chi phí không ghi chú,other,EXPENSE,other_9
+bồi thường bảo hiểm,income_other,INCOME,income_other_8
+gửi xe quán gần nhà,transport,EXPENSE,transport_4
+thu nhập freelance,income_other,INCOME,income_other_5
+chi phi khong ghi chu,other,EXPENSE,other_9
+lãi  tiết  kiệm  ngân  hàng,income_other,INCOME,income_other_3
+phi thuong nien the tin dung,transfer_fee,EXPENSE,transfer_fee_3
+phi chuyen khoan nhanh 247,transfer_fee,EXPENSE,transfer_fee_6
+an vat ngoai duong,food,EXPENSE,food_15
+choi game o quan net,entertainment,EXPENSE,entertainment_15
+an sang banh cuon,food,EXPENSE,food_0
+PHÍ NAPAS,transfer_fee,EXPENSE,transfer_fee_10
+đóng quỹ lớp,other,EXPENSE,other_8
+TIỀN LÌ XÌ,other,EXPENSE,other_10
+trà sữa katinat,food,EXPENSE,food_4
+BÁNH MÌ QUÁN GẦN NHÀ,food,EXPENSE,food_6
+mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8
+nhan tien chuyen khoan tu ban,income_other,INCOME,income_other_10
+khám bệnh bệnh viện chợ rẫy,health,EXPENSE,health_1
+phi chuyen khoan nhanh 247,transfer_fee,EXPENSE,transfer_fee_6
+mua sach thiet ke,education,EXPENSE,education_1
+tiền  học  thêm  cho  con,education,EXPENSE,education_3
+phí đỗ xe,transport,EXPENSE,transport_17
+đi nha sĩ,health,EXPENSE,health_2
+phí napas,transfer_fee,EXPENSE,transfer_fee_10
+mua văn phòng phẩm,education,EXPENSE,education_5
+học tiếng anh trung tâm,education,EXPENSE,education_6
+mua  nước  hoa,shopping,EXPENSE,shopping_14
+tiền  nước  tháng  6,housing,EXPENSE,housing_2
+mua  do  lat  vat,other,EXPENSE,other_13
+phí thi tiếng anh ielts,education,EXPENSE,education_15
+spotify premium,entertainment,EXPENSE,entertainment_2
+vé máy bay đi hà nội,transport,EXPENSE,transport_13
+nạp tiền xe bus,transport,EXPENSE,transport_10
+mua nhiet ke,health,EXPENSE,health_15
+THU NHẬP LƯƠNG THÁNG,salary,INCOME,salary_12
+VÉ THAM QUAN BẢO TÀNG,entertainment,EXPENSE,entertainment_12
+lai  tiet  kiem  ngan  hang,income_other,INCOME,income_other_3
+mua giày starbucks,shopping,EXPENSE,shopping_2
+thanh toan luong thang 6,salary,INCOME,salary_5
+chữa răng khôn,health,EXPENSE,health_8
+mua qua tang sinh nhat,shopping,EXPENSE,shopping_8
+đóng góp quỹ từ thiện,other,EXPENSE,other_11
+tiem  phong  cum,health,EXPENSE,health_11
+cúng giỗ,other,EXPENSE,other_3
+phí rút tiền atm,transfer_fee,EXPENSE,transfer_fee_1
+phi thue bao netflix,entertainment,EXPENSE,entertainment_1
+mua máy tính cho việc học,education,EXPENSE,education_10
+DI NHA SI,health,EXPENSE,health_2
+thưởng nóng,salary,INCOME,salary_11
+rửa xe máy,transport,EXPENSE,transport_6
+tiền lương công ty trả,salary,INCOME,salary_13
+bar beer với bạn,entertainment,EXPENSE,entertainment_8
+TIỀN THUÊ NHÀ THÁNG 11,housing,EXPENSE,housing_0
+khóa đào tạo nghề,education,EXPENSE,education_14
+dich vu ve sinh nha,housing,EXPENSE,housing_8
+MUA ĐỒ ĐIỆN TỬ,shopping,EXPENSE,shopping_17
+công viên giải trí,entertainment,EXPENSE,entertainment_7
+mua máy tính cho việc học,education,EXPENSE,education_10
+nhận lương công ty katinat,salary,INCOME,salary_1
+mua  đồ  lặt  vặt,other,EXPENSE,other_13
+phí cầu đường hà nội,transport,EXPENSE,transport_11
+thu nhập lương tháng,salary,INCOME,salary_12
+BE CAR RA SÂN BAY,transport,EXPENSE,transport_2
+vé  tàu  đi  sài  gòn,transport,EXPENSE,transport_7
+chơi game ở quán net,entertainment,EXPENSE,entertainment_15
+MUA NƯỚC HOA,shopping,EXPENSE,shopping_14
+ship đồ ăn qua shopeefood,food,EXPENSE,food_5
+mua nội thất phòng khách,housing,EXPENSE,housing_6
+tiền thưởng ngoài lương,income_other,INCOME,income_other_11
+MUA TÚI XÁCH HÀNG HIỆU,shopping,EXPENSE,shopping_12
+phí bảo hiểm sức khỏe,health,EXPENSE,health_14
+grab bike đi làm,transport,EXPENSE,transport_1
+mừng tuổi,other,EXPENSE,other_7
+lương  part  time,salary,INCOME,salary_8
+CƠM TRƯA CĂN TIN CÔNG TY,food,EXPENSE,food_2
+thu  nhập  từ  công  việc  chính,salary,INCOME,salary_9
+thu nhập ngoài giờ,income_other,INCOME,income_other_13
+phi giao dich ngan hang,transfer_fee,EXPENSE,transfer_fee_2
+tiền lương công ty trả,salary,INCOME,salary_13
+MUA DO DIEN TU,shopping,EXPENSE,shopping_17
+được tặng tiền,income_other,INCOME,income_other_1
+lai tiet kiem ngan hang,income_other,INCOME,income_other_3
+được tặng tiền,income_other,INCOME,income_other_1
+mua đồng hồ đeo tay,shopping,EXPENSE,shopping_13
+HỌC PHÍ KHÓA TIẾNG ANH,education,EXPENSE,education_0
+vat ly tri lieu,health,EXPENSE,health_9
+phí chuyển khoản nhanh 247,transfer_fee,EXPENSE,transfer_fee_6
+phí đỗ xe,transport,EXPENSE,transport_17
+mua sách giáo khoa,education,EXPENSE,education_13
+be car ra sân bay,transport,EXPENSE,transport_2
+PHÍ CHUYỂN KHOẢN NGÂN HÀNG,transfer_fee,EXPENSE,transfer_fee_0
+thuê gia sư,education,EXPENSE,education_9
+phí  thường  niên  thẻ  tín  dụng,transfer_fee,EXPENSE,transfer_fee_3
+khóa học online trên udemy,education,EXPENSE,education_2
+sơn lại tường nhà,housing,EXPENSE,housing_10
+du lich ha noi,entertainment,EXPENSE,entertainment_4
+phi cau duong ha noi,transport,EXPENSE,transport_11
+quần jeans đặt trên shopee,shopping,EXPENSE,shopping_1
+đi xe khách về quê,transport,EXPENSE,transport_14
+mua vali du lịch,shopping,EXPENSE,shopping_9
+vé máy bay đi hà nội,transport,EXPENSE,transport_13
+choi  game  o  quan  net,entertainment,EXPENSE,entertainment_15
+khám bệnh bệnh viện đại học y,health,EXPENSE,health_1
+phi sms banking,transfer_fee,EXPENSE,transfer_fee_9
+đóng bảo hiểm y tế,health,EXPENSE,health_4
+VÉ CONCERT STARBUCKS,entertainment,EXPENSE,entertainment_3
+cho thuê nhà,income_other,INCOME,income_other_7
+tiền thuê nhà tháng 5,housing,EXPENSE,housing_0
+mua  đồ  lặt  vặt,other,EXPENSE,other_13
+luong  thang  5,salary,INCOME,salary_0
+mừng tuổi,other,EXPENSE,other_7
+mua sách giáo khoa,education,EXPENSE,education_13
+karaoke cuối tuần,entertainment,EXPENSE,entertainment_5
+khoa hoc online tren udemy,education,EXPENSE,education_2
+lương  chuyển  khoản,salary,INCOME,salary_4
+cước internet wifi,housing,EXPENSE,housing_3
+MUA VÉ XE BUÝT THÁNG,transport,EXPENSE,transport_3
+mua sắm online,shopping,EXPENSE,shopping_15
+BÁN ĐỒ CŨ,income_other,INCOME,income_other_0
+phí phát sinh,other,EXPENSE,other_5
+ăn  sáng  xôi  mặn,food,EXPENSE,food_19
+đám cưới phong bì,other,EXPENSE,other_6
+VẬT LÝ TRỊ LIỆU,health,EXPENSE,health_9
+phí rút tiền mặt,transfer_fee,EXPENSE,transfer_fee_11
+lai  tiet  kiem  ngan  hang,income_other,INCOME,income_other_3
+ủng hộ từ thiện,other,EXPENSE,other_2
+đồ ăn nhanh phúc long,food,EXPENSE,food_16
+tiền lì xì,other,EXPENSE,other_10
+mua nhiệt kế,health,EXPENSE,health_15
+thu nhập freelance,income_other,INCOME,income_other_5
+khoa  lap  trinh  marketing,education,EXPENSE,education_8
+cà phê starbucks,food,EXPENSE,food_1
+bar beer voi ban,entertainment,EXPENSE,entertainment_8
+lương  chuyển  khoản,salary,INCOME,salary_4
+vé tham quan bảo tàng,entertainment,EXPENSE,entertainment_12
+thưởng  nóng,salary,INCOME,salary_11
+dat hang tiki OD776,shopping,EXPENSE,shopping_11
+uống bia ở quán quán gần nhà,food,EXPENSE,food_12
+mua rau củ quả ở chợ bến thành,food,EXPENSE,food_13
+thay nhớt xe máy petrolimex,transport,EXPENSE,transport_5
+thay nhớt xe máy petrolimex,transport,EXPENSE,transport_5
+hoc tieng anh trung tam,education,EXPENSE,education_6
+thu  nhập  freelance,income_other,INCOME,income_other_5
+khám bệnh bệnh viện đại học y,health,EXPENSE,health_1
+ĐỒ ĂN NHANH THE COFFEE HOUSE,food,EXPENSE,food_16
+khóa lập trình kế toán,education,EXPENSE,education_8
+mua áo highlands,shopping,EXPENSE,shopping_0
+thuê phòng xem bóng đá,entertainment,EXPENSE,entertainment_10
+thu nhập freelance,income_other,INCOME,income_other_5
+mua khẩu trang,health,EXPENSE,health_10
+TIỀN ĐIỆN THÁNG 9,housing,EXPENSE,housing_1
+trà sữa phúc long,food,EXPENSE,food_4
+cổ tức cổ phiếu,income_other,INCOME,income_other_4
+mua áo the coffee house,shopping,EXPENSE,shopping_0
+thuê gia sư,education,EXPENSE,education_9
+sơn lại tường nhà,housing,EXPENSE,housing_10
+an  sang  xoi  ga,food,EXPENSE,food_0
+mua sach python,education,EXPENSE,education_1
+thuong  hieu  suat  quy,salary,INCOME,salary_6
+mua túi xách hàng hiệu,shopping,EXPENSE,shopping_12
+mua van phong pham,education,EXPENSE,education_5
+vé xem phim quán gần nhà,entertainment,EXPENSE,entertainment_0
+mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14
+ĐẶT PIZZA SHOPEEFOOD,food,EXPENSE,food_10
+mua nhiet ke,health,EXPENSE,health_15
+phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2
+bán hàng online,income_other,INCOME,income_other_12
+khoa lap trinh tieng anh,education,EXPENSE,education_8
+thưởng tết,salary,INCOME,salary_3
+di xe khach ve que,transport,EXPENSE,transport_14
+choi bowling,entertainment,EXPENSE,entertainment_9
+phi thuong nien the tin dung,transfer_fee,EXPENSE,transfer_fee_3
+buffet tối phúc long,food,EXPENSE,food_7
+ĐI KHÁM BÁC SĨ,health,EXPENSE,health_13
+tien luong cong ty tra,salary,INCOME,salary_13
+trúng xổ số,income_other,INCOME,income_other_6
+phí quản lý chung cư,housing,EXPENSE,housing_4
+phi thi tieng anh ielts,education,EXPENSE,education_15
+lương cơ bản,salary,INCOME,salary_10
+mua đồ điện tử,shopping,EXPENSE,shopping_17
+THAY NHỚT XE MÁY PETROLIMEX,transport,EXPENSE,transport_5
+mua truyện tranh,entertainment,EXPENSE,entertainment_11
+phi napas,transfer_fee,EXPENSE,transfer_fee_10
+DONG HOC PHI CHO CON,education,EXPENSE,education_12
+HỌC PHÍ KHÓA THIẾT KẾ,education,EXPENSE,education_0
+goi com giao tan noi,food,EXPENSE,food_17
+sửa  ống  nước,housing,EXPENSE,housing_5
+phí quản lý thẻ,transfer_fee,EXPENSE,transfer_fee_7
+tai  nghe  bluetooth,shopping,EXPENSE,shopping_5
+thu nhap ngoai gio,income_other,INCOME,income_other_13
+BÁN HÀNG ONLINE,income_other,INCOME,income_other_12
+vat  ly  tri  lieu,health,EXPENSE,health_9
+vé concert the coffee house,entertainment,EXPENSE,entertainment_3
+thưởng  hiệu  suất  quý,salary,INCOME,salary_6
+phí sinh hoạt gia đình,housing,EXPENSE,housing_15
+quỹ đen,other,EXPENSE,other_1
+grab bike đi làm,transport,EXPENSE,transport_1
+nạp game online,entertainment,EXPENSE,entertainment_6
+bar beer với bạn,entertainment,EXPENSE,entertainment_8
+phí tập gym tháng 7,health,EXPENSE,health_5
+LỆ PHÍ NHẬP HỌC,education,EXPENSE,education_11
+ung ho tu thien,other,EXPENSE,other_2
+mỹ phẩm the coffee house,shopping,EXPENSE,shopping_3
+ăn sáng mì quảng,food,EXPENSE,food_0
+ăn sáng xôi mặn,food,EXPENSE,food_19
+mua máy tính cho việc học,education,EXPENSE,education_10
+cước internet wifi,housing,EXPENSE,housing_3
+phí  sinh  hoạt  gia  đình,housing,EXPENSE,housing_15
+bar beer voi ban,entertainment,EXPENSE,entertainment_8
+BỒI THƯỜNG BẢO HIỂM,income_other,INCOME,income_other_8
+ca  phe  starbucks,food,EXPENSE,food_1
+luong co ban,salary,INCOME,salary_10
+BÁN HÀNG ONLINE,income_other,INCOME,income_other_12
+lệ phí nhập học,education,EXPENSE,education_11
+vé  máy  bay  đi  hà  nội,transport,EXPENSE,transport_13
+mua khẩu trang,health,EXPENSE,health_10
+ĐỔI BÌNH GAS,housing,EXPENSE,housing_7
+mua  vali  du  lịch,shopping,EXPENSE,shopping_9
+du  lịch  đà  nẵng,entertainment,EXPENSE,entertainment_4
+chơi bowling,entertainment,EXPENSE,entertainment_9
+khóa đào tạo nghề,education,EXPENSE,education_14
+BÁN CỔ PHIẾU,income_other,INCOME,income_other_9
+PHÍ RÚT TIỀN MẶT,transfer_fee,EXPENSE,transfer_fee_11
+mua do gia dung,shopping,EXPENSE,shopping_6
+gửi xe quán hải sản,transport,EXPENSE,transport_4
+mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14
+TIEN DIEN THANG 9,housing,EXPENSE,housing_1
+vé tham quan bảo tàng,entertainment,EXPENSE,entertainment_12
+GỬI XE CĂN TIN CÔNG TY,transport,EXPENSE,transport_4
+cho thue nha,income_other,INCOME,income_other_7
+mua dong ho deo tay,shopping,EXPENSE,shopping_13
+VÉ CONCERT STARBUCKS,entertainment,EXPENSE,entertainment_3
+ve tham quan bao tang,entertainment,EXPENSE,entertainment_12
+mua thực phẩm ở siêu thị,food,EXPENSE,food_18
+phí chuyển tiền quốc tế,transfer_fee,EXPENSE,transfer_fee_4
+ĐỔ XĂNG PV OIL,transport,EXPENSE,transport_0
+phí cầu đường hà nội,transport,EXPENSE,transport_11
+mua ve xe buyt thang,transport,EXPENSE,transport_3
+phi rut tien mat,transfer_fee,EXPENSE,transfer_fee_11
+phí  sinh  hoạt  gia  đình,housing,EXPENSE,housing_15
+vé máy bay đi đà nẵng,transport,EXPENSE,transport_13
+sửa máy điều hòa,housing,EXPENSE,housing_14
+sửa máy điều hòa,housing,EXPENSE,housing_14
+tiệc  sinh  nhật  ở  nhà  hàng,food,EXPENSE,food_14
+đặt pizza shopeefood,food,EXPENSE,food_10
+mua  xăng  xe,transport,EXPENSE,transport_16
+thưởng  hiệu  suất  quý,salary,INCOME,salary_6
+thay nhot xe may petrolimex,transport,EXPENSE,transport_5
+tiền lương công ty trả,salary,INCOME,salary_13
+tiêm phòng cúm,health,EXPENSE,health_11
+mua  trái  cây  chợ  bến  thành,food,EXPENSE,food_9
+phí  napas,transfer_fee,EXPENSE,transfer_fee_10
+TRÚNG XỔ SỐ,income_other,INCOME,income_other_6
+thuê  phòng  xem  bóng  đá,entertainment,EXPENSE,entertainment_10
+giáo trình đại học,education,EXPENSE,education_7
+hoan tien shopee,income_other,INCOME,income_other_2
+hóa  đơn  điện  nước,housing,EXPENSE,housing_13
+mua đồ điện tử,shopping,EXPENSE,shopping_17
+mua xăng xe,transport,EXPENSE,transport_16
+uống bia ở quán căn tin công ty,food,EXPENSE,food_12
+thue  phong  xem  bong  da,entertainment,EXPENSE,entertainment_10
+cho thuê nhà,income_other,INCOME,income_other_7
+CÚNG GIỖ,other,EXPENSE,other_3
+tiền thưởng ngoài lương,income_other,INCOME,income_other_11
+be car ra sân bay,transport,EXPENSE,transport_2
+đi chợ winmart mua đồ ăn,food,EXPENSE,food_3
+cho thuê nhà,income_other,INCOME,income_other_7
+trà sữa phúc long,food,EXPENSE,food_4
+mua  vali  du  lich,shopping,EXPENSE,shopping_9
+đóng học phí cho con,education,EXPENSE,education_12
+VẬT LÝ TRỊ LIỆU,health,EXPENSE,health_9
+mua nhiệt kế,health,EXPENSE,health_15
+cho thue nha,income_other,INCOME,income_other_7
+grab  bike  đi  làm,transport,EXPENSE,transport_1
+cúng giỗ,other,EXPENSE,other_3
+nhận tiền chuyển khoản từ bạn,income_other,INCOME,income_other_10
+phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2
+nạp  tiền  xe  bus,transport,EXPENSE,transport_10
+phi sms banking,transfer_fee,EXPENSE,transfer_fee_9
+trung xo so,income_other,INCOME,income_other_6
+tien luong cong ty tra,salary,INCOME,salary_13
+ăn vặt ngoài đường,food,EXPENSE,food_15
+sua xe dap,transport,EXPENSE,transport_9
+ban do cu,income_other,INCOME,income_other_0
+tiec sinh nhat o nha hang,food,EXPENSE,food_14
+thu nhập lương tháng,salary,INCOME,salary_12
+phí chuyển khoản nhanh 247,transfer_fee,EXPENSE,transfer_fee_6
+chi tiêu linh tinh,other,EXPENSE,other_0
+phi  napas,transfer_fee,EXPENSE,transfer_fee_10
+mua may loc nuoc,housing,EXPENSE,housing_11
+thu  nhap  tu  cong  viec  chinh,salary,INCOME,salary_9
+QUỸ ĐEN,other,EXPENSE,other_1
+LUONG THANG 3,salary,INCOME,salary_0
+mua  đồ  chơi  cho  em  bé,shopping,EXPENSE,shopping_10
+chữa răng khôn,health,EXPENSE,health_8
+lương tháng 10,salary,INCOME,salary_0
+khám bệnh phòng khám gia đình,health,EXPENSE,health_1
+phí chuyển khoản ngân hàng,transfer_fee,EXPENSE,transfer_fee_0
+chi tiêu linh tinh,other,EXPENSE,other_0
+phí tập gym tháng 11,health,EXPENSE,health_5
+TIỀN THUÊ NHÀ THÁNG 6,housing,EXPENSE,housing_0
+quần jeans đặt trên shopee,shopping,EXPENSE,shopping_1
+THANH TOAN LUONG THANG 12,salary,INCOME,salary_5
+tiêm  phòng  cúm,health,EXPENSE,health_11
+dịch  vụ  vệ  sinh  nhà,housing,EXPENSE,housing_8
+thu  nhập  ngoài  giờ,income_other,INCOME,income_other_13
+phí  quản  lý  chung  cư,housing,EXPENSE,housing_4
+mua nội thất phòng khách,housing,EXPENSE,housing_6
+mua truyện tranh,entertainment,EXPENSE,entertainment_11
+SƠN LẠI TƯỜNG NHÀ,housing,EXPENSE,housing_10
+đặt pizza shopeefood,food,EXPENSE,food_10
+đặt  phòng  khách  sạn  đi  du  lịch,entertainment,EXPENSE,entertainment_13
+mua đồ lặt vặt,other,EXPENSE,other_13
+tien  rac  thang  10,housing,EXPENSE,housing_9
+du lịch đà lạt,entertainment,EXPENSE,entertainment_4
+ĐÓNG HỌC PHÍ CHO CON,education,EXPENSE,education_12
+ăn  sáng  xôi  gà,food,EXPENSE,food_0
+ăn nhậu với bạn ở nhà hàng trung tâm,food,EXPENSE,food_8
+mua điện thoại mới,shopping,EXPENSE,shopping_4
+MUA ĐỒ ĐIỆN TỬ,shopping,EXPENSE,shopping_17
+mua vé xe buýt tháng,transport,EXPENSE,transport_3
+CHI PHI KHONG GHI CHU,other,EXPENSE,other_9
+mua noi that phong khach,housing,EXPENSE,housing_6
+đơn hàng lazada TK2026,shopping,EXPENSE,shopping_7
+khóa học online trên udemy,education,EXPENSE,education_2
+THANH TOAN LUONG THANG 3,salary,INCOME,salary_5
+ve tau di nha trang,transport,EXPENSE,transport_7
+tiền nhà hàng tháng,housing,EXPENSE,housing_12
+vé xem phim quán gần nhà,entertainment,EXPENSE,entertainment_0
+MUA NHIỆT KẾ,health,EXPENSE,health_15
+an sang xoi man,food,EXPENSE,food_19
+do  xang  cay  xang  dau  ngo,transport,EXPENSE,transport_0
+ca phe the coffee house,food,EXPENSE,food_1
+MUA ĐỒ GIA DỤNG,shopping,EXPENSE,shopping_6
+AN PHO QUAN GAN NHA,food,EXPENSE,food_11
+học phí khóa marketing,education,EXPENSE,education_0
+thue phong xem bong da,entertainment,EXPENSE,entertainment_10
+THANH TOÁN LƯƠNG THÁNG 3,salary,INCOME,salary_5
+mua truyen tranh,entertainment,EXPENSE,entertainment_11
+QUẦN JEANS ĐẶT TRÊN SHOPEE,shopping,EXPENSE,shopping_1
+khóa  lập  trình  marketing,education,EXPENSE,education_8
+đặt phòng khách sạn đi du lịch,entertainment,EXPENSE,entertainment_13
+TIỀN LƯƠNG CÔNG TY TRẢ,salary,INCOME,salary_13
+xét  nghiệm  máu,health,EXPENSE,health_3
+chi phí không ghi chú,other,EXPENSE,other_9
+mua đồ không rõ loại,other,EXPENSE,other_4
+thue phong xem bong da,entertainment,EXPENSE,entertainment_10
+doi binh gas,housing,EXPENSE,housing_7
+mua  giày  katinat,shopping,EXPENSE,shopping_2
+phí chuyển tiền quốc tế,transfer_fee,EXPENSE,transfer_fee_4
+ung ho tu thien,other,EXPENSE,other_2
+nạp  tiền  xe  bus,transport,EXPENSE,transport_10
+tien thuong ngoai luong,income_other,INCOME,income_other_11
+MUA ĐIỆN THOẠI MỚI,shopping,EXPENSE,shopping_4
+phí thường niên thẻ tín dụng,transfer_fee,EXPENSE,transfer_fee_3
+mua rau củ quả ở siêu thị coopmart,food,EXPENSE,food_13
+phí bảo hiểm sức khỏe,health,EXPENSE,health_14
+giao trinh dai hoc,education,EXPENSE,education_7
+mua sách thiết kế,education,EXPENSE,education_1
+phi  dich  vu  chuyen  tien,transfer_fee,EXPENSE,transfer_fee_8
+spotify premium,entertainment,EXPENSE,entertainment_2
+đổ xăng petrolimex,transport,EXPENSE,transport_0
+mua đồ gia dụng,shopping,EXPENSE,shopping_6
+mua thực phẩm ở siêu thị,food,EXPENSE,food_18
+nhận tiền chuyển khoản từ bạn,income_other,INCOME,income_other_10
+mỹ phẩm phúc long,shopping,EXPENSE,shopping_3
+du lịch hà nội,entertainment,EXPENSE,entertainment_4
+thanh toán lương tháng 11,salary,INCOME,salary_5
+nạp tiền xe bus,transport,EXPENSE,transport_10
+tiền nhà hàng tháng,housing,EXPENSE,housing_12
+ăn  sáng  xôi  mặn,food,EXPENSE,food_19
+TIÊM PHÒNG CÚM,health,EXPENSE,health_11
+bán đồ cũ,income_other,INCOME,income_other_0
+phi rut tien atm,transfer_fee,EXPENSE,transfer_fee_1
+do an nhanh starbucks,food,EXPENSE,food_16
+nhận  tiền  chuyển  khoản  từ  bạn,income_other,INCOME,income_other_10
+MUA DONG HO DEO TAY,shopping,EXPENSE,shopping_13
+lương chuyển khoản,salary,INCOME,salary_4
+thưởng  dự  án,salary,INCOME,salary_2
+cho  thuê  nhà,income_other,INCOME,income_other_7
+sửa xe đạp,transport,EXPENSE,transport_9
+sửa xe đạp,transport,EXPENSE,transport_9
+tiền điện tháng 7,housing,EXPENSE,housing_1
+cúng giỗ,other,EXPENSE,other_3
+PHÍ CHUYỂN KHOẢN NGÂN HÀNG,transfer_fee,EXPENSE,transfer_fee_0
+ban co phieu,income_other,INCOME,income_other_9
+mua ve xem ca nhac,entertainment,EXPENSE,entertainment_14
+karaoke cuối tuần,entertainment,EXPENSE,entertainment_5
+chơi game ở quán net,entertainment,EXPENSE,entertainment_15
+mua do lat vat,other,EXPENSE,other_13
+khóa đào tạo nghề,education,EXPENSE,education_14
+ĐỒ ĂN NHANH THE COFFEE HOUSE,food,EXPENSE,food_16
+sua may dieu hoa,housing,EXPENSE,housing_14
+MUA DONG HO DEO TAY,shopping,EXPENSE,shopping_13
+chơi game ở quán net,entertainment,EXPENSE,entertainment_15
+tiền  thuê  nhà  tháng  6,housing,EXPENSE,housing_0
+UỐNG BIA Ở QUÁN QUÁN GẦN NHÀ,food,EXPENSE,food_12
+mua vitamin,health,EXPENSE,health_6
+hóa đơn điện nước,housing,EXPENSE,housing_13
+SPOTIFY PREMIUM,entertainment,EXPENSE,entertainment_2
+ăn  phở  quán  gần  nhà,food,EXPENSE,food_11
+mua thuốc nhà thuốc gần nhà,health,EXPENSE,health_0
+ship đồ ăn qua befood,food,EXPENSE,food_5
+my pham the coffee house,shopping,EXPENSE,shopping_3
+MUA VÉ XE BUÝT THÁNG,transport,EXPENSE,transport_3
+mua túi xách hàng hiệu,shopping,EXPENSE,shopping_12
+được tặng tiền,income_other,INCOME,income_other_1
+ăn sáng xôi mặn,food,EXPENSE,food_19
+chi khác,other,EXPENSE,other_12
+bảo dưỡng xe máy,transport,EXPENSE,transport_15
+phi chuyen khoan ngan hang,transfer_fee,EXPENSE,transfer_fee_0
+thuê gia sư,education,EXPENSE,education_9
+mừng tuổi,other,EXPENSE,other_7
+karaoke cuối tuần,entertainment,EXPENSE,entertainment_5
+THANH TOÁN LƯƠNG THÁNG 12,salary,INCOME,salary_5
+mua điện thoại mới,shopping,EXPENSE,shopping_4
+mua đồ chơi cho em bé,shopping,EXPENSE,shopping_10
+KHAM SUC KHOE DINH KY,health,EXPENSE,health_7
+mua rau củ quả ở chợ thái bình,food,EXPENSE,food_13
+mua sắm online,shopping,EXPENSE,shopping_15
+DAT PIZZA SHOPEEFOOD,food,EXPENSE,food_10
+MUA ĐỒNG HỒ ĐEO TAY,shopping,EXPENSE,shopping_13
+mua xăng xe,transport,EXPENSE,transport_16
+dat pizza shopeefood,food,EXPENSE,food_10
+đi khám bác sĩ,health,EXPENSE,health_13
+tiền thưởng ngoài lương,income_other,INCOME,income_other_11
+nhận  lương  công  ty  highlands,salary,INCOME,salary_1
+phí thi tiếng anh ielts,education,EXPENSE,education_15
+đặt hàng tiki OD776,shopping,EXPENSE,shopping_11
+sửa ống nước,housing,EXPENSE,housing_5
+taxi  highlands,transport,EXPENSE,transport_8
+bánh mì quán gần nhà,food,EXPENSE,food_6
+thuê gia sư,education,EXPENSE,education_9
+thu nhập từ công việc chính,salary,INCOME,salary_9
+DOI BINH GAS,housing,EXPENSE,housing_7
+PHÍ SMS BANKING,transfer_fee,EXPENSE,transfer_fee_9
+sua may dieu hoa,housing,EXPENSE,housing_14
+công viên giải trí,entertainment,EXPENSE,entertainment_7
+tiền  điện  tháng  12,housing,EXPENSE,housing_1
+mua đồ không rõ loại,other,EXPENSE,other_4
+thưởng  hiệu  suất  quý,salary,INCOME,salary_6
+lãi tiết kiệm ngân hàng,income_other,INCOME,income_other_3
+đặt xe công nghệ đi làm,transport,EXPENSE,transport_12
+vé xem phim nhà hàng trung tâm,entertainment,EXPENSE,entertainment_0
+mua thuốc nhà thuốc long châu,health,EXPENSE,health_0
+tien luong cong ty tra,salary,INCOME,salary_13
+an pho quan gan nha,food,EXPENSE,food_11
+lệ phí thi chứng chỉ,education,EXPENSE,education_4
+mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14
+phí thuê bao netflix,entertainment,EXPENSE,entertainment_1
+thu nhap ngoai gio,income_other,INCOME,income_other_13
+mua  may  loc  nuoc,housing,EXPENSE,housing_11
+hóa đơn điện nước,housing,EXPENSE,housing_13
+PHÍ ĐỖ XE,transport,EXPENSE,transport_17
+le phi thi chung chi,education,EXPENSE,education_4
+ủng hộ từ thiện,other,EXPENSE,other_2
+ĐÓNG HỌC PHÍ CHO CON,education,EXPENSE,education_12
+phí thường niên thẻ tín dụng,transfer_fee,EXPENSE,transfer_fee_3
+khoa dao tao nghe,education,EXPENSE,education_14
+hoàn tiền shopee,income_other,INCOME,income_other_2
+boi thuong bao hiem,income_other,INCOME,income_other_8
+nhận lương công ty starbucks,salary,INCOME,salary_1
+dong quy lop,other,EXPENSE,other_8
+ăn nhậu với bạn ở quán gần nhà,food,EXPENSE,food_8
+tiệc sinh nhật ở nhà hàng,food,EXPENSE,food_14
+phí rút tiền atm,transfer_fee,EXPENSE,transfer_fee_1
+phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2
+MUA ĐỒ ĐIỆN TỬ,shopping,EXPENSE,shopping_17
+phí dịch vụ chuyển tiền,transfer_fee,EXPENSE,transfer_fee_8
+nhận tiền chuyển khoản từ bạn,income_other,INCOME,income_other_10
+thưởng tết,salary,INCOME,salary_3
+vật lý trị liệu,health,EXPENSE,health_9
+lệ phí thi chứng chỉ,education,EXPENSE,education_4
+PHI TAP GYM THANG 3,health,EXPENSE,health_5
+sua may dieu hoa,housing,EXPENSE,housing_14
+khóa đào tạo nghề,education,EXPENSE,education_14
+PHÍ THUÊ BAO NETFLIX,entertainment,EXPENSE,entertainment_1
+quỹ đen,other,EXPENSE,other_1
+hóa đơn điện nước,housing,EXPENSE,housing_13
+đóng bảo hiểm y tế,health,EXPENSE,health_4
+chi phí không ghi chú,other,EXPENSE,other_9
+MUA DO DIEN TU,shopping,EXPENSE,shopping_17
+đóng bảo hiểm y tế,health,EXPENSE,health_4
+phí  rút  tiền  mặt,transfer_fee,EXPENSE,transfer_fee_11
+mua  trái  cây  siêu  thị  coopmart,food,EXPENSE,food_9
+mua nước hoa,shopping,EXPENSE,shopping_14
+thưởng  dự  án,salary,INCOME,salary_2
+đóng góp quỹ từ thiện,other,EXPENSE,other_11
+phí quản lý thẻ,transfer_fee,EXPENSE,transfer_fee_7
+MUA NOI THAT PHONG KHACH,housing,EXPENSE,housing_6
+KHAM SUC KHOE DINH KY,health,EXPENSE,health_7
+PHÍ CHUYỂN KHOẢN NGÂN HÀNG,transfer_fee,EXPENSE,transfer_fee_0
+ủng  hộ  từ  thiện,other,EXPENSE,other_2
+lương  tháng  11,salary,INCOME,salary_0
+an sang xoi man,food,EXPENSE,food_19
+mua do choi cho em be,shopping,EXPENSE,shopping_10
+taxi  the  coffee  house,transport,EXPENSE,transport_8
+đổi bình gas,housing,EXPENSE,housing_7
+tiền thuê nhà tháng 9,housing,EXPENSE,housing_0
+doi binh gas,housing,EXPENSE,housing_7
+học phí khóa kế toán,education,EXPENSE,education_0
+LƯƠNG THÁNG 3,salary,INCOME,salary_0
+lương  part  time,salary,INCOME,salary_8
+luong  part  time,salary,INCOME,salary_8
+đặt pizza shopeefood,food,EXPENSE,food_10
+THU NHẬP NGOÀI GIỜ,income_other,INCOME,income_other_13
+MUA VITAMIN,health,EXPENSE,health_6
+đi khám bác sĩ,health,EXPENSE,health_13
+trúng xổ số,income_other,INCOME,income_other_6
+ăn phở nhà hàng trung tâm,food,EXPENSE,food_11
+tai  nghe  bluetooth,shopping,EXPENSE,shopping_5
+phi cau duong ha noi,transport,EXPENSE,transport_11
+phi bao hiem suc khoe,health,EXPENSE,health_14
+quan  jeans  dat  tren  shopee,shopping,EXPENSE,shopping_1
+MUA ĐIỆN THOẠI MỚI,shopping,EXPENSE,shopping_4
+mỹ phẩm starbucks,shopping,EXPENSE,shopping_3
+PHÍ DỊCH VỤ CHUYỂN TIỀN,transfer_fee,EXPENSE,transfer_fee_8
+phí giao dịch ngân hàng,transfer_fee,EXPENSE,transfer_fee_2
+MUA THUỐC PHARMACITY,health,EXPENSE,health_0
+đóng góp quỹ từ thiện,other,EXPENSE,other_11
+lãi  tiết  kiệm  ngân  hàng,income_other,INCOME,income_other_3
+phí duy trì tài khoản,transfer_fee,EXPENSE,transfer_fee_5
+thưởng nóng,salary,INCOME,salary_11
+DAT HANG TIKI SP123,shopping,EXPENSE,shopping_11
+ve  concert  katinat,entertainment,EXPENSE,entertainment_3
+khóa lập trình tiếng anh,education,EXPENSE,education_8
+phi thue bao netflix,entertainment,EXPENSE,entertainment_1
+MUA QUẦN ÁO MỚI,shopping,EXPENSE,shopping_16
+buffet tối starbucks,food,EXPENSE,food_7
+nhận lương công ty highlands,salary,INCOME,salary_1
+nhan luong cong ty highlands,salary,INCOME,salary_1
+mua  do  choi  cho  em  be,shopping,EXPENSE,shopping_10
+BÁN ĐỒ CŨ,income_other,INCOME,income_other_0
+quỹ  đen,other,EXPENSE,other_1
+sửa xe đạp,transport,EXPENSE,transport_9
+mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8
+ủng  hộ  từ  thiện,other,EXPENSE,other_2
+đi chợ winmart mua đồ ăn,food,EXPENSE,food_3
+ĐỔI BÌNH GAS,housing,EXPENSE,housing_7
+sửa máy điều hòa,housing,EXPENSE,housing_14
+nạp game online,entertainment,EXPENSE,entertainment_6
+mua rau củ quả ở siêu thị coopmart,food,EXPENSE,food_13
+phí sms banking,transfer_fee,EXPENSE,transfer_fee_9
+đóng góp quỹ từ thiện,other,EXPENSE,other_11
+PHÍ QUẢN LÝ THẺ,transfer_fee,EXPENSE,transfer_fee_7
+mua dong ho deo tay,shopping,EXPENSE,shopping_13
+học phí khóa toán,education,EXPENSE,education_0
+mua đồ lặt vặt,other,EXPENSE,other_13
+mua qua tang sinh nhat,shopping,EXPENSE,shopping_8
+mua nội thất phòng khách,housing,EXPENSE,housing_6
+bán cổ phiếu,income_other,INCOME,income_other_9
+trúng xổ số,income_other,INCOME,income_other_6
+mua quần áo mới,shopping,EXPENSE,shopping_16
+lãi tiết kiệm ngân hàng,income_other,INCOME,income_other_3
+nhan luong cong ty starbucks,salary,INCOME,salary_1
+được tặng tiền,income_other,INCOME,income_other_1
+đi xe khách về quê,transport,EXPENSE,transport_14
+CHI PHÍ KHÔNG GHI CHÚ,other,EXPENSE,other_9
+đóng bảo hiểm y tế,health,EXPENSE,health_4
+dat  phong  khach  san  di  du  lich,entertainment,EXPENSE,entertainment_13
+mua thuốc bổ,health,EXPENSE,health_12
+CHƠI BOWLING,entertainment,EXPENSE,entertainment_9
+uong bia o quan quan gan nha,food,EXPENSE,food_12
+phí chuyển tiền quốc tế,transfer_fee,EXPENSE,transfer_fee_4
+mua đồ gia dụng,shopping,EXPENSE,shopping_6
+mua vé xe buýt tháng,transport,EXPENSE,transport_3
+bảo dưỡng xe máy,transport,EXPENSE,transport_15
+khoa dao tao nghe,education,EXPENSE,education_14
+chi tiêu linh tinh,other,EXPENSE,other_0
+TIỀN NƯỚC THÁNG 3,housing,EXPENSE,housing_2
+cúng giỗ,other,EXPENSE,other_3
+chơi  game  ở  quán  net,entertainment,EXPENSE,entertainment_15
+phí  chuyển  khoản  ngân  hàng,transfer_fee,EXPENSE,transfer_fee_0
+phí đỗ xe,transport,EXPENSE,transport_17
+PHÍ DUY TRÌ TÀI KHOẢN,transfer_fee,EXPENSE,transfer_fee_5
+đồ ăn nhanh starbucks,food,EXPENSE,food_16
+mua  máy  lọc  nước,housing,EXPENSE,housing_11
+giáo  trình  đại  học,education,EXPENSE,education_7
+mua giày phúc long,shopping,EXPENSE,shopping_2
+ve  tau  di  sai  gon,transport,EXPENSE,transport_7
+PHÍ QUẢN LÝ THẺ,transfer_fee,EXPENSE,transfer_fee_7
+mua  thuốc  bổ,health,EXPENSE,health_12
+mua van phong pham,education,EXPENSE,education_5
+cuoc internet wifi,housing,EXPENSE,housing_3
+thuê phòng xem bóng đá,entertainment,EXPENSE,entertainment_10
+chữa răng khôn,health,EXPENSE,health_8
+nạp game online,entertainment,EXPENSE,entertainment_6
+quan jeans dat tren shopee,shopping,EXPENSE,shopping_1
+ăn phở quán gần nhà,food,EXPENSE,food_11
+đi khám bác sĩ,health,EXPENSE,health_13
+đóng học phí cho con,education,EXPENSE,education_12
+bồi thường bảo hiểm,income_other,INCOME,income_other_8
+mua  tui  xach  hang  hieu,shopping,EXPENSE,shopping_12
+mua thuốc nhà thuốc long châu,health,EXPENSE,health_0
+MỸ PHẨM STARBUCKS,shopping,EXPENSE,shopping_3
+vé xem phim quán hải sản,entertainment,EXPENSE,entertainment_0
+du  lich  sai  gon,entertainment,EXPENSE,entertainment_4
+thu nhap tu cong viec chinh,salary,INCOME,salary_9
+mua thuốc pharmacity,health,EXPENSE,health_0
+phí thi tiếng anh ielts,education,EXPENSE,education_15
+phí tập gym tháng 8,health,EXPENSE,health_5
+ship đồ ăn qua befood,food,EXPENSE,food_5
+phi tap gym thang 11,health,EXPENSE,health_5
+uống bia ở quán quán hải sản,food,EXPENSE,food_12
+boi thuong bao hiem,income_other,INCOME,income_other_8
+tiền rác tháng 2,housing,EXPENSE,housing_9
+thu nhập từ công việc chính,salary,INCOME,salary_9
+khóa học online trên udemy,education,EXPENSE,education_2
+MUA VĂN PHÒNG PHẨM,education,EXPENSE,education_5
+BAN CO PHIEU,income_other,INCOME,income_other_9
+ăn sáng bún chả,food,EXPENSE,food_0
+sửa ống nước,housing,EXPENSE,housing_5
+hoàn tiền shopee,income_other,INCOME,income_other_2
+mua vali du lịch,shopping,EXPENSE,shopping_9
+LỆ PHÍ THI CHỨNG CHỈ,education,EXPENSE,education_4
+CHI TIÊU LINH TINH,other,EXPENSE,other_0
+thay nhớt xe máy pv oil,transport,EXPENSE,transport_5
+dich vu ve sinh nha,housing,EXPENSE,housing_8
+tiền học thêm cho con,education,EXPENSE,education_3
+giao trinh dai hoc,education,EXPENSE,education_7
+an nhau voi ban o nha hang trung tam,food,EXPENSE,food_8
+thưởng hiệu suất quý,salary,INCOME,salary_6
+buffet tối katinat,food,EXPENSE,food_7
+dịch vụ vệ sinh nhà,housing,EXPENSE,housing_8
+ship  đồ  ăn  qua  giao  hàng  tiết  kiệm,food,EXPENSE,food_5
+mua khẩu trang,health,EXPENSE,health_10
+phí bảo hiểm sức khỏe,health,EXPENSE,health_14
+quy  den,other,EXPENSE,other_1
+mua  trái  cây  chợ  bến  thành,food,EXPENSE,food_9
+thu nhập freelance,income_other,INCOME,income_other_5
+chi khác,other,EXPENSE,other_12
+cà  phê  phúc  long,food,EXPENSE,food_1
+tiêm phòng cúm,health,EXPENSE,health_11
+ăn vặt ngoài đường,food,EXPENSE,food_15
+đi nha sĩ,health,EXPENSE,health_2
+đám cưới phong bì,other,EXPENSE,other_6
+phí thuê bao netflix,entertainment,EXPENSE,entertainment_1
+ăn vặt ngoài đường,food,EXPENSE,food_15
+MUA TRÁI CÂY CHỢ BẾN THÀNH,food,EXPENSE,food_9
+mua sách giáo khoa,education,EXPENSE,education_13
+lệ phí nhập học,education,EXPENSE,education_11
+hóa đơn điện nước,housing,EXPENSE,housing_13
+rửa xe máy,transport,EXPENSE,transport_6
+khóa học online trên udemy,education,EXPENSE,education_2
+phí quản lý thẻ,transfer_fee,EXPENSE,transfer_fee_7
+ve xem phim quan hai san,entertainment,EXPENSE,entertainment_0
+cổ tức cổ phiếu,income_other,INCOME,income_other_4
+ve xem phim nha hang trung tam,entertainment,EXPENSE,entertainment_0
+co  tuc  co  phieu,income_other,INCOME,income_other_4
+mừng tuổi,other,EXPENSE,other_7
+mua van phong pham,education,EXPENSE,education_5
+tiệc sinh nhật ở nhà hàng,food,EXPENSE,food_14
+MUA VALI DU LICH,shopping,EXPENSE,shopping_9
+đi xe khách về quê,transport,EXPENSE,transport_14
+cà  phê  phúc  long,food,EXPENSE,food_1
+phụ cấp làm thêm,salary,INCOME,salary_7
+mua văn phòng phẩm,education,EXPENSE,education_5
+chơi game ở quán net,entertainment,EXPENSE,entertainment_15
+tai nghe bluetooth,shopping,EXPENSE,shopping_5
+MUA NHIỆT KẾ,health,EXPENSE,health_15
+MUA THUỐC BỔ,health,EXPENSE,health_12
+mua ve xe buyt thang,transport,EXPENSE,transport_3
+gửi  xe  căn  tin  công  ty,transport,EXPENSE,transport_4
+mua sắm online,shopping,EXPENSE,shopping_15
+đám cưới phong bì,other,EXPENSE,other_6
+MY PHAM STARBUCKS,shopping,EXPENSE,shopping_3
+karaoke cuối tuần,entertainment,EXPENSE,entertainment_5
+VE CONCERT STARBUCKS,entertainment,EXPENSE,entertainment_3
+luong  thang  12,salary,INCOME,salary_0
+phí  dịch  vụ  chuyển  tiền,transfer_fee,EXPENSE,transfer_fee_8
+tiền nhà hàng tháng,housing,EXPENSE,housing_12
+đặt phòng khách sạn đi du lịch,entertainment,EXPENSE,entertainment_13
+mua quần áo mới,shopping,EXPENSE,shopping_16
+lương cơ bản,salary,INCOME,salary_10
+mua  truyện  tranh,entertainment,EXPENSE,entertainment_11
+nap game online,entertainment,EXPENSE,entertainment_6
+lương part time,salary,INCOME,salary_8
+bar beer với bạn,entertainment,EXPENSE,entertainment_8
+cước internet wifi,housing,EXPENSE,housing_3
+bán hàng online,income_other,INCOME,income_other_12
+mua máy tính cho việc học,education,EXPENSE,education_10
+vé máy bay đi hà nội,transport,EXPENSE,transport_13
+đơn hàng lazada OD776,shopping,EXPENSE,shopping_7
+taxi the coffee house,transport,EXPENSE,transport_8
+công viên giải trí,entertainment,EXPENSE,entertainment_7
+mua vitamin,health,EXPENSE,health_6
+mua thuoc pharmacity,health,EXPENSE,health_0
+bồi thường bảo hiểm,income_other,INCOME,income_other_8
+phí duy trì tài khoản,transfer_fee,EXPENSE,transfer_fee_5
+tiền rác tháng 8,housing,EXPENSE,housing_9
+phí chuyển khoản nhanh 247,transfer_fee,EXPENSE,transfer_fee_6
+phí tập gym tháng 4,health,EXPENSE,health_5
+phí thi tiếng anh ielts,education,EXPENSE,education_15
+lệ phí nhập học,education,EXPENSE,education_11
+chơi bowling,entertainment,EXPENSE,entertainment_9
+hoc tieng anh trung tam,education,EXPENSE,education_6
+công viên giải trí,entertainment,EXPENSE,entertainment_7
+ĂN VẶT NGOÀI ĐƯỜNG,food,EXPENSE,food_15
+rua xe may,transport,EXPENSE,transport_6
+phí thường niên thẻ tín dụng,transfer_fee,EXPENSE,transfer_fee_3
+ăn sáng xôi mặn,food,EXPENSE,food_19
+lương  chuyển  khoản,salary,INCOME,salary_4
+uống bia ở quán quán hải sản,food,EXPENSE,food_12
+phụ cấp làm thêm,salary,INCOME,salary_7
+thuê phòng xem bóng đá,entertainment,EXPENSE,entertainment_10
+hoàn tiền shopee,income_other,INCOME,income_other_2
+thay nhot xe may petrolimex,transport,EXPENSE,transport_5
+THU NHAP NGOAI GIO,income_other,INCOME,income_other_13
+XÉT NGHIỆM MÁU,health,EXPENSE,health_3
+co tuc co phieu,income_other,INCOME,income_other_4
+cước internet wifi,housing,EXPENSE,housing_3
+xet  nghiem  mau,health,EXPENSE,health_3
+mua máy lọc nước,housing,EXPENSE,housing_11
+tiền nước tháng 4,housing,EXPENSE,housing_2
+vật lý trị liệu,health,EXPENSE,health_9
+phí sinh hoạt gia đình,housing,EXPENSE,housing_15
+vé tàu đi nha trang,transport,EXPENSE,transport_7
+sơn lại tường nhà,housing,EXPENSE,housing_10
+mua thuoc nha thuoc long chau,health,EXPENSE,health_0
+tiền thưởng ngoài lương,income_other,INCOME,income_other_11
+bán hàng online,income_other,INCOME,income_other_12
+MUA MÁY LỌC NƯỚC,housing,EXPENSE,housing_11
+mua quà tặng sinh nhật,shopping,EXPENSE,shopping_8
+rửa xe máy,transport,EXPENSE,transport_6
+son lai tuong nha,housing,EXPENSE,housing_10
+học tiếng anh trung tâm,education,EXPENSE,education_6
+PHÍ RÚT TIỀN ATM,transfer_fee,EXPENSE,transfer_fee_1
+phí dịch vụ chuyển tiền,transfer_fee,EXPENSE,transfer_fee_8
+dong quy lop,other,EXPENSE,other_8
+grab bike đi làm,transport,EXPENSE,transport_1
+du  lịch  sài  gòn,entertainment,EXPENSE,entertainment_4
+mua nhiet ke,health,EXPENSE,health_15
+bar beer với bạn,entertainment,EXPENSE,entertainment_8
+cà phê the coffee house,food,EXPENSE,food_1
+phi do xe,transport,EXPENSE,transport_17
+tiền rác tháng 7,housing,EXPENSE,housing_9
+đi xe khách về quê,transport,EXPENSE,transport_14
+quan  jeans  dat  tren  shopee,shopping,EXPENSE,shopping_1
+phí napas,transfer_fee,EXPENSE,transfer_fee_10
+mua thuốc bổ,health,EXPENSE,health_12
+phi do xe,transport,EXPENSE,transport_17
+mua đồ không rõ loại,other,EXPENSE,other_4
+ĐI NHA SĨ,health,EXPENSE,health_2
+tiền lương công ty trả,salary,INCOME,salary_13
+tiền điện tháng 10,housing,EXPENSE,housing_1
+KHÁM SỨC KHỎE ĐỊNH KỲ,health,EXPENSE,health_7
+nhận tiền chuyển khoản từ bạn,income_other,INCOME,income_other_10
+phi rut tien mat,transfer_fee,EXPENSE,transfer_fee_11
+tiền  lì  xì,other,EXPENSE,other_10
+cho thue nha,income_other,INCOME,income_other_7
+mua sách tiếng anh,education,EXPENSE,education_1
+trung xo so,income_other,INCOME,income_other_6
+dong gop quy tu thien,other,EXPENSE,other_11
+mua vé xem ca nhạc,entertainment,EXPENSE,entertainment_14
+cơm trưa nhà hàng trung tâm,food,EXPENSE,food_2
+bồi thường bảo hiểm,income_other,INCOME,income_other_8
+lệ phí thi chứng chỉ,education,EXPENSE,education_4
+chi khác,other,EXPENSE,other_12
+hoa  don  dien  nuoc,housing,EXPENSE,housing_13
+choi bowling,entertainment,EXPENSE,entertainment_9
+chua rang khon,health,EXPENSE,health_8
+bao duong xe may,transport,EXPENSE,transport_15
+mua quan ao moi,shopping,EXPENSE,shopping_16
+tiền học thêm cho con,education,EXPENSE,education_3
+đồ ăn nhanh katinat,food,EXPENSE,food_16
+lương  tháng  5,salary,INCOME,salary_0
+mua đồ không rõ loại,other,EXPENSE,other_4
+đám cưới phong bì,other,EXPENSE,other_6
+bán cổ phiếu,income_other,INCOME,income_other_9
+chi khác,other,EXPENSE,other_12
+phí thi tiếng anh ielts,education,EXPENSE,education_15
+mua ao highlands,shopping,EXPENSE,shopping_0
+di nha si,health,EXPENSE,health_2
+gửi xe nhà hàng trung tâm,transport,EXPENSE,transport_4
+tien nha hang thang,housing,EXPENSE,housing_12
+phí quản lý chung cư,housing,EXPENSE,housing_4
+đổi bình gas,housing,EXPENSE,housing_7
+thu nhập từ công việc chính,salary,INCOME,salary_9
+bánh mì căn tin công ty,food,EXPENSE,food_6
+mua giày starbucks,shopping,EXPENSE,shopping_2
+PHI THUE BAO NETFLIX,entertainment,EXPENSE,entertainment_1
+nhan tien chuyen khoan tu ban,income_other,INCOME,income_other_10
+TIỀN HỌC THÊM CHO CON,education,EXPENSE,education_3
+PHÍ TẬP GYM THÁNG 3,health,EXPENSE,health_5
+mua văn phòng phẩm,education,EXPENSE,education_5
+phí cầu đường đà lạt,transport,EXPENSE,transport_11
+quy den,other,EXPENSE,other_1
+khóa học online trên udemy,education,EXPENSE,education_2
+mua vitamin,health,EXPENSE,health_6

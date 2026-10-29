@@ -1,0 +1,84 @@
+name: smart-finance
+
+# Local/demo stack: PostgreSQL + AI service + API + web (nginx).
+# Copy .env.example to .env and set JWT_SECRET before `docker compose up`.
+# For production, set NODE_ENV=production and COOKIE_SECURE=true behind HTTPS.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-smartfinance}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-smartfinance}
+      POSTGRES_DB: ${POSTGRES_DB:-smart_finance}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  ai:
+    build:
+      context: .
+      dockerfile: apps/ai-service/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '8000:8000'
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-smartfinance}:${POSTGRES_PASSWORD:-smartfinance}@db:5432/${POSTGRES_DB:-smart_finance}?schema=public
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env (at least 32 characters)}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:5173}
+      AI_SERVICE_URL: http://ai:8000
+      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-3000}
+      AI_MODEL_VERSION: ${AI_MODEL_VERSION:-baseline-tfidf-lr-v1}
+    depends_on:
+      db:
+        condition: service_healthy
+      ai:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '5173:80'
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # Optional demo data: `docker compose --profile tools run --rm seed`
+  seed:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    profiles: ['tools']
+    working_dir: /app
+    entrypoint: ['npx', 'prisma', 'db', 'seed', '--schema=/app/prisma/schema.prisma']
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-smartfinance}:${POSTGRES_PASSWORD:-smartfinance}@db:5432/${POSTGRES_DB:-smart_finance}?schema=public
+      SEED_DEMO: 'true'
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
