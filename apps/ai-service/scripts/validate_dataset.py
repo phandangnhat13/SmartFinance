@@ -53,6 +53,11 @@ def normalize_loose(text: str) -> str:
     return normalize_exact(without_marks.replace("đ", "d").replace("Đ", "D"))
 
 
+def keyword_tokens(text: str) -> set[str]:
+    """Tokens used for the paraphrase lexical-overlap diagnostic."""
+    return {token for token in normalize_loose(text).split() if len(token) >= 3}
+
+
 def load_split(name: str, path: Path) -> tuple[list[dict[str, str]], list[str]]:
     errors: list[str] = []
     if not path.exists():
@@ -86,8 +91,10 @@ def main() -> int:
 
     exact_seen: dict[str, str] = {}
     loose_seen: dict[str, str] = {}
+    ids_seen: dict[str, str] = {}
     groups: defaultdict[str, set[str]] = defaultdict(set)
     distribution: dict[str, Counter[str]] = {}
+    near_duplicate_warnings = 0
 
     for name, rows in splits.items():
         distribution[name] = Counter(row["label"] for row in rows)
@@ -100,6 +107,16 @@ def main() -> int:
                 errors.append(
                     f"{name}: type mismatch for {row['id']}: {row['type']} != {taxonomy[label]}"
                 )
+            previous_id = ids_seen.get(row["id"])
+            if previous_id is not None:
+                errors.append(f"duplicate id {row['id']!r} in {name} and {previous_id}")
+            else:
+                ids_seen[row["id"]] = name
+            expected_prefix = f"{label}_" if name != "paraphrase" else f"eval_{label}_"
+            if not row["group"].startswith(expected_prefix):
+                warnings.append(
+                    f"{name}: group {row['group']!r} does not match label {label!r}"
+                )
             key = normalize_exact(row["description"])
             previous = exact_seen.get(key)
             if previous is not None:
@@ -109,6 +126,7 @@ def main() -> int:
             loose_key = normalize_loose(row["description"])
             previous_loose = loose_seen.get(loose_key)
             if previous_loose is not None and previous_loose != name:
+                near_duplicate_warnings += 1
                 warnings.append(
                     f"accent-insensitive overlap between {name} and {previous_loose}: "
                     f"{row['description']!r}"
@@ -130,10 +148,37 @@ def main() -> int:
             if count < MIN_PER_CLASS:
                 warnings.append(f"{name}: label {label} has only {count} rows")
 
+    train_tokens: set[str] = set()
+    for row in splits.get("train", []):
+        train_tokens |= keyword_tokens(row["description"])
+    paraphrase_rows = splits.get("paraphrase", [])
+    overlap_rows = sum(
+        1 for row in paraphrase_rows if keyword_tokens(row["description"]) & train_tokens
+    )
+
     report = {
         "ok": not errors,
         "splits": {name: len(rows) for name, rows in splits.items()},
         "distribution": {name: dict(sorted(counter.items())) for name, counter in distribution.items()},
+        "checks": {
+            "uniqueIds": len(ids_seen) == sum(len(rows) for rows in splits.values()),
+            "duplicateDescriptions": sum(
+                1 for error in errors if error.startswith("duplicate description")
+            ),
+            "nearDuplicateWarnings": near_duplicate_warnings,
+            "groupLabelMismatches": sum(
+                1 for warning in warnings if "does not match label" in warning
+            ),
+            "paraphraseLexicalOverlap": {
+                "rows": len(paraphrase_rows),
+                "rowsSharingTrainToken": overlap_rows,
+                "share": round(overlap_rows / len(paraphrase_rows), 4) if paraphrase_rows else None,
+                "note": (
+                    "informational: the paraphrase bank reuses everyday Vietnamese vocabulary "
+                    "and is therefore not an out-of-distribution benchmark"
+                ),
+            },
+        },
         "errors": errors,
         "warnings": warnings,
     }

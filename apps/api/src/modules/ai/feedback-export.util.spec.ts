@@ -1,7 +1,9 @@
 import {
   buildFeedbackRecord,
+  collectFeedbackRecords,
   normalizeFeedbackKey,
   redactDescription,
+  type FeedbackSource,
 } from './feedback-export.util';
 
 describe('feedback export utilities', () => {
@@ -53,5 +55,60 @@ describe('feedback export utilities', () => {
     expect(normalizeFeedbackKey('Cà phê  Sáng', 'food')).toBe(
       normalizeFeedbackKey('cà phê sáng', 'food'),
     );
+  });
+
+  it('drops an unknown predicted slug but keeps a valid accepted label', () => {
+    const record = buildFeedbackRecord({
+      predictionId: 'p4',
+      inputDescription: 'mua áo',
+      predictedSlug: 'not-a-label',
+      acceptedSlug: 'shopping',
+      modelVersion: 'v2',
+      status: 'CORRECTED',
+    });
+    expect(record).toMatchObject({ label: 'shopping', predictedLabel: null });
+  });
+
+  it('collects records, skipping invalid rows and duplicates', () => {
+    const sources: FeedbackSource[] = [
+      {
+        predictionId: 'p1',
+        inputDescription: 'cà phê sáng',
+        predictedSlug: 'food',
+        acceptedSlug: 'food',
+        modelVersion: 'v2',
+        status: 'ACCEPTED',
+      },
+      {
+        predictionId: 'p2',
+        inputDescription: 'CÀ PHÊ   sáng',
+        predictedSlug: 'food',
+        acceptedSlug: 'food',
+        modelVersion: 'v2',
+        status: 'ACCEPTED',
+      },
+      {
+        predictionId: 'p3',
+        inputDescription: 'danh mục tự tạo',
+        predictedSlug: 'food',
+        acceptedSlug: 'my-custom-category',
+        modelVersion: 'v2',
+        status: 'CORRECTED',
+      },
+      {
+        predictionId: 'p4',
+        inputDescription: '  ',
+        predictedSlug: null,
+        acceptedSlug: 'food',
+        modelVersion: 'v2',
+        status: 'ACCEPTED',
+      },
+    ];
+
+    const result = collectFeedbackRecords(sources);
+    expect(result.records).toHaveLength(1);
+    expect(result.records[0]).toMatchObject({ text: 'cà phê sáng', label: 'food' });
+    expect(result.duplicatesRemoved).toBe(1);
+    expect(result.skippedInvalid).toBe(2);
   });
 });

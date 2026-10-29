@@ -6,6 +6,7 @@ import type { SuperAgentTest } from 'supertest';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/app.setup';
 import { PrismaService } from '../src/common/prisma/prisma.service';
+import { buildFeedbackExport } from '../src/modules/ai/feedback-export';
 
 interface AccountBody {
   id: string;
@@ -378,6 +379,139 @@ describe('Smart Finance API (e2e)', () => {
       .expect(200);
     expect(response.body.status).toBe('model_not_ready');
     expect(response.body.categoryId).toBeNull();
+  });
+
+  it('stores AI feedback only for the owner and supports deletion', async () => {
+    const prediction = await prisma.aiPrediction.create({
+      data: {
+        userId: state.userId,
+        inputDescription: 'cà phê sáng',
+        modelName: 'tfidf-char-logreg',
+        modelVersion: 'tfidf-char-lr-v2',
+        predictedSlug: 'food',
+        predictedCategoryId: state.foodCategoryId,
+        confidence: 0.82,
+        status: 'SUGGESTED',
+      },
+    });
+
+    await otherAgent
+      .post(`/api/v1/ai/predictions/${prediction.id}/feedback`)
+      .send({ action: 'ACCEPT' })
+      .expect(404);
+
+    const accepted = await agent
+      .post(`/api/v1/ai/predictions/${prediction.id}/feedback`)
+      .send({ action: 'ACCEPT' })
+      .expect(200);
+    expect(accepted.body.prediction).toMatchObject({
+      id: prediction.id,
+      status: 'ACCEPTED',
+      acceptedCategoryId: state.foodCategoryId,
+    });
+
+    const corrected = await agent
+      .post(`/api/v1/ai/predictions/${prediction.id}/feedback`)
+      .send({ action: 'CORRECT', categoryId: state.salaryCategoryId })
+      .expect(200);
+    expect(corrected.body.prediction).toMatchObject({
+      status: 'CORRECTED',
+      acceptedCategoryId: state.salaryCategoryId,
+    });
+
+    await agent
+      .post(`/api/v1/ai/predictions/${prediction.id}/feedback`)
+      .send({ action: 'CORRECT', categoryId: '00000000-0000-4000-8000-000000000000' })
+      .expect(400);
+
+    await otherAgent.delete(`/api/v1/ai/predictions/${prediction.id}`).expect(404);
+    await agent.delete(`/api/v1/ai/predictions/${prediction.id}`).expect(204);
+    await agent.delete(`/api/v1/ai/predictions/${prediction.id}`).expect(404);
+
+    const remaining = await prisma.aiPrediction.count({ where: { id: prediction.id } });
+    expect(remaining).toBe(0);
+  });
+
+  it('exports feedback only for consenting users, redacted and deduplicated', async () => {
+    await prisma.user.update({
+      where: { id: state.otherUserId },
+      data: { allowAiResearch: true },
+    });
+
+    const customCategory = await prisma.category.create({
+      data: { userId: state.otherUserId, name: 'Danh mục tự tạo', type: 'EXPENSE' },
+    });
+
+    const base = {
+      modelName: 'tfidf-char-logreg',
+      modelVersion: 'tfidf-char-lr-v2',
+      predictedSlug: 'food',
+      predictedCategoryId: state.foodCategoryId,
+      confidence: 0.8,
+    };
+
+    await prisma.aiPrediction.create({
+      data: {
+        ...base,
+        userId: state.userId,
+        inputDescription: 'chi tiêu riêng của người không đồng ý',
+        status: 'ACCEPTED',
+        acceptedCategoryId: state.foodCategoryId,
+      },
+    });
+    await prisma.aiPrediction.create({
+      data: {
+        ...base,
+        userId: state.otherUserId,
+        inputDescription: 'cà phê sáng an@example.com 0912345678',
+        status: 'ACCEPTED',
+        acceptedCategoryId: state.foodCategoryId,
+      },
+    });
+    await prisma.aiPrediction.create({
+      data: {
+        ...base,
+        userId: state.otherUserId,
+        inputDescription: 'CÀ PHÊ SÁNG an@example.com 0912345678',
+        status: 'ACCEPTED',
+        acceptedCategoryId: state.foodCategoryId,
+      },
+    });
+    await prisma.aiPrediction.create({
+      data: {
+        ...base,
+        userId: state.otherUserId,
+        inputDescription: 'mua đồ linh tinh',
+        status: 'CORRECTED',
+        acceptedCategoryId: customCategory.id,
+      },
+    });
+    await prisma.aiPrediction.create({
+      data: {
+        ...base,
+        userId: state.otherUserId,
+        inputDescription: 'chưa có nhãn cuối',
+        status: 'SUGGESTED',
+      },
+    });
+
+    const exported = await buildFeedbackExport(prisma);
+
+    expect(exported.metadata.consentingUsers).toBe(1);
+    expect(exported.metadata.candidatePredictions).toBe(3);
+    expect(exported.metadata.exportedRecords).toBe(1);
+    expect(exported.metadata.duplicatesRemoved).toBe(1);
+    expect(exported.metadata.skippedInvalid).toBe(1);
+    expect(exported.metadata.perLabel).toEqual({ food: 1 });
+    expect(exported.metadata.fileSha256).toMatch(/^[0-9a-f]{64}$/);
+
+    expect(exported.fileBody).toContain('[email]');
+    expect(exported.fileBody).toContain('[phone]');
+    expect(exported.fileBody).not.toContain('an@example.com');
+    expect(exported.fileBody).not.toContain('0912345678');
+    expect(exported.fileBody).not.toContain('chi tiêu riêng');
+    expect(exported.fileBody).not.toContain(state.userId);
+    expect(exported.fileBody).not.toContain(state.otherUserId);
   });
 
   it('returns the required error envelope', async () => {

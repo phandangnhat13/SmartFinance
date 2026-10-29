@@ -47,6 +47,41 @@ export function normalizeFeedbackKey(text: string, label: string): string {
   return `${label}::${text.toLowerCase().replace(/\s+/g, ' ').trim()}`;
 }
 
+export interface FeedbackCollection {
+  records: FeedbackRecord[];
+  skippedInvalid: number;
+  duplicatesRemoved: number;
+}
+
+/**
+ * Turn raw prediction rows into a deduplicated, validated feedback set.
+ * Callers are responsible for selecting only consenting users' rows; this
+ * function enforces label validity and duplicate removal.
+ */
+export function collectFeedbackRecords(sources: FeedbackSource[]): FeedbackCollection {
+  const seen = new Set<string>();
+  const records: FeedbackRecord[] = [];
+  let skippedInvalid = 0;
+  let duplicatesRemoved = 0;
+
+  for (const source of sources) {
+    const record = buildFeedbackRecord(source);
+    if (!record) {
+      skippedInvalid += 1;
+      continue;
+    }
+    const key = normalizeFeedbackKey(record.text, record.label);
+    if (seen.has(key)) {
+      duplicatesRemoved += 1;
+      continue;
+    }
+    seen.add(key);
+    records.push(record);
+  }
+
+  return { records, skippedInvalid, duplicatesRemoved };
+}
+
 export function buildFeedbackRecord(source: FeedbackSource): FeedbackRecord | null {
   const accepted = source.acceptedSlug?.trim() ?? '';
   if (!TAXONOMY_SLUGS.has(accepted)) return null;

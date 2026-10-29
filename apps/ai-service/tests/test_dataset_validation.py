@@ -41,6 +41,16 @@ def test_committed_dataset_passes_validation(capsys: pytest.CaptureFixture[str])
     for name in SPLIT_FILES:
         assert len(report["distribution"][name]) == 11
 
+    checks = report["checks"]
+    assert checks["uniqueIds"] is True
+    assert checks["duplicateDescriptions"] == 0
+    assert checks["groupLabelMismatches"] == 0
+    overlap = checks["paraphraseLexicalOverlap"]
+    assert overlap["rows"] == 440
+    # Informational: the paraphrase bank shares everyday vocabulary with train.
+    assert 0.0 <= overlap["share"] <= 1.0
+    assert overlap["rowsSharingTrainToken"] >= 1
+
 
 def test_metadata_hashes_match_committed_files() -> None:
     metadata_path = DATA_DIR / "dataset_metadata.json"

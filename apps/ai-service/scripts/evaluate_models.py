@@ -184,6 +184,24 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def load_latest_stability() -> dict | None:
+    """Return the most recent ``scripts/stability.py`` artifact, if any.
+
+    Stability resampling is a separate (slower) command; the report embeds its
+    summary when the artifact is present so the numbers come from one file.
+    """
+    directory = ROOT / "artifacts" / "stability"
+    if not directory.exists():
+        return None
+    files = sorted(directory.glob("stability-*.json"))
+    if not files:
+        return None
+    try:
+        return json.loads(files[-1].read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
 def git_commit() -> str:
     try:
         return subprocess.run(
@@ -360,6 +378,143 @@ def at_threshold(
     }
 
 
+def calibration_report(
+    truth: list[str], predictions: list[str], confidences: list[float], bins: int = 10
+) -> dict:
+    """Top-label reliability: equal-width bins over the predicted confidence.
+
+    Expected calibration error (ECE) and the Brier score are computed on the
+    confidence of the *predicted* label, which is exactly the value the product
+    compares against the abstention threshold.
+    """
+    if not truth:
+        return {
+            "bins": bins,
+            "expectedCalibrationError": None,
+            "brierScore": None,
+            "table": [],
+        }
+
+    counts = [0] * bins
+    correct = [0] * bins
+    confidence_sum = [0.0] * bins
+    brier_total = 0.0
+    for label, prediction, confidence in zip(truth, predictions, confidences, strict=True):
+        index = min(bins - 1, max(0, int(confidence * bins)))
+        counts[index] += 1
+        confidence_sum[index] += confidence
+        correct[index] += int(prediction == label)
+        brier_total += (confidence - (1.0 if prediction == label else 0.0)) ** 2
+
+    table: list[dict] = []
+    ece = 0.0
+    for index in range(bins):
+        count = counts[index]
+        entry = {
+            "lower": round(index / bins, 2),
+            "upper": round((index + 1) / bins, 2),
+            "count": count,
+            "accuracy": round(correct[index] / count, 4) if count else None,
+            "avgConfidence": round(confidence_sum[index] / count, 4) if count else None,
+        }
+        if count:
+            ece += count / len(truth) * abs(entry["accuracy"] - entry["avgConfidence"])
+        table.append(entry)
+
+    return {
+        "bins": bins,
+        "expectedCalibrationError": round(ece, 4),
+        "brierScore": round(brier_total / len(truth), 4),
+        "table": table,
+    }
+
+
+def error_analysis(
+    truth: list[str],
+    predictions: list[str],
+    confidences: list[float],
+    descriptions: list[str] | None = None,
+    max_examples: int = 40,
+) -> dict:
+    """Summarise which classes and class pairs the model confuses."""
+    per_label: list[dict] = []
+    for label in LABELS:
+        support = sum(1 for value in truth if value == label)
+        errors = sum(
+            1
+            for value, prediction in zip(truth, predictions, strict=True)
+            if value == label and prediction != label
+        )
+        per_label.append(
+            {
+                "label": label,
+                "support": support,
+                "errors": errors,
+                "errorRate": round(errors / support, 4) if support else None,
+            }
+        )
+
+    pair_counts = Counter(
+        (value, prediction)
+        for value, prediction in zip(truth, predictions, strict=True)
+        if value != prediction
+    )
+    confusion_pairs = [
+        {"trueLabel": true_label, "predictedLabel": predicted, "count": count}
+        for (true_label, predicted), count in pair_counts.most_common(12)
+    ]
+
+    examples: list[dict] = []
+    if descriptions is not None:
+        for description, value, prediction, confidence in zip(
+            descriptions, truth, predictions, confidences, strict=True
+        ):
+            if value == prediction or len(examples) >= max_examples:
+                continue
+            examples.append(
+                {
+                    "text": description,
+                    "trueLabel": value,
+                    "predictedLabel": prediction,
+                    "confidence": round(float(confidence), 4),
+                }
+            )
+
+    return {
+        "misclassified": sum(pair_counts.values()),
+        "total": len(truth),
+        "perLabel": per_label,
+        "confusionPairs": confusion_pairs,
+        "examples": examples,
+    }
+
+
+def plot_reliability(report: dict, title: str, path: Path) -> None:
+    points = [row for row in report["table"] if row["count"]]
+    figure, axis = plt.subplots(figsize=(6, 5))
+    axis.plot([0, 1], [0, 1], linestyle="--", color="grey", label="perfect calibration")
+    if points:
+        axis.plot(
+            [row["avgConfidence"] for row in points],
+            [row["accuracy"] for row in points],
+            marker="o",
+            color="#1d4ed8",
+            label="observed",
+        )
+    axis.set(
+        xlim=(0, 1),
+        ylim=(0, 1),
+        xlabel="Mean predicted confidence",
+        ylabel="Empirical accuracy",
+        title=title,
+    )
+    axis.legend(loc="upper left")
+    axis.grid(alpha=0.25)
+    figure.tight_layout()
+    figure.savefig(path, dpi=150)
+    plt.close(figure)
+
+
 def plot_confusion(matrix: dict, title: str, path: Path) -> None:
     values = np.array(matrix["matrix"])
     labels = matrix["labels"]
@@ -515,6 +670,12 @@ def main() -> int:
     lr_validation_metrics = metrics(validation_labels, lr_validation_predictions)
     lr_curve = selective_curve(validation_labels, lr_validation_predictions, lr_validation_confidences)
     threshold_choice = choose_threshold(lr_curve)
+    lr_validation_calibration = calibration_report(
+        validation_labels, lr_validation_predictions, lr_validation_confidences
+    )
+    lr_validation_errors = error_analysis(
+        validation_labels, lr_validation_predictions, lr_validation_confidences
+    )
 
     # Final models fit on train + validation.
     combined_texts = train_texts + validation_texts
@@ -547,6 +708,12 @@ def main() -> int:
         },
     }
 
+    evaluated: dict[str, dict[str, tuple[list[str], list[float]]]] = {
+        "keyword": {},
+        "tfidf-lr": {},
+        "tfidf-svc": {},
+    }
+
     for set_name, rows in evaluation_sets.items():
         set_texts, set_labels, set_types = texts(rows), labels(rows), types(rows)
 
@@ -555,6 +722,7 @@ def main() -> int:
         ]
         keyword_predictions = [label for label, _ in keyword_output]
         keyword_confidences = [confidence for _, confidence in keyword_output]
+        evaluated["keyword"][set_name] = (keyword_predictions, keyword_confidences)
         results["keyword"]["sets"][set_name] = {
             "metrics": metrics(set_labels, keyword_predictions),
             "thresholdCurve": selective_curve(set_labels, keyword_predictions, keyword_confidences),
@@ -562,6 +730,7 @@ def main() -> int:
 
         for key, pipeline in (("tfidf-lr", final_lr), ("tfidf-svc", final_svc)):
             predictions, confidences = type_aware_predictions(pipeline, set_texts, set_types)
+            evaluated[key][set_name] = (predictions, confidences)
             results[key]["sets"][set_name] = {
                 "metrics": metrics(set_labels, predictions),
                 "thresholdCurve": selective_curve(set_labels, predictions, confidences),
@@ -579,7 +748,42 @@ def main() -> int:
         "metrics": lr_validation_metrics,
         "thresholdCurve": lr_curve,
         "selectedThreshold": threshold_choice,
+        "calibration": lr_validation_calibration,
+        "errorAnalysis": lr_validation_errors,
     }
+
+    # Calibration and error analysis for the deployed model on both eval sets.
+    lr_calibration: dict[str, dict] = {"validation": lr_validation_calibration}
+    lr_error_analysis: dict[str, dict] = {}
+    for set_name, rows in evaluation_sets.items():
+        set_labels = labels(rows)
+        predictions, confidences = evaluated["tfidf-lr"][set_name]
+        lr_calibration[set_name] = calibration_report(set_labels, predictions, confidences)
+        lr_error_analysis[set_name] = error_analysis(
+            set_labels, predictions, confidences, descriptions=texts(rows)
+        )
+        results["tfidf-lr"]["sets"][set_name]["calibration"] = lr_calibration[set_name]
+        results["tfidf-lr"]["sets"][set_name]["errorAnalysis"] = lr_error_analysis[set_name]
+
+    misclassified_payload = {
+        "provenance": (
+            "Synthetic Vietnamese transaction descriptions from the held-out template-group "
+            "test split. Contains no real user data."
+        ),
+        "model": MODEL_VERSION,
+        "runId": run_id,
+        "threshold": threshold_choice["threshold"],
+        "summary": {
+            "misclassified": lr_error_analysis["test"]["misclassified"],
+            "total": lr_error_analysis["test"]["total"],
+            "confusionPairs": lr_error_analysis["test"]["confusionPairs"],
+            "perLabel": lr_error_analysis["test"]["perLabel"],
+        },
+        "examples": lr_error_analysis["test"]["examples"],
+    }
+    (run_dir / "misclassified_tfidf-lr_test.json").write_text(
+        json.dumps(misclassified_payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
     # Confusion matrices + PNGs for every model and evaluation set.
     for key in ("keyword", "tfidf-lr", "tfidf-svc"):
@@ -590,11 +794,20 @@ def main() -> int:
                 run_dir / f"confusion_matrix_{key}_{set_name}.png",
             )
 
+    for set_name in ("validation", "test"):
+        plot_reliability(
+            lr_calibration[set_name],
+            f"TF-IDF + Logistic Regression — reliability ({set_name})",
+            run_dir / f"reliability_tfidf-lr_{set_name}.png",
+        )
+
+    stability = load_latest_stability()
     payload = {
         "metadata": metadata,
         "keywordRules": keyword_rules,
         "results": results,
         "selectedThreshold": threshold_choice,
+        "stability": stability,
     }
     (run_dir / "results.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -618,6 +831,24 @@ def main() -> int:
         "testMetrics": results["tfidf-lr"]["sets"]["test"]["metrics"],
         "paraphraseMetrics": results["tfidf-lr"]["sets"]["paraphrase"]["metrics"],
         "atSelectedThresholdOnTest": results["tfidf-lr"]["atSelectedThresholdOnTest"],
+        "calibration": {
+            set_name: {
+                "expectedCalibrationError": report["expectedCalibrationError"],
+                "brierScore": report["brierScore"],
+            }
+            for set_name, report in lr_calibration.items()
+        },
+        "errorAnalysis": {
+            "validation": {
+                "misclassified": lr_validation_errors["misclassified"],
+                "total": lr_validation_errors["total"],
+            },
+            "test": {
+                "misclassified": lr_error_analysis["test"]["misclassified"],
+                "total": lr_error_analysis["test"]["total"],
+                "confusionPairs": lr_error_analysis["test"]["confusionPairs"],
+            },
+        },
     }
     models_dir = ROOT / "models"
     models_dir.mkdir(parents=True, exist_ok=True)
@@ -629,6 +860,18 @@ def main() -> int:
         "runId": run_id,
         "runDir": str(run_dir),
         "selectedThreshold": threshold_choice,
+        "calibration": {
+            set_name: {
+                "ece": report["expectedCalibrationError"],
+                "brier": report["brierScore"],
+            }
+            for set_name, report in lr_calibration.items()
+        },
+        "misclassifiedTest": {
+            "count": lr_error_analysis["test"]["misclassified"],
+            "total": lr_error_analysis["test"]["total"],
+            "topPairs": lr_error_analysis["test"]["confusionPairs"][:3],
+        },
         "comparison": {
             set_name: {
                 key: {
@@ -730,11 +973,70 @@ def _render_report(payload: dict) -> str:
     )
     lines.append("")
     lines.append(
+        "Selection rule (fixed before looking at test): choose the lowest threshold on the grid "
+        f"whose validation selective accuracy is at least {payload['metadata']['protocol']['selectiveAccuracyTarget']:.0%}; "
+        "among those, take the one with the highest coverage. Ties fall back to the point that "
+        "maximises coverage x selective accuracy."
+    )
+    lines.append("")
+    lines.append("Validation coverage / selective accuracy / selective risk for every threshold:")
+    lines.append("")
+    lines.append("| Threshold | Coverage | Selective accuracy | Selective risk |")
+    lines.append("| ---: | ---: | ---: | ---: |")
+    for point in results["tfidf-lr"]["validation"]["thresholdCurve"]:
+        accuracy = point["selectiveAccuracy"]
+        risk = point["selectiveRisk"]
+        lines.append(
+            f"| {point['threshold']:.2f} | {point['coverage']:.1%} | "
+            f"{'—' if accuracy is None else f'{accuracy:.1%}'} | "
+            f"{'—' if risk is None else f'{risk:.1%}'} |"
+        )
+    lines.append("")
+    lines.append(
         "Items below the threshold are returned as `low_confidence`; the UI never applies a "
         "suggestion without explicit user confirmation."
     )
     lines.append("")
-    lines.append("## 5. Per-class results — TF-IDF + Logistic Regression (held-out test)")
+    lines.append("## 5. Confidence calibration — TF-IDF + Logistic Regression")
+    lines.append("")
+    lines.append(
+        "Top-label calibration with equal-width bins over the predicted confidence. ECE is the "
+        "count-weighted gap between mean confidence and empirical accuracy; the Brier score is "
+        "the mean squared error of the confidence against the 0/1 outcome."
+    )
+    lines.append("")
+    calibration_reports = {
+        "validation": results["tfidf-lr"]["validation"]["calibration"],
+        "test": results["tfidf-lr"]["sets"]["test"]["calibration"],
+    }
+    lines.append("| Split | ECE | Brier score | Bins with data |")
+    lines.append("| --- | ---: | ---: | ---: |")
+    for set_name, report in calibration_reports.items():
+        populated = sum(1 for row in report["table"] if row["count"])
+        lines.append(
+            f"| {set_name} | {report['expectedCalibrationError']:.4f} | "
+            f"{report['brierScore']:.4f} | {populated}/{report['bins']} |"
+        )
+    lines.append("")
+    lines.append("Reliability table (validation):")
+    lines.append("")
+    lines.append("| Bin | Rows | Mean confidence | Accuracy | Gap |")
+    lines.append("| --- | ---: | ---: | ---: | ---: |")
+    for row in results["tfidf-lr"]["validation"]["calibration"]["table"]:
+        if not row["count"]:
+            continue
+        gap = abs(row["accuracy"] - row["avgConfidence"])
+        lines.append(
+            f"| {row['lower']:.2f}–{row['upper']:.2f} | {row['count']} | "
+            f"{row['avgConfidence']:.4f} | {row['accuracy']:.4f} | {gap:.4f} |"
+        )
+    lines.append("")
+    lines.append(
+        "The threshold is chosen on the validation split only; calibration is reported, not "
+        "optimised, so it is a diagnostic rather than a tuning signal."
+    )
+    lines.append("")
+    lines.append("## 6. Per-class results — TF-IDF + Logistic Regression (held-out test)")
     lines.append("")
     lines.append("| Label | Precision | Recall | F1 | Support |")
     lines.append("| --- | ---: | ---: | ---: | ---: |")
@@ -744,7 +1046,76 @@ def _render_report(payload: dict) -> str:
             f"{row['f1']:.4f} | {row['support']} |"
         )
     lines.append("")
-    lines.append("## 6. Hyper-parameter search (validation macro F1)")
+    lines.append("## 7. Error analysis — held-out test")
+    lines.append("")
+    errors = results["tfidf-lr"]["sets"]["test"]["errorAnalysis"]
+    lines.append(
+        f"{errors['misclassified']} of {errors['total']} test rows are misclassified "
+        f"({errors['misclassified'] / errors['total']:.1%})."
+    )
+    lines.append("")
+    lines.append("Most frequent confusion pairs (true → predicted):")
+    lines.append("")
+    lines.append("| True | Predicted | Count |")
+    lines.append("| --- | --- | ---: |")
+    for pair in errors["confusionPairs"]:
+        lines.append(f"| {pair['trueLabel']} | {pair['predictedLabel']} | {pair['count']} |")
+    lines.append("")
+    lines.append("Error rate per class:")
+    lines.append("")
+    lines.append("| Label | Support | Errors | Error rate |")
+    lines.append("| --- | ---: | ---: | ---: |")
+    for row in errors["perLabel"]:
+        rate = "—" if row["errorRate"] is None else f"{row['errorRate']:.1%}"
+        lines.append(f"| {row['label']} | {row['support']} | {row['errors']} | {rate} |")
+    lines.append("")
+    lines.append(
+        "A sample of misclassified rows is written to "
+        "`misclassified_tfidf-lr_test.json` in the run directory. These are synthetic "
+        "descriptions generated by the repository; no user data is included."
+    )
+    lines.append("")
+    lines.append("| Description (synthetic) | True | Predicted | Confidence |")
+    lines.append("| --- | --- | --- | ---: |")
+    for example in errors["examples"][:15]:
+        text = example["text"].replace("|", "\\|")
+        lines.append(
+            f"| {text} | {example['trueLabel']} | {example['predictedLabel']} | "
+            f"{example['confidence']:.2f} |"
+        )
+    lines.append("")
+    stability = payload.get("stability")
+    if stability:
+        protocol = stability["protocol"]
+        lines.append("## 8. Split stability (development data only)")
+        lines.append("")
+        lines.append(
+            f"`scripts/stability.py` resamples train + validation with "
+            f"{protocol['folds']}-fold StratifiedGroupKFold for seeds "
+            f"{', '.join(str(seed) for seed in protocol['seeds'])}. Hyper-parameters are fixed at "
+            f"C={protocol['fixedC']}; the held-out test split is never used."
+        )
+        lines.append("")
+        lines.append("| Method | Accuracy mean ± std | Accuracy min–max | Macro F1 mean ± std | Macro F1 min–max |")
+        lines.append("| --- | ---: | ---: | ---: | ---: |")
+        for key, stats in stability["methods"].items():
+            accuracy = stats["accuracy"]
+            macro = stats["macroF1"]
+            lines.append(
+                f"| {results[key]['displayName']} | "
+                f"{accuracy['mean']:.4f} ± {accuracy['std']:.4f} | "
+                f"{accuracy['min']:.4f}–{accuracy['max']:.4f} | "
+                f"{macro['mean']:.4f} ± {macro['std']:.4f} | "
+                f"{macro['min']:.4f}–{macro['max']:.4f} |"
+            )
+        lines.append("")
+        lines.append(
+            "The spread is wide because each fold holds out a small number of template groups. "
+            "Treat the single held-out test score as one draw from this distribution, not as a "
+            "precise estimate."
+        )
+        lines.append("")
+    lines.append("## 9. Hyper-parameter search (validation macro F1)")
     lines.append("")
     lines.append("| Model | C | Validation macro F1 | Validation accuracy |")
     lines.append("| --- | ---: | ---: | ---: |")
@@ -754,19 +1125,28 @@ def _render_report(payload: dict) -> str:
                 f"| {name} | {point['C']} | {point['macroF1']:.4f} | {point['accuracy']:.4f} |"
             )
     lines.append("")
-    lines.append("## 7. Confusion matrices")
+    lines.append("## 10. Confusion matrices and reliability diagrams")
     lines.append("")
     lines.append(f"PNG files are in `artifacts/experiments/{metadata['runId']}/`:")
     for key in ("keyword", "tfidf-lr", "tfidf-svc"):
         for set_name in ("test", "paraphrase"):
             lines.append(f"- `confusion_matrix_{key}_{set_name}.png`")
+    lines.append("- `reliability_tfidf-lr_validation.png`")
+    lines.append("- `reliability_tfidf-lr_test.png`")
     lines.append("")
-    lines.append("## 8. Limitations")
+    lines.append("## 11. Limitations")
     lines.append("")
     lines.append("- All data is synthetic; absolute scores do not estimate accuracy on real users.")
     lines.append("- The paraphrase set is written by hand and shares vocabulary and label definitions with training.")
     lines.append("- The keyword baseline is mined from train only, but remains a simple rule system.")
-    lines.append("- SVC probabilities come from sigmoid calibration on 3 internal folds; calibration quality is not separately measured.")
+    lines.append(
+        "- Calibration is measured for the deployed Logistic Regression only; the SVC probabilities "
+        "come from sigmoid calibration on 3 internal folds and are reported without an ECE."
+    )
+    lines.append(
+        "- The development-set folds are small, so the split-stability interval is wide; the held-out "
+        "test score is a single draw, not a precise estimate."
+    )
     lines.append("- Feedback data from users is not yet used for training (consent-gated export exists).")
     lines.append("")
     return "\n".join(lines)

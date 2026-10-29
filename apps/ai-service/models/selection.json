@@ -1,8 +1,8 @@
 {
   "modelName": "tfidf-char-logreg",
   "modelVersion": "tfidf-char-lr-v2",
-  "selectedAt": "2026-10-29T18:34:45.653959+00:00",
-  "runId": "20261029T183445Z",
+  "selectedAt": "2026-10-29T19:09:23.095975+00:00",
+  "runId": "20261029T190923Z",
   "bestC": 2.0,
   "threshold": 0.5,
   "thresholdSelection": {
@@ -771,5 +771,91 @@
     "selectiveRisk": 0.1702,
     "acceptedCount": 94,
     "totalCount": 200
+  },
+  "calibration": {
+    "validation": {
+      "expectedCalibrationError": 0.1216,
+      "brierScore": 0.209
+    },
+    "test": {
+      "expectedCalibrationError": 0.2233,
+      "brierScore": 0.251
+    },
+    "paraphrase": {
+      "expectedCalibrationError": 0.2606,
+      "brierScore": 0.1637
+    }
+  },
+  "errorAnalysis": {
+    "validation": {
+      "misclassified": 87,
+      "total": 200
+    },
+    "test": {
+      "misclassified": 60,
+      "total": 200,
+      "confusionPairs": [
+        {
+          "trueLabel": "transport",
+          "predictedLabel": "food",
+          "count": 10
+        },
+        {
+          "trueLabel": "income_other",
+          "predictedLabel": "salary",
+          "count": 8
+        },
+        {
+          "trueLabel": "other",
+          "predictedLabel": "shopping",
+          "count": 8
+        },
+        {
+          "trueLabel": "shopping",
+          "predictedLabel": "food",
+          "count": 8
+        },
+        {
+          "trueLabel": "housing",
+          "predictedLabel": "transport",
+          "count": 7
+        },
+        {
+          "trueLabel": "health",
+          "predictedLabel": "other",
+          "count": 6
+        },
+        {
+          "trueLabel": "entertainment",
+          "predictedLabel": "food",
+          "count": 4
+        },
+        {
+          "trueLabel": "transport",
+          "predictedLabel": "shopping",
+          "count": 3
+        },
+        {
+          "trueLabel": "education",
+          "predictedLabel": "health",
+          "count": 2
+        },
+        {
+          "trueLabel": "education",
+          "predictedLabel": "shopping",
+          "count": 1
+        },
+        {
+          "trueLabel": "entertainment",
+          "predictedLabel": "transport",
+          "count": 1
+        },
+        {
+          "trueLabel": "food",
+          "predictedLabel": "transport",
+          "count": 1
+        }
+      ]
+    }
   }
 }

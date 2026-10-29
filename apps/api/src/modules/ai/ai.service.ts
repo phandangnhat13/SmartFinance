@@ -94,6 +94,17 @@ export class AiService {
     });
   }
 
+  /**
+   * Remove one of the current user's own predictions. `deleteMany` keeps the
+   * ownership check inside the write, so another user's row can never match.
+   */
+  async deletePrediction(userId: string, predictionId: string): Promise<void> {
+    const result = await this.prisma.aiPrediction.deleteMany({
+      where: { id: predictionId, userId },
+    });
+    if (result.count === 0) throw new NotFoundException('Không tìm thấy kết quả dự đoán');
+  }
+
   async modelInfo() {
     const info = await this.provider.modelInfo();
     if (!info) {

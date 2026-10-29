@@ -9,7 +9,12 @@ interface Mocks {
   prisma: {
     transaction: { findFirst: jest.Mock };
     category: { findFirst: jest.Mock };
-    aiPrediction: { create: jest.Mock; update: jest.Mock; findFirst: jest.Mock };
+    aiPrediction: {
+      create: jest.Mock;
+      update: jest.Mock;
+      findFirst: jest.Mock;
+      deleteMany: jest.Mock;
+    };
   };
   categories: { getAccessibleOrThrow: jest.Mock };
   provider: { classify: jest.Mock; classifyBatch: jest.Mock };
@@ -29,6 +34,7 @@ function createService(): Mocks {
       create: jest.fn().mockResolvedValue({ id: 'prediction-1' }),
       update: jest.fn().mockResolvedValue({ id: 'prediction-1' }),
       findFirst: jest.fn(),
+      deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
   };
   const categories = { getAccessibleOrThrow: jest.fn() };
@@ -137,5 +143,59 @@ describe('AiService', () => {
       service.feedback('user-1', 'prediction-1', { action: 'CORRECT', categoryId: 'other-user' }),
     ).rejects.toThrow('not found');
     expect(prisma.aiPrediction.update).not.toHaveBeenCalled();
+  });
+
+  it('accepts a prediction using its own category', async () => {
+    const { service, prisma } = createService();
+    prisma.aiPrediction.findFirst.mockResolvedValue({
+      id: 'prediction-1',
+      predictedCategoryId: 'category-food',
+    });
+
+    await service.feedback('user-1', 'prediction-1', { action: 'ACCEPT' });
+
+    expect(prisma.aiPrediction.update).toHaveBeenCalledWith({
+      where: { id: 'prediction-1' },
+      data: { status: 'ACCEPTED', acceptedCategoryId: 'category-food' },
+    });
+  });
+
+  it('rejects a prediction and clears any accepted category', async () => {
+    const { service, prisma } = createService();
+    prisma.aiPrediction.findFirst.mockResolvedValue({
+      id: 'prediction-1',
+      predictedCategoryId: 'category-food',
+    });
+
+    await service.feedback('user-1', 'prediction-1', { action: 'REJECT' });
+
+    expect(prisma.aiPrediction.update).toHaveBeenCalledWith({
+      where: { id: 'prediction-1' },
+      data: { status: 'REJECTED', acceptedCategoryId: null },
+    });
+  });
+
+  it("does not accept another user's prediction", async () => {
+    const { service, prisma } = createService();
+    prisma.aiPrediction.findFirst.mockResolvedValue(null);
+
+    await expect(
+      service.feedback('user-1', 'prediction-from-user-2', { action: 'ACCEPT' }),
+    ).rejects.toThrow('Không tìm thấy kết quả dự đoán');
+    expect(prisma.aiPrediction.update).not.toHaveBeenCalled();
+  });
+
+  it('deletes only the current user’s prediction', async () => {
+    const { service, prisma } = createService();
+
+    await service.deletePrediction('user-1', 'prediction-1');
+    expect(prisma.aiPrediction.deleteMany).toHaveBeenCalledWith({
+      where: { id: 'prediction-1', userId: 'user-1' },
+    });
+
+    prisma.aiPrediction.deleteMany.mockResolvedValueOnce({ count: 0 });
+    await expect(service.deletePrediction('user-1', 'prediction-2')).rejects.toThrow(
+      'Không tìm thấy kết quả dự đoán',
+    );
   });
 });

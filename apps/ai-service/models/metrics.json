@@ -1,9 +1,9 @@
 {
   "modelName": "tfidf-char-logreg",
   "modelVersion": "tfidf-char-lr-v2",
-  "trainedAt": "2026-10-29T18:35:04.765499+00:00",
+  "trainedAt": "2026-10-29T19:09:37.077810+00:00",
   "threshold": 0.5,
-  "selectionRunId": "20261029T183445Z",
+  "selectionRunId": "20261029T190923Z",
   "dataset": {
     "fingerprint": "ee91cf5bccf0914cc97ca1386ec1bf69dd03ae1225cc8a1980241c4ce4f70443",
     "splits": {

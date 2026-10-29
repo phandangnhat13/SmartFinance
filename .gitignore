@@ -25,6 +25,7 @@ venv/
 apps/ai-service/artifacts/*.joblib
 apps/ai-service/artifacts/*.json
 apps/ai-service/artifacts/experiments/
+apps/ai-service/artifacts/stability/
 
 # Editor / OS
 .DS_Store
@@ -36,6 +37,8 @@ Thumbs.db
 # Test artifacts
 playwright-report/
 test-results/
+blob-report/
+apps/web/e2e/.auth/
 
 # Documentation: publish only the root README, keep other Markdown local
 *.md

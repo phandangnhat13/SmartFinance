@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -60,6 +61,16 @@ export class AiController {
         acceptedCategoryId: prediction.acceptedCategoryId,
       },
     };
+  }
+
+  @Delete('predictions/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Xóa một kết quả dự đoán AI của chính bạn' })
+  async deletePrediction(
+    @CurrentUser() current: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<void> {
+    await this.aiService.deletePrediction(current.id, id);
   }
 
   @Get('model-info')

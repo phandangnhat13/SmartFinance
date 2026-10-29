@@ -11,16 +11,10 @@
  *   npm run feedback:export -w @smart-finance/api -- --out exports/my-set.jsonl
  */
 
-import { createHash } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { PrismaClient } from '@prisma/client';
-import {
-  buildFeedbackRecord,
-  FEEDBACK_SCHEMA_VERSION,
-  normalizeFeedbackKey,
-  type FeedbackRecord,
-} from '../modules/ai/feedback-export.util';
+import { buildFeedbackExport } from '../modules/ai/feedback-export';
 
 const DEFAULT_EXPORT_DIR = resolve(__dirname, '../../../../exports');
 
@@ -49,82 +43,7 @@ async function main(): Promise<void> {
 
   const prisma = new PrismaClient();
   try {
-    const consentingUsers = await prisma.user.findMany({
-      where: { allowAiResearch: true },
-      select: { id: true },
-    });
-    const userIds = consentingUsers.map((user) => user.id);
-
-    const predictions = userIds.length
-      ? await prisma.aiPrediction.findMany({
-          where: {
-            userId: { in: userIds },
-            status: { in: ['ACCEPTED', 'CORRECTED'] },
-            acceptedCategoryId: { not: null },
-          },
-          orderBy: { createdAt: 'asc' },
-          select: {
-            id: true,
-            inputDescription: true,
-            predictedSlug: true,
-            modelVersion: true,
-            status: true,
-            acceptedCategory: { select: { slug: true } },
-          },
-        })
-      : [];
-
-    const seen = new Set<string>();
-    const records: FeedbackRecord[] = [];
-    let skippedInvalid = 0;
-    let duplicatesRemoved = 0;
-
-    for (const prediction of predictions) {
-      const record = buildFeedbackRecord({
-        predictionId: prediction.id,
-        inputDescription: prediction.inputDescription,
-        predictedSlug: prediction.predictedSlug,
-        acceptedSlug: prediction.acceptedCategory?.slug ?? null,
-        modelVersion: prediction.modelVersion,
-        status: prediction.status,
-      });
-      if (!record) {
-        skippedInvalid += 1;
-        continue;
-      }
-      const key = normalizeFeedbackKey(record.text, record.label);
-      if (seen.has(key)) {
-        duplicatesRemoved += 1;
-        continue;
-      }
-      seen.add(key);
-      records.push(record);
-    }
-
-    const perLabel: Record<string, number> = {};
-    for (const record of records) {
-      perLabel[record.label] = (perLabel[record.label] ?? 0) + 1;
-    }
-
-    const body = records.map((record) => JSON.stringify(record)).join('\n');
-    const fileBody = records.length ? `${body}\n` : '';
-    const fingerprint = createHash('sha256').update(fileBody, 'utf8').digest('hex');
-
-    const metadata = {
-      schemaVersion: FEEDBACK_SCHEMA_VERSION,
-      exportedAt: new Date().toISOString(),
-      purpose: 'ai-feedback-research',
-      consentField: 'users.allowAiResearch',
-      consentingUsers: userIds.length,
-      candidatePredictions: predictions.length,
-      exportedRecords: records.length,
-      skippedInvalid,
-      duplicatesRemoved,
-      perLabel,
-      redactionApplied: true,
-      fileSha256: fingerprint,
-      note: 'Synthetic evaluation data must stay separate. Never add these rows to the held-out test set; split by user and text before training.',
-    };
+    const { fileBody, metadata } = await buildFeedbackExport(prisma);
 
     if (dryRun) {
       console.log(JSON.stringify({ dryRun: true, ...metadata }, null, 2));
@@ -139,11 +58,11 @@ async function main(): Promise<void> {
         {
           output,
           metadataPath: `${output}.meta.json`,
-          exportedRecords: records.length,
-          consentingUsers: userIds.length,
-          skippedInvalid,
-          duplicatesRemoved,
-          fileSha256: fingerprint,
+          exportedRecords: metadata.exportedRecords,
+          consentingUsers: metadata.consentingUsers,
+          skippedInvalid: metadata.skippedInvalid,
+          duplicatesRemoved: metadata.duplicatesRemoved,
+          fileSha256: metadata.fileSha256,
         },
         null,
         2,
@@ -155,7 +74,18 @@ async function main(): Promise<void> {
 }
 
 void main().catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : 'unknown error';
-  console.error(`Feedback export failed: ${message}`);
+  // Prisma error messages can echo query arguments, and those include user
+  // descriptions. Log only the error class and code by default.
+  const name = error instanceof Error ? error.name : 'UnknownError';
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code?: unknown }).code)
+      : 'n/a';
+  console.error(
+    `Feedback export failed (${name}, code ${code}). Set AI_EXPORT_DEBUG=1 to print the stack trace.`,
+  );
+  if (process.env.AI_EXPORT_DEBUG === '1' && error instanceof Error) {
+    console.error(error.stack);
+  }
   process.exitCode = 1;
 });

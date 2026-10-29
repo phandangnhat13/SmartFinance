@@ -194,6 +194,7 @@ Không commit `.env`, API key hoặc dữ liệu cá nhân.
 | `npm run typecheck`                             | `tsc --noEmit` cho tất cả workspace                   |
 | `npm test`                                      | Unit test API (Jest) + web (Vitest)                   |
 | `npm run test:e2e`                              | E2E API với PostgreSQL thật (cần `TEST_DATABASE_URL`) |
+| `npm run test:e2e -w @smart-finance/web`        | E2E trình duyệt Playwright (DB `smart_finance_e2e`)   |
 | `npm run prisma:migrate` / `prisma:deploy`      | Migration ở môi trường dev / triển khai               |
 | `npm run prisma:seed`                           | System categories (+ demo nếu `SEED_DEMO=true`)       |
 | `npm run prisma:studio`                         | Prisma Studio                                         |
@@ -206,16 +207,22 @@ Script AI (chạy trong `apps/ai-service`):
 | `python scripts/generate_dataset.py` | Sinh lại dataset tổng hợp (tất định theo seed)         |
 | `python scripts/validate_dataset.py` | Kiểm tra trùng/rò rỉ/độ phủ nhãn trước khi train       |
 | `python scripts/evaluate_models.py`  | So sánh 3 phương pháp, chọn ngưỡng trên validation     |
+| `python scripts/stability.py`        | Độ ổn định theo split (train+validation, nhiều seed)   |
 | `python scripts/train.py`            | Huấn luyện artifact phục vụ từ `models/selection.json` |
 
 ### Kiểm thử
 
 ```bash
 npm run typecheck && npm run lint
-npm test                       # API unit + web unit
-npm run test:e2e               # cần database test đã migrate
-cd apps/ai-service && pytest   # AI service
+npm test                       # API unit (36) + web unit (11)
+npm run test:e2e               # API e2e (18), cần database test đã migrate
+npm run test:e2e -w @smart-finance/web   # Trình duyệt (13); tự tạo DB + server riêng
+cd apps/ai-service && pytest   # AI service (30)
 ```
+
+Playwright cần PostgreSQL đang chạy và `npx playwright install chromium` một lần. Suite tự tạo
+database `smart_finance_e2e`, chạy API cổng 3100, web 5174 và AI stub 8011; không dùng database
+phát triển hay server dev đang chạy. Screenshot/trace được giữ khi test fail.
 
 Xem chi tiết phạm vi, dữ liệu test và tiêu chí chấp nhận tại [docs/TEST_PLAN.md](docs/TEST_PLAN.md).
 
@@ -241,6 +248,9 @@ Kết quả test held-out (200 dòng):
 | TF-IDF + calibrated LinearSVC    |     0.6800 |     0.6937 |      0.6781 |
 
 - Ngưỡng **0.50**: test coverage 47.0% (94/200), selective accuracy 83.0%.
+- Calibration LR: ECE 0.1216 / Brier 0.2090 (validation); 0.2233 / 0.2510 (test) — confidence dùng
+  để xếp hạng gợi ý tốt hơn là đọc như xác suất.
+- Stability (train+validation, 5-fold, seed 42/7/2026): LR 0.5971 ± 0.0384 accuracy.
 - Kết quả AI **chỉ là đề xuất**; giao dịch chỉ lưu danh mục sau khi người dùng xác nhận.
 - Đây là số liệu trên dữ liệu tổng hợp, **không phải** ước lượng độ chính xác trên người dùng thật.
 
@@ -284,10 +294,15 @@ account,type,amount,occurredAt,description,category,note,currency
 - Lỗi trả về theo envelope thống nhất, không lộ stack trace.
 - CSV export escape công thức; file upload chỉ chấp nhận `.csv`.
 - Phản hồi AI chỉ được xuất khi người dùng bật `allowAiResearch`; mô tả được khử email/số điện
-  thoại/số dài, không xuất `userId`, email hay `predictionId`.
+  thoại/số dài, không xuất `userId`, email hay `predictionId`. Người dùng có thể xóa prediction
+  của chính mình (`DELETE /api/v1/ai/predictions/:id`).
+- AI service không có xác thực riêng: chỉ nên chạy trong mạng nội bộ hoặc sau reverse proxy.
+  Không publish cổng 8000 ra Internet khi triển khai thật.
 
-Các advisory còn lại của dependencies (chủ yếu ở dev tooling) được ghi nhận tại
-[docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md).
+`npm audit` báo 20 mục (phần lớn ở dev tooling); 8 mục trên đường production, chủ yếu là
+`react-router`/`react-router-dom`, `zod` và `js-yaml` qua Swagger. Chưa nâng major để tránh phá vỡ
+tương thích — lý do và đường ảnh hưởng ghi tại
+[docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) và [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ---
 
@@ -296,7 +311,7 @@ Các advisory còn lại của dependencies (chủ yếu ở dev tooling) đư�
 | Tài liệu                                                       | Nội dung                                      |
 | -------------------------------------------------------------- | --------------------------------------------- |
 | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)               | Kế hoạch và tiến độ theo phase                |
-| [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)     | Kế hoạch vòng 2 (fullstack + AI Phase 2)      |
+| [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)     | Kế hoạch vòng 2–3 (fullstack + AI + E2E)      |
 | [docs/IMPLEMENTATION_AUDIT.md](docs/IMPLEMENTATION_AUDIT.md)   | Kết quả audit, lỗi đã sửa, khoảng trống       |
 | [docs/PROJECT_CHARTER.md](docs/PROJECT_CHARTER.md)             | Mục tiêu, phạm vi, tiêu chí thành công        |
 | [docs/SRS.md](docs/SRS.md)                                     | Yêu cầu chức năng/phi chức năng               |
