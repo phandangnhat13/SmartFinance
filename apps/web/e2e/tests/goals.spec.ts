@@ -271,8 +271,10 @@ test('pauses, completes and archives a goal from the UI', async () => {
 
   await dialog.getByRole('button', { name: 'Đóng' }).click();
 
-  page.once('dialog', (confirmation) => void confirmation.accept());
   await renamed.getByRole('button', { name: 'Lưu trữ Quỹ khẩn cấp 6 tháng' }).click();
+  const archiveConfirm = page.getByRole('dialog', { name: 'Lưu trữ mục tiêu' });
+  await expect(archiveConfirm).toBeVisible();
+  await archiveConfirm.getByRole('button', { name: 'Lưu trữ' }).click();
   await expect(renamed).toHaveCount(0);
 
   // Archived goals stay readable when explicitly requested.

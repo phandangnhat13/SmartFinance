@@ -275,7 +275,15 @@ test('opens from the sidebar and shows the period overview and charts', async ()
   // The transfer pair must not inflate the count: only the two real rows count.
   await expect(statCard('Số giao dịch').locator('p').nth(1)).toHaveText('2');
 
-  // Charts are rendered by the real charting library in a real browser.
+  // The default tab shows the comparison, which lives with the overview KPIs.
+  await expect(page.getByText('So sánh với kỳ trước')).toBeVisible();
+  await expect(page.getByText('Thay đổi chi tiêu theo danh mục')).toBeVisible();
+  await expect(page.getByText(foodCategoryName, { exact: true }).first()).toBeVisible();
+
+  // Only the active tab is rendered; charts require opening the trends tab.
+  await expect(page.locator('section[aria-label="Biểu đồ thu nhập và chi tiêu"]')).toHaveCount(0);
+  await page.getByRole('tab', { name: 'Xu hướng' }).click();
+  await expect(page).toHaveURL(/\/analytics\?tab=trends$/);
   await expect(
     page.locator('section[aria-label="Biểu đồ thu nhập và chi tiêu"] svg').first(),
   ).toBeVisible();
@@ -287,6 +295,30 @@ test('opens from the sidebar and shows the period overview and charts', async ()
 
   // Months inside the window without any transaction say so instead of showing 0.
   await expect(page.getByText('Không có dữ liệu').first()).toBeVisible();
+
+  // Back/Forward follow the tab URL without a full reload.
+  await page.goBack();
+  await expect(page).toHaveURL(/\/analytics$/);
+  await expect(page.getByText('So sánh với kỳ trước')).toBeVisible();
+  await page.goForward();
+  await expect(page).toHaveURL(/\/analytics\?tab=trends$/);
+  await expect(page.getByText('Dòng tiền ròng theo tháng')).toBeVisible();
+
+  // The category breakdown lives on its own tab.
+  await page.getByRole('tab', { name: 'Danh mục' }).click();
+  await expect(page).toHaveURL(/\/analytics\?tab=categories$/);
+  await expect(page.getByText('Cơ cấu nguồn thu theo danh mục')).toBeVisible();
+  await expect(page.getByText(incomeCategoryName, { exact: true }).first()).toBeVisible();
+
+  // Arrow keys move selection and focus like a standard tablist.
+  await page.getByRole('tab', { name: 'Danh mục' }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('tab', { name: 'Xu hướng' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(page).toHaveURL(/\/analytics\?tab=trends$/);
+  await expect(page.getByText('Dòng tiền ròng theo tháng')).toBeVisible();
 
   const overviewResponse = await page.request.get(
     `/api/v1/analytics/overview?period=month&currency=VND&month=${currentMonth}`,
@@ -342,9 +374,6 @@ test('opens from the sidebar and shows the period overview and charts', async ()
     total: '9000000.00',
     sharePercent: 100,
   });
-  await expect(page.getByText('Cơ cấu nguồn thu theo danh mục')).toBeVisible();
-  await expect(page.getByText(incomeCategoryName, { exact: true }).first()).toBeVisible();
-
   const expenseResponse = await page.request.get(
     `/api/v1/analytics/expenses?months=12&month=${currentMonth}&currency=VND`,
   );
@@ -370,9 +399,36 @@ test('opens from the sidebar and shows the period overview and charts', async ()
     changeAmount: '1000000.00',
     changePercent: 100,
   });
-  await expect(page.getByText('So sánh với kỳ trước')).toBeVisible();
-  await expect(page.getByText('Thay đổi chi tiêu theo danh mục')).toBeVisible();
-  await expect(page.getByText(foodCategoryName, { exact: true }).first()).toBeVisible();
+});
+
+test('deep-links a tab and makes no request for unopened tabs', async () => {
+  const analyticsRequests: string[] = [];
+  page.on('request', (request) => {
+    const url = request.url();
+    if (url.includes('/api/v1/analytics/') || url.includes('/api/v1/ai/analytics/')) {
+      analyticsRequests.push(url);
+    }
+  });
+
+  await page.goto('/analytics?tab=categories');
+  await expect(page).toHaveURL(/\/analytics\?tab=categories$/);
+  await expect(page.getByText('Phân tích theo danh mục')).toBeVisible();
+
+  await expect
+    .poll(() => analyticsRequests.some((url) => url.includes('/analytics/categories?')))
+    .toBe(true);
+  // The categories tab loads its own panels plus the shared overview shell.
+  expect(analyticsRequests.some((url) => url.includes('/analytics/trends?'))).toBe(false);
+  expect(analyticsRequests.some((url) => url.includes('/analytics/forecast?'))).toBe(false);
+  expect(analyticsRequests.some((url) => url.includes('/financial-health'))).toBe(false);
+  expect(analyticsRequests.some((url) => url.includes('/ai/analytics/'))).toBe(false);
+
+  await page.getByRole('tab', { name: 'Phân tích AI' }).click();
+  await expect(page.getByLabel('Trợ lý phân tích AI')).toBeVisible();
+  await expect
+    .poll(() => analyticsRequests.some((url) => url.includes('/ai/analytics/summary')))
+    .toBe(true);
+  expect(analyticsRequests.some((url) => url.includes('/analytics/trends?'))).toBe(false);
 });
 
 test('changes the chart window and the comparison period', async () => {
@@ -388,6 +444,9 @@ test('changes the chart window and the comparison period', async () => {
   await page.goto('/analytics');
   await expect(statCard('Thu nhập')).toContainText(/5\.000\.000/);
 
+  // The chart window control lives on the tab that renders the charts.
+  await page.getByRole('tab', { name: 'Xu hướng' }).click();
+  await expect(page.getByText('Thu nhập và chi tiêu theo tháng')).toBeVisible();
   const trendsResponse = page.waitForResponse(
     (response) =>
       response.url().includes('/api/v1/analytics/trends?') && response.url().includes('months=12'),
@@ -395,8 +454,10 @@ test('changes the chart window and the comparison period', async () => {
   await page.getByLabel('Khoảng biểu đồ & phân tích tháng').selectOption('12');
   const trendsBody = (await (await trendsResponse).json()) as AnalyticsTrendsDto;
   expect(trendsBody.points).toHaveLength(12);
-  await expect(page.getByText(/12 tháng gần nhất/)).toBeVisible();
+  await expect(page.getByText(/12 tháng gần nhất/).first()).toBeVisible();
 
+  await page.getByRole('tab', { name: 'Tổng quan' }).click();
+  await expect(page).toHaveURL(/\/analytics$/);
   const quarterResponse = page.waitForResponse(
     (response) =>
       response.url().includes('/api/v1/analytics/overview?') &&

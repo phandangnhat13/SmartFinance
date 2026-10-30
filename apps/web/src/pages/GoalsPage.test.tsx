@@ -730,7 +730,6 @@ describe('GoalsPage — contributions', () => {
     const server = createServer([
       makeGoal({ contributions: [contribution({ id: 'c1', amount: '2000000.00' })] }),
     ]);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     renderPage();
 
     await screen.findByText('Mua laptop');
@@ -761,6 +760,11 @@ describe('GoalsPage — contributions', () => {
     await user.click(within(goalCard('Mua laptop')).getByRole('button', { name: 'Chi tiết' }));
     const reopened = await screen.findByRole('dialog');
     await user.click(within(reopened).getByRole('button', { name: 'Xóa khoản góp' }));
+
+    // Deleting asks through the shared ConfirmDialog instead of window.confirm.
+    const confirm = await screen.findByRole('dialog', { name: 'Xoá khoản góp' });
+    expect(callsFor(server, 'DELETE', '/goals/goal-1/contributions/c1')).toHaveLength(0);
+    await user.click(within(confirm).getByRole('button', { name: 'Xoá khoản góp' }));
 
     await waitFor(() =>
       expect(callsFor(server, 'DELETE', '/goals/goal-1/contributions/c1')).toHaveLength(1),
@@ -814,11 +818,13 @@ describe('GoalsPage — status changes and archiving', () => {
   it('archives a goal after confirmation', async () => {
     const user = userEvent.setup();
     const server = createServer([makeGoal()]);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     renderPage();
 
     await screen.findByText('Mua laptop');
     await user.click(screen.getByRole('button', { name: 'Lưu trữ Mua laptop' }));
+
+    const confirm = await screen.findByRole('dialog', { name: 'Lưu trữ mục tiêu' });
+    await user.click(within(confirm).getByRole('button', { name: 'Lưu trữ' }));
 
     await waitFor(() => expect(callsFor(server, 'DELETE', '/goals/goal-1')).toHaveLength(1));
   });
@@ -826,12 +832,15 @@ describe('GoalsPage — status changes and archiving', () => {
   it('does not archive when the user cancels the confirmation', async () => {
     const user = userEvent.setup();
     const server = createServer([makeGoal()]);
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
     renderPage();
 
     await screen.findByText('Mua laptop');
     await user.click(screen.getByRole('button', { name: 'Lưu trữ Mua laptop' }));
 
+    const confirm = await screen.findByRole('dialog', { name: 'Lưu trữ mục tiêu' });
+    await user.click(within(confirm).getByRole('button', { name: 'Huỷ' }));
+
+    expect(screen.queryByRole('dialog', { name: 'Lưu trữ mục tiêu' })).not.toBeInTheDocument();
     expect(callsFor(server, 'DELETE', '/goals/goal-1')).toHaveLength(0);
   });
 });

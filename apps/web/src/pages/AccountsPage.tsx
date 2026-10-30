@@ -8,12 +8,14 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
   Badge,
+  ConfirmDialog,
   EmptyState,
   ErrorAlert,
   FieldError,
   Modal,
   PageHeader,
   Spinner,
+  cn,
 } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { api, errorMessage } from '../lib/api';
@@ -39,6 +41,7 @@ export function AccountsPage() {
   const [editing, setEditing] = useState<AccountDto | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<AccountDto | null>(null);
 
   const accountsQuery = useQuery({
     queryKey: ['accounts', includeArchived],
@@ -129,25 +132,22 @@ export function AccountsPage() {
     }
   }
 
-  async function handleDelete(account: AccountDto) {
-    if (
-      !window.confirm(
-        `Xoá vĩnh viễn tài khoản "${account.name}"? Chỉ xoá được khi chưa có giao dịch.`,
-      )
-    )
-      return;
+  async function confirmDelete() {
+    if (!pendingDelete) return;
     setActionError(null);
     try {
-      await deleteMutation.mutateAsync(account.id);
+      await deleteMutation.mutateAsync(pendingDelete.id);
     } catch {
       // error surfaced through onError
+    } finally {
+      setPendingDelete(null);
     }
   }
 
   const accounts = accountsQuery.data?.items ?? [];
-  const total = accounts
-    .filter((account) => !account.isArchived)
-    .reduce((sum, account) => sum + Number(account.balance), 0);
+  const activeAccounts = accounts.filter((account) => !account.isArchived);
+  const archivedCount = accounts.length - activeAccounts.length;
+  const total = activeAccounts.reduce((sum, account) => sum + Number(account.balance), 0);
 
   return (
     <div>
@@ -161,23 +161,29 @@ export function AccountsPage() {
         }
       />
 
-      <div className="card mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-sm text-slate-500">Tổng số dư (tài khoản đang dùng)</p>
-          <p className="text-2xl font-bold text-slate-900">
-            {formatMoney(String(total), user?.defaultCurrency ?? 'VND')}
-          </p>
+      <section className="card mb-4" aria-label="Tổng quan tài khoản">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="stat-label">Tổng số dư (tài khoản đang dùng)</p>
+            <p data-numeric className="mt-1 text-3xl font-semibold tracking-tight text-ink">
+              {formatMoney(String(total), user?.defaultCurrency ?? 'VND')}
+            </p>
+            <p className="mt-1 text-xs text-ink-muted">
+              {activeAccounts.length} tài khoản đang dùng
+              {archivedCount > 0 ? ` · ${archivedCount} đã lưu trữ` : ''}
+            </p>
+          </div>
+          <label className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink-secondary">
+            <input
+              type="checkbox"
+              checked={includeArchived}
+              onChange={(event) => setIncludeArchived(event.target.checked)}
+              className="h-4 w-4 rounded border-line-strong accent-brand"
+            />
+            Hiện tài khoản đã lưu trữ
+          </label>
         </div>
-        <label className="flex items-center gap-2 text-sm text-slate-600">
-          <input
-            type="checkbox"
-            checked={includeArchived}
-            onChange={(event) => setIncludeArchived(event.target.checked)}
-            className="h-4 w-4 rounded border-slate-300"
-          />
-          Hiện tài khoản đã lưu trữ
-        </label>
-      </div>
+      </section>
 
       {actionError ? (
         <div className="mb-4">
@@ -205,41 +211,50 @@ export function AccountsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {accounts.map((account) => (
-            <article key={account.id} className={`card ${account.isArchived ? 'opacity-70' : ''}`}>
+            <article
+              key={account.id}
+              className={cn('card flex flex-col', account.isArchived && 'opacity-70')}
+            >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-hover">
                     <Wallet className="h-5 w-5" aria-hidden />
                   </span>
-                  <div>
-                    <p className="font-semibold text-slate-900">{account.name}</p>
-                    <p className="text-xs text-slate-500">{ACCOUNT_TYPE_LABELS[account.type]}</p>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-ink">{account.name}</p>
+                    <p className="text-xs text-ink-muted">
+                      {ACCOUNT_TYPE_LABELS[account.type]} · {account.currency}
+                    </p>
                   </div>
                 </div>
                 {account.isArchived ? <Badge tone="slate">Đã lưu trữ</Badge> : null}
               </div>
-              <p className="mt-4 text-xl font-bold text-slate-900">
+
+              <p data-numeric className="mt-4 text-2xl font-semibold tracking-tight text-ink">
                 {formatMoney(account.balance, account.currency)}
               </p>
-              <p className="text-xs text-slate-500">
-                Ban đầu: {formatMoney(account.initialBalance, account.currency)}
+              <p className="text-xs text-ink-muted">
+                Số dư ban đầu: {formatMoney(account.initialBalance, account.currency)}
               </p>
-              <div className="mt-4 flex gap-1 border-t border-slate-100 pt-3">
+
+              <div className="mt-auto flex gap-1 border-t border-line pt-3">
                 <button
                   type="button"
                   onClick={() => openEdit(account)}
-                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                  className="icon-btn"
                   aria-label={`Sửa ${account.name}`}
+                  title="Sửa"
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
                 <button
                   type="button"
                   onClick={() => archiveMutation.mutate(account)}
-                  className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                  className="icon-btn"
                   aria-label={
                     account.isArchived ? `Khôi phục ${account.name}` : `Lưu trữ ${account.name}`
                   }
+                  title={account.isArchived ? 'Khôi phục' : 'Lưu trữ'}
                 >
                   {account.isArchived ? (
                     <ArchiveRestore className="h-4 w-4" />
@@ -249,9 +264,10 @@ export function AccountsPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => void handleDelete(account)}
-                  className="ml-auto rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                  onClick={() => setPendingDelete(account)}
+                  className="icon-btn ml-auto hover:bg-danger-soft hover:text-danger"
                   aria-label={`Xoá ${account.name}`}
+                  title="Xoá"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -332,6 +348,18 @@ export function AccountsPage() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Xoá tài khoản?"
+        description={`Xoá vĩnh viễn tài khoản “${pendingDelete?.name ?? ''}”? Chỉ xoá được khi chưa có giao dịch; hành động này không thể hoàn tác.`}
+        confirmLabel="Xoá tài khoản"
+        pending={deleteMutation.isPending}
+        onConfirm={() => void confirmDelete()}
+        onClose={() => {
+          if (!deleteMutation.isPending) setPendingDelete(null);
+        }}
+      />
     </div>
   );
 }

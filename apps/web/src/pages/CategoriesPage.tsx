@@ -13,6 +13,7 @@ import {
   Modal,
   PageHeader,
   Spinner,
+  TabBar,
 } from '../components/ui';
 import { api, errorMessage } from '../lib/api';
 
@@ -115,100 +116,110 @@ export function CategoriesPage() {
       />
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab.value}
-              type="button"
-              onClick={() => setType(tab.value)}
-              className={`rounded-lg px-4 py-1.5 text-sm font-medium ${
-                type === tab.value
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-        <label className="flex items-center gap-2 text-sm text-slate-600">
+        <TabBar
+          label="Loại danh mục"
+          tabs={TABS}
+          value={type}
+          onChange={setType}
+          idBase="category-tabs"
+          panelId="category-tabpanel"
+        />
+        <label className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink-secondary">
           <input
             type="checkbox"
             checked={includeArchived}
             onChange={(event) => setIncludeArchived(event.target.checked)}
-            className="h-4 w-4 rounded border-slate-300"
+            className="h-4 w-4 rounded border-line-strong accent-brand"
           />
           Hiện danh mục đã lưu trữ
         </label>
       </div>
 
-      {actionError ? (
-        <div className="mb-4">
-          <ErrorAlert message={actionError} />
-        </div>
-      ) : null}
+      <div
+        id="category-tabpanel"
+        role="tabpanel"
+        aria-labelledby={`category-tabs-tab-${type}`}
+        tabIndex={0}
+        className="focus-visible:outline-none"
+      >
+        {actionError ? (
+          <div className="mb-4">
+            <ErrorAlert message={actionError} />
+          </div>
+        ) : null}
 
-      {categoriesQuery.isLoading ? (
-        <Spinner label="Đang tải danh mục..." />
-      ) : categoriesQuery.error ? (
-        <ErrorAlert
-          message={errorMessage(categoriesQuery.error)}
-          onRetry={() => void categoriesQuery.refetch()}
-        />
-      ) : categories.length === 0 ? (
-        <EmptyState
-          title="Chưa có danh mục"
-          description="Thêm danh mục riêng cho loại giao dịch này."
-        />
-      ) : (
-        <div className="card overflow-hidden p-0">
-          <ul className="divide-y divide-slate-100">
-            {categories.map((category) => (
-              <li key={category.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="truncate font-medium text-slate-800">{category.name}</span>
-                  {category.isSystem ? (
-                    <Badge tone="slate">
-                      <Lock className="mr-1 h-3 w-3" aria-hidden /> Hệ thống
-                    </Badge>
-                  ) : (
-                    <Badge tone="emerald">Riêng</Badge>
-                  )}
-                  {category.isArchived ? <Badge tone="amber">Đã lưu trữ</Badge> : null}
-                </div>
-                {!category.isSystem ? (
-                  <div className="flex shrink-0 gap-1">
-                    <button
-                      type="button"
-                      onClick={() => openEdit(category)}
-                      className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-                      aria-label={`Sửa ${category.name}`}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => archiveMutation.mutate(category)}
-                      className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-                      aria-label={
-                        category.isArchived
-                          ? `Khôi phục ${category.name}`
-                          : `Lưu trữ ${category.name}`
-                      }
-                    >
-                      {category.isArchived ? (
-                        <ArchiveRestore className="h-4 w-4" />
-                      ) : (
-                        <Archive className="h-4 w-4" />
-                      )}
-                    </button>
+        {categoriesQuery.isLoading ? (
+          <Spinner label="Đang tải danh mục..." />
+        ) : categoriesQuery.error ? (
+          <ErrorAlert
+            message={errorMessage(categoriesQuery.error)}
+            onRetry={() => void categoriesQuery.refetch()}
+          />
+        ) : categories.length === 0 ? (
+          <EmptyState
+            title="Chưa có danh mục"
+            description="Thêm danh mục riêng cho loại giao dịch này."
+            action={
+              <button type="button" className="btn-primary" onClick={openCreate}>
+                <Plus className="h-4 w-4" aria-hidden /> Thêm danh mục
+              </button>
+            }
+          />
+        ) : (
+          <div className="card overflow-hidden p-0">
+            <ul className="divide-y divide-line">
+              {categories.map((category) => (
+                <li
+                  key={category.id}
+                  className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+                >
+                  <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                    <span className="min-w-0 truncate font-medium text-ink">{category.name}</span>
+                    {category.isSystem ? (
+                      <Badge tone="slate">
+                        <Lock className="mr-1 h-3 w-3" aria-hidden /> Hệ thống
+                      </Badge>
+                    ) : (
+                      <Badge tone="emerald">Riêng</Badge>
+                    )}
+                    {category.isArchived ? <Badge tone="amber">Đã lưu trữ</Badge> : null}
                   </div>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+                  {!category.isSystem ? (
+                    <div className="flex shrink-0 gap-1">
+                      <button
+                        type="button"
+                        onClick={() => openEdit(category)}
+                        className="icon-btn"
+                        aria-label={`Sửa ${category.name}`}
+                        title="Sửa"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => archiveMutation.mutate(category)}
+                        className="icon-btn"
+                        aria-label={
+                          category.isArchived
+                            ? `Khôi phục ${category.name}`
+                            : `Lưu trữ ${category.name}`
+                        }
+                        title={category.isArchived ? 'Khôi phục' : 'Lưu trữ'}
+                      >
+                        {category.isArchived ? (
+                          <ArchiveRestore className="h-4 w-4" />
+                        ) : (
+                          <Archive className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
 
       <Modal
         open={formOpen}

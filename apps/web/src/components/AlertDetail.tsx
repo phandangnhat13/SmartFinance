@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { SpendingAlertDto, SpendingAlertStatus } from '@smart-finance/shared-types';
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { api, errorMessage } from '../lib/api';
 import {
   ALERT_SEVERITY_LABELS,
@@ -44,9 +45,9 @@ function FactList({ rows }: { rows: FactRow[] }) {
   return (
     <dl className="grid gap-2 sm:grid-cols-2">
       {visible.map((row) => (
-        <div key={row.label} className="rounded-xl bg-slate-50 px-3 py-2">
-          <dt className="text-xs uppercase tracking-wide text-slate-500">{row.label}</dt>
-          <dd className="mt-0.5 text-sm font-medium text-slate-800">{row.value}</dd>
+        <div key={row.label} className="rounded-xl bg-surface-muted px-3 py-2">
+          <dt className="text-xs uppercase tracking-wide text-ink-muted">{row.label}</dt>
+          <dd className="mt-0.5 text-sm font-medium text-ink">{row.value}</dd>
         </div>
       ))}
     </dl>
@@ -54,7 +55,7 @@ function FactList({ rows }: { rows: FactRow[] }) {
 }
 
 function SectionTitle({ children }: { children: ReactNode }) {
-  return <h3 className="text-sm font-semibold text-slate-900">{children}</h3>;
+  return <h3 className="text-sm font-semibold text-ink">{children}</h3>;
 }
 
 function LargeTransactionFacts({
@@ -127,12 +128,12 @@ function LargeTransactionFacts({
         ]}
       />
       {clamped ? (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+        <p className="rounded-xl border border-warning-border bg-warning-soft p-3 text-xs text-warning-strong">
           Điểm số lưu trong cơ sở dữ liệu đã chạm giới hạn của cột số và bị cắt bớt. Độ lệch vững
           hiển thị ở trên là giá trị thực tế tính từ dữ liệu, không bị cắt.
         </p>
       ) : null}
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-ink-muted">
         Độ lệch vững cho biết khoản chi cách mức thường lệ bao nhiêu lần độ lệch; đây không phải xác
         suất.
       </p>
@@ -189,7 +190,7 @@ function CategorySpikeFacts({
       {references.length > 0 ? (
         <div>
           <SectionTitle>Các tháng tham chiếu</SectionTitle>
-          <ul className="mt-2 space-y-1 text-sm text-slate-700">
+          <ul className="mt-2 space-y-1 text-sm text-ink-secondary">
             {references.map((reference, index) => {
               const spend = formatAmountValue(reference.spend, currency);
               const count = factNumber(reference, 'transactions');
@@ -208,7 +209,7 @@ function CategorySpikeFacts({
       {excluded.length > 0 ? (
         <div>
           <SectionTitle>Tháng bị loại khỏi tham chiếu</SectionTitle>
-          <ul className="mt-2 space-y-1 text-sm text-slate-600">
+          <ul className="mt-2 space-y-1 text-sm text-ink-secondary">
             {excluded.map((reference, index) => (
               <li key={`${factString(reference, 'month') ?? 'excluded'}-${index}`}>
                 {formatMonthLabel(factString(reference, 'month'))}
@@ -267,14 +268,14 @@ function DuplicateFacts({
       />
 
       {alert.transactionId || alert.relatedTransactionId ? (
-        <div className="rounded-xl border border-slate-200 p-3">
+        <div className="rounded-xl border border-line p-3">
           <SectionTitle>Hai giao dịch bị nghi trùng</SectionTitle>
-          <ul className="mt-2 space-y-1 text-sm text-slate-700">
+          <ul className="mt-2 space-y-1 text-sm text-ink-secondary">
             <li>
               <span className="font-medium">Giao dịch chính:</span>{' '}
               {occurredAt ? formatDateTime(occurredAt, timezone) : '—'}
               {alert.transactionId ? (
-                <span className="ml-2 break-all font-mono text-xs text-slate-500">
+                <span className="ml-2 break-all font-mono text-xs text-ink-muted">
                   {alert.transactionId}
                 </span>
               ) : null}
@@ -283,7 +284,7 @@ function DuplicateFacts({
               <span className="font-medium">Giao dịch liên quan:</span>{' '}
               {relatedOccurredAt ? formatDateTime(relatedOccurredAt, timezone) : '—'}
               {alert.relatedTransactionId ? (
-                <span className="ml-2 break-all font-mono text-xs text-slate-500">
+                <span className="ml-2 break-all font-mono text-xs text-ink-muted">
                   {alert.relatedTransactionId}
                 </span>
               ) : null}
@@ -292,7 +293,7 @@ function DuplicateFacts({
         </div>
       ) : null}
 
-      {note ? <p className="text-xs text-slate-500">{note}</p> : null}
+      {note ? <p className="text-xs text-ink-muted">{note}</p> : null}
     </div>
   );
 }
@@ -324,7 +325,32 @@ export function AlertDetail({ alert, timezone, fallbackCurrency, onUpdated }: Al
         </Badge>
       </div>
 
-      <p className="text-sm leading-relaxed text-slate-700">{alert.explanation}</p>
+      <div>
+        <h3 className="text-sm font-semibold text-ink">Vì sao có cảnh báo này</h3>
+        <p className="mt-1 break-words text-sm leading-relaxed text-ink-secondary">
+          {alert.explanation}
+        </p>
+        {alert.transactionId || alert.relatedTransactionId ? (
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            {alert.transactionId ? (
+              <Link
+                to={`/transactions/${alert.transactionId}/edit`}
+                className="font-medium text-brand hover:underline"
+              >
+                Xem giao dịch chính
+              </Link>
+            ) : null}
+            {alert.relatedTransactionId ? (
+              <Link
+                to={`/transactions/${alert.relatedTransactionId}/edit`}
+                className="font-medium text-brand hover:underline"
+              >
+                Xem giao dịch liên quan
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
 
       <FactList
         rows={[
@@ -349,9 +375,9 @@ export function AlertDetail({ alert, timezone, fallbackCurrency, onUpdated }: Al
         <DuplicateFacts alert={alert} facts={facts} currency={currency} timezone={timezone} />
       ) : null}
 
-      <div className="rounded-xl border border-slate-200 p-4">
+      <div className="rounded-xl border border-line bg-surface-muted p-4">
         <SectionTitle>Xử lý cảnh báo</SectionTitle>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-ink-muted">
           Cảnh báo chỉ là gợi ý từ dữ liệu của bạn. “Đã xem” không có nghĩa là bạn xác nhận có gian
           lận; “Đánh dấu bình thường” nghĩa là khoản chi này bình thường với bạn.
         </p>
@@ -376,10 +402,10 @@ export function AlertDetail({ alert, timezone, fallbackCurrency, onUpdated }: Al
             );
           })}
         </div>
-        <ul className="mt-3 space-y-1 text-xs text-slate-500">
+        <ul className="mt-3 space-y-1 text-xs text-ink-muted">
           {actions.map((action) => (
             <li key={action.status}>
-              <span className="font-medium text-slate-700">{action.label}:</span>{' '}
+              <span className="font-medium text-ink-secondary">{action.label}:</span>{' '}
               {action.description}
             </li>
           ))}

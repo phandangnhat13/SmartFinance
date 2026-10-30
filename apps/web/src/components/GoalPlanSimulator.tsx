@@ -43,12 +43,12 @@ function Figure({
   simulated: string;
 }) {
   return (
-    <tr className="border-t border-slate-100">
-      <th scope="row" className="py-2 pr-3 text-left font-medium text-slate-600">
+    <tr className="border-t border-line">
+      <th scope="row" className="py-2 pr-3 text-left font-medium text-ink-secondary">
         {label}
       </th>
-      <td className="py-2 pr-3 text-right text-slate-700">{current}</td>
-      <td className="py-2 text-right font-semibold text-slate-900">{simulated}</td>
+      <td className="py-2 pr-3 text-right text-ink-secondary">{current}</td>
+      <td className="py-2 text-right font-semibold text-ink">{simulated}</td>
     </tr>
   );
 }
@@ -220,12 +220,12 @@ export function GoalPlanSimulator({
     (simulation.scenario === 'DEADLINE' || simulation.scenario === 'TARGET_AMOUNT');
 
   return (
-    <section className="rounded-xl border border-slate-200 p-4" aria-label="Mô phỏng kế hoạch">
+    <section className="rounded-xl border border-line p-4" aria-label="Mô phỏng kế hoạch">
       <div className="flex items-center gap-2">
-        <Wand2 className="h-4 w-4 text-sky-600" aria-hidden />
-        <h3 className="text-sm font-semibold text-slate-900">Mô phỏng kế hoạch</h3>
+        <Wand2 className="h-4 w-4 text-info" aria-hidden />
+        <h3 className="text-sm font-semibold text-ink">Mô phỏng kế hoạch</h3>
       </div>
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-xs text-ink-muted">
         Chỉ là phép tính xem trước: không có khoản góp nào được tạo và mục tiêu chưa bị thay đổi.
       </p>
 
@@ -244,8 +244,8 @@ export function GoalPlanSimulator({
             }}
             className={`rounded-lg px-3 py-1.5 text-xs font-medium ${
               scenario === option.key
-                ? 'bg-sky-600 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                ? 'bg-info text-white'
+                : 'bg-surface-muted text-ink-secondary hover:bg-line'
             }`}
           >
             {option.label}
@@ -255,7 +255,7 @@ export function GoalPlanSimulator({
 
       <div className="mt-3 flex flex-wrap items-end gap-2">
         {scenario === 'MONTHLY_AMOUNT' ? (
-          <label className="flex min-w-52 flex-1 flex-col gap-1 text-sm text-slate-600">
+          <label className="flex min-w-52 flex-1 flex-col gap-1 text-sm text-ink-secondary">
             <span>Số tiền góp mỗi tháng</span>
             <input
               className="input"
@@ -267,7 +267,7 @@ export function GoalPlanSimulator({
           </label>
         ) : null}
         {scenario === 'DEADLINE' ? (
-          <label className="flex min-w-52 flex-1 flex-col gap-1 text-sm text-slate-600">
+          <label className="flex min-w-52 flex-1 flex-col gap-1 text-sm text-ink-secondary">
             <span>Ngày đích mới</span>
             <input
               type="date"
@@ -279,7 +279,7 @@ export function GoalPlanSimulator({
           </label>
         ) : null}
         {scenario === 'TARGET_AMOUNT' ? (
-          <label className="flex min-w-52 flex-1 flex-col gap-1 text-sm text-slate-600">
+          <label className="flex min-w-52 flex-1 flex-col gap-1 text-sm text-ink-secondary">
             <span>Số tiền mục tiêu mới</span>
             <input
               className="input"
@@ -307,15 +307,15 @@ export function GoalPlanSimulator({
         </div>
       ) : null}
       {applied ? (
-        <p className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+        <p className="mt-2 rounded-xl border border-brand/30 bg-brand-soft p-3 text-xs text-brand-hover">
           {applied}
         </p>
       ) : null}
 
       {simulation && figures ? (
-        <div className="mt-4 rounded-xl border border-slate-100 p-3">
+        <div className="mt-4 rounded-xl border border-line p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h4 className="text-sm font-semibold text-slate-900">Hiện tại so với giả định</h4>
+            <h4 className="text-sm font-semibold text-ink">Hiện tại so với giả định</h4>
             <Badge tone={FEASIBILITY_TONES[simulation.feasibility]}>
               {SIMULATION_FEASIBILITY_LABELS[simulation.feasibility]}
             </Badge>
@@ -324,7 +324,7 @@ export function GoalPlanSimulator({
             <table className="w-full text-sm">
               <caption className="sr-only">So sánh kế hoạch hiện tại và kế hoạch giả định</caption>
               <thead>
-                <tr className="text-xs uppercase tracking-wide text-slate-500">
+                <tr className="text-xs uppercase tracking-wide text-ink-muted">
                   <th scope="col" className="py-1 pr-3 text-left font-medium">
                     Chỉ số
                   </th>
@@ -348,9 +348,9 @@ export function GoalPlanSimulator({
               </tbody>
             </table>
           </div>
-          <p className="mt-2 text-sm text-slate-600">{simulation.feasibilityReason}</p>
+          <p className="mt-2 text-sm text-ink-secondary">{simulation.feasibilityReason}</p>
           {simulation.warnings.length > 0 ? (
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-amber-800">
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-warning-strong">
               {simulation.warnings.map((warning) => (
                 <li key={warning}>{warning}</li>
               ))}
@@ -367,12 +367,12 @@ export function GoalPlanSimulator({
               >
                 Xem trước thay đổi
               </button>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-ink-muted">
                 Bạn sẽ thấy thay đổi cũ → mới và phải xác nhận lần nữa.
               </span>
             </div>
           ) : (
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="mt-3 text-xs text-ink-muted">
               Mức góp mỗi tháng chỉ là giả định để xem trước, nên chỉ có thể áp dụng thay đổi ngày
               đích hoặc số tiền mục tiêu.
             </p>
@@ -405,23 +405,23 @@ export function GoalPlanSimulator({
             {preview.problems.length > 0 ? (
               <ErrorAlert message={preview.problems.join(' ')} />
             ) : null}
-            <p className="text-sm text-slate-600">
-              Mục tiêu <span className="font-semibold text-slate-900">{preview.goalName}</span> sẽ
-              được cập nhật sau khi bạn xác nhận. Các khoản góp đã ghi nhận không thay đổi.
+            <p className="text-sm text-ink-secondary">
+              Mục tiêu <span className="font-semibold text-ink">{preview.goalName}</span> sẽ được
+              cập nhật sau khi bạn xác nhận. Các khoản góp đã ghi nhận không thay đổi.
             </p>
-            <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+            <ul className="divide-y divide-line rounded-xl border border-line">
               {preview.changes.map((change) => (
                 <li
                   key={change.field}
                   className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm"
                 >
-                  <span className="text-slate-600">
+                  <span className="text-ink-secondary">
                     {change.field === 'targetAmount' ? 'Số tiền mục tiêu' : 'Ngày đích'}
                   </span>
-                  <span className="text-slate-500">
+                  <span className="text-ink-muted">
                     {formatChange(change.field, change.oldValue, preview.currency, timezone)}
                     {' → '}
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-ink">
                       {formatChange(change.field, change.newValue, preview.currency, timezone)}
                     </span>
                   </span>
@@ -429,21 +429,21 @@ export function GoalPlanSimulator({
               ))}
             </ul>
             <div className="grid gap-2 sm:grid-cols-2">
-              <p className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+              <p className="rounded-xl bg-surface-muted p-3 text-xs text-ink-secondary">
                 Còn thiếu sau điều chỉnh:{' '}
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-ink">
                   {formatMoney(preview.projected.remainingAmount, preview.currency)}
                 </span>
               </p>
-              <p className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+              <p className="rounded-xl bg-surface-muted p-3 text-xs text-ink-secondary">
                 Cần góp mỗi tháng:{' '}
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-ink">
                   {moneyOrDash(preview.projected.requiredMonthlySaving, preview.currency)}
                 </span>
               </p>
             </div>
             {preview.warnings.length > 0 ? (
-              <ul className="list-disc space-y-1 pl-5 text-xs text-amber-800">
+              <ul className="list-disc space-y-1 pl-5 text-xs text-warning-strong">
                 {preview.warnings.map((warning) => (
                   <li key={warning}>{warning}</li>
                 ))}

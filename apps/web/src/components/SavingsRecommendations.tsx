@@ -29,10 +29,10 @@ const CONFIDENCE_LABELS: Record<'high' | 'medium' | 'low', string> = {
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold text-slate-900">{value}</p>
-      {hint ? <p className="mt-0.5 text-xs text-slate-500">{hint}</p> : null}
+    <div className="rounded-xl bg-surface-muted p-3">
+      <p className="text-xs text-ink-muted">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold text-ink">{value}</p>
+      {hint ? <p className="mt-0.5 text-xs text-ink-muted">{hint}</p> : null}
     </div>
   );
 }
@@ -53,8 +53,8 @@ function GoalAllocation({
     <li className="p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate font-semibold text-slate-900">{item.goalName}</p>
-          <p className="text-xs text-slate-500">
+          <p className="truncate font-semibold text-ink">{item.goalName}</p>
+          <p className="text-xs text-ink-muted">
             Ưu tiên {item.priority} · còn thiếu {formatMoney(item.remainingAmount, item.currency)}
             {item.targetDate
               ? ` · hạn ${formatDate(item.targetDate, timezone)}`
@@ -67,12 +67,12 @@ function GoalAllocation({
       </div>
 
       <div className="mt-2 grid gap-2 sm:grid-cols-2">
-        <p className="text-sm text-slate-700">
-          Đề xuất: <span className="font-semibold text-slate-900">{recommended}</span>
+        <p className="text-sm text-ink-secondary">
+          Đề xuất: <span className="font-semibold text-ink">{recommended}</span>
         </p>
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-ink-secondary">
           Cần thiết:{' '}
-          <span className="font-semibold text-slate-900">
+          <span className="font-semibold text-ink">
             {item.requiredMonthlySaving === null
               ? '—'
               : `${formatMoney(item.requiredMonthlySaving, item.currency)}/tháng`}
@@ -80,23 +80,23 @@ function GoalAllocation({
         </p>
       </div>
 
-      <p className="mt-2 text-xs text-slate-500">{item.priorityReason}</p>
-      <p className="mt-1 text-sm text-slate-600">{item.explanation}</p>
+      <p className="mt-2 text-xs text-ink-muted">{item.priorityReason}</p>
+      <p className="mt-1 text-sm text-ink-secondary">{item.explanation}</p>
 
       {item.estimatedCompletionDate ? (
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-ink-muted">
           Dự kiến hoàn thành: {formatDate(`${item.estimatedCompletionDate}T00:00`, timezone)}
         </p>
       ) : null}
 
       {item.feasibility === 'NOT_FEASIBLE' ? (
-        <p className="mt-2 rounded-lg border border-rose-200 bg-rose-50 p-2 text-xs text-rose-800">
+        <p className="mt-2 rounded-lg border border-danger-border bg-danger-soft p-2 text-xs text-danger-strong">
           Với mức tiết kiệm hiện tại, mục tiêu này khó có thể hoàn thành đúng hạn. Hãy tăng mức tiết
           kiệm, dời hạn chót hoặc giảm số tiền cần.
         </p>
       ) : null}
       {item.feasibility === 'AT_RISK' ? (
-        <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+        <p className="mt-2 rounded-lg border border-warning-border bg-warning-soft p-2 text-xs text-warning-strong">
           Mức đề xuất thấp hơn mức cần thiết nên mục tiêu này có thể trễ hạn.
         </p>
       ) : null}
@@ -158,16 +158,16 @@ export function SavingsRecommendations({
     <section className="card mb-6" aria-label="Đề xuất tiết kiệm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <PiggyBank className="h-4 w-4 text-emerald-600" aria-hidden />
-          <h2 className="text-sm font-semibold text-slate-900">Đề xuất tiết kiệm</h2>
+          <PiggyBank className="h-4 w-4 text-brand" aria-hidden />
+          <h2 className="text-sm font-semibold text-ink">Đề xuất tiết kiệm</h2>
         </div>
-        <Link to="/insights" className="text-xs font-medium text-sky-700 hover:underline">
+        <Link to="/insights" className="text-xs font-medium text-brand hover:underline">
           Xem phân tích tài chính
         </Link>
       </div>
 
       {query.isLoading ? (
-        <p className="mt-3 text-sm text-slate-500">Đang tính đề xuất tiết kiệm...</p>
+        <p className="mt-3 text-sm text-ink-muted">Đang tính đề xuất tiết kiệm...</p>
       ) : query.error ? (
         <div className="mt-3">
           <ErrorAlert message={errorMessage(query.error)} onRetry={() => void query.refetch()} />
@@ -212,10 +212,10 @@ export function SavingsRecommendations({
           </div>
 
           {data.status === 'available' ? (
-            <p className="mt-3 text-sm text-slate-700">
+            <p className="mt-3 text-sm text-ink-secondary">
               Dựa trên {data.capacity.monthsAnalyzed} tháng đã kết thúc có giao dịch, bạn có thể
               dành khoảng{' '}
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-ink">
                 {formatMoney(data.capacity.suggestedMonthlySaving ?? '0', data.currency)}/tháng
               </span>
               . Đây là dòng tiền ròng trung bình{' '}
@@ -224,23 +224,23 @@ export function SavingsRecommendations({
               {formatMoney(data.capacity.safetyBufferAmount ?? '0', data.currency)}).
             </p>
           ) : data.status === 'no_capacity' ? (
-            <p className="mt-3 text-sm text-amber-800">
+            <p className="mt-3 text-sm text-warning-strong">
               Dòng tiền ròng trung bình trong {data.capacity.monthsAnalyzed} tháng đã kết thúc không
               dương, nên hiện chưa thể đề xuất mức tiết kiệm. Hãy ghi nhận thêm thu nhập hoặc giảm
               chi tiêu trước khi đặt thêm mục tiêu.
             </p>
           ) : (
-            <p className="mt-3 text-sm text-slate-600">
+            <p className="mt-3 text-sm text-ink-secondary">
               {data.capacity.reason === 'no_income'
                 ? `Chưa ghi nhận thu nhập ${data.currency} trong các tháng đã kết thúc nên chưa thể đề xuất mức tiết kiệm.`
                 : `Chưa có tháng nào đã kết thúc với giao dịch ${data.currency}. Cần ít nhất một tháng có thu nhập để tính khả năng tiết kiệm.`}
             </p>
           )}
 
-          <div className="mt-4 border-t border-slate-100 pt-4">
+          <div className="mt-4 border-t border-line pt-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 className="text-sm font-semibold text-slate-900">Phân bổ theo mục tiêu</h3>
-              <span className="text-xs text-slate-500">
+              <h3 className="text-sm font-semibold text-ink">Phân bổ theo mục tiêu</h3>
+              <span className="text-xs text-ink-muted">
                 {data.monthlyBudget === null
                   ? 'Chưa có ngân sách để phân bổ'
                   : `Ngân sách ${formatMoney(data.monthlyBudget, data.currency)}/tháng · đã phân bổ ${formatMoney(data.allocatedMonthly, data.currency)}${
@@ -252,11 +252,11 @@ export function SavingsRecommendations({
             </div>
 
             {data.items.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-ink-muted">
                 Không có mục tiêu đang thực hiện nào trong {data.currency} để đề xuất.
               </p>
             ) : (
-              <ul className="mt-2 divide-y divide-slate-100 rounded-xl border border-slate-100">
+              <ul className="mt-2 divide-y divide-line rounded-xl border border-line">
                 {data.items.map((item) => (
                   <GoalAllocation key={item.goalId} item={item} timezone={timezone} />
                 ))}
@@ -266,7 +266,7 @@ export function SavingsRecommendations({
             {(data.excluded.paused > 0 ||
               data.excluded.completed > 0 ||
               data.excluded.archived > 0) && (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-ink-muted">
                 Không phân bổ cho {data.excluded.paused} mục tiêu tạm dừng,{' '}
                 {data.excluded.completed} mục tiêu hoàn thành và {data.excluded.archived} mục tiêu
                 lưu trữ.
@@ -275,14 +275,14 @@ export function SavingsRecommendations({
           </div>
 
           <form
-            className="mt-4 border-t border-slate-100 pt-4"
+            className="mt-4 border-t border-line pt-4"
             onSubmit={(event) => {
               event.preventDefault();
               applySimulation();
             }}
           >
             <div className="flex flex-wrap items-end gap-2">
-              <label className="flex min-w-52 flex-col gap-1 text-sm text-slate-600">
+              <label className="flex min-w-52 flex-col gap-1 text-sm text-ink-secondary">
                 <span>Mức tiết kiệm giả định mỗi tháng</span>
                 <input
                   className="input"
@@ -301,27 +301,27 @@ export function SavingsRecommendations({
                 </button>
               ) : null}
             </div>
-            {inputError ? <p className="mt-1 text-xs text-rose-700">{inputError}</p> : null}
+            {inputError ? <p className="mt-1 text-xs text-expense">{inputError}</p> : null}
             {data.simulated && data.simulatedMonthlySaving !== null ? (
-              <p className="mt-2 rounded-xl border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800">
+              <p className="mt-2 rounded-xl border border-brand/30 bg-brand-soft p-3 text-xs text-ink-secondary">
                 Đang mô phỏng với {formatMoney(data.simulatedMonthlySaving, data.currency)}/tháng.
                 Đây chỉ là giả định để xem trước; không mục tiêu hay khoản góp nào được ghi lại.
               </p>
             ) : (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-ink-muted">
                 Nhập một mức khác để xem trước cách phân bổ thay đổi. Việc mô phỏng không tạo khoản
                 góp nào.
               </p>
             )}
           </form>
 
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-ink-muted">
             Đây là đề xuất dựa trên quy tắc từ dữ liệu bạn đã ghi nhận, không phải cam kết. Ứng dụng
             không tự tạo khoản góp hay sửa mục tiêu; bạn tự quyết định có làm theo hay không.
           </p>
 
-          <details className="mt-3 text-xs text-slate-600">
-            <summary className="cursor-pointer font-medium text-slate-700">
+          <details className="mt-3 text-xs text-ink-secondary">
+            <summary className="cursor-pointer font-medium text-ink-secondary">
               Giả định và giới hạn của đề xuất
             </summary>
             <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -329,7 +329,7 @@ export function SavingsRecommendations({
                 <li key={item}>{item}</li>
               ))}
             </ul>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-slate-500">
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-ink-muted">
               {data.limitations.map((item) => (
                 <li key={item}>{item}</li>
               ))}

@@ -22,8 +22,25 @@
     --sf-brand: 5 150 105;
     --sf-brand-hover: 4 120 87;
     --sf-brand-soft: 236 253 245;
+    --sf-brand-deep: 6 95 70;
     --sf-income: 4 120 87;
     --sf-expense: 225 29 72;
+    --sf-warning: 245 158 11;
+    --sf-warning-strong: 146 64 14;
+    --sf-warning-border: 253 230 138;
+    --sf-warning-soft: 255 251 235;
+    --sf-danger: 225 29 72;
+    --sf-danger-strong: 190 18 60;
+    --sf-danger-border: 254 205 211;
+    --sf-danger-soft: 255 241 242;
+    --sf-info: 2 132 199;
+    --sf-info-strong: 3 105 161;
+    --sf-info-border: 186 230 253;
+    --sf-info-soft: 240 249 255;
+    --sf-accent: 139 92 246;
+    --sf-accent-strong: 109 40 217;
+    --sf-accent-border: 221 214 254;
+    --sf-accent-soft: 245 243 255;
   }
 
   html {
@@ -85,7 +102,7 @@
     @apply btn text-ink-secondary hover:bg-surface-muted;
   }
   .btn-danger {
-    @apply btn bg-rose-600 text-white hover:bg-rose-700;
+    @apply btn bg-danger text-white hover:bg-danger-strong;
   }
   .btn-sm {
     @apply px-3 py-1.5 text-xs;

@@ -19,6 +19,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { chartTheme } from '../lib/chartTheme';
 import { formatDateTime, formatMoney, formatMonthLabel } from '../lib/format';
 import { Badge, EmptyState } from './ui';
 
@@ -111,7 +112,7 @@ function SeriesChart({
   const data = buildChartData(series);
   return (
     <div>
-      <p className="mb-1 text-sm font-medium text-slate-700">{title}</p>
+      <p className="mb-1 text-sm font-medium text-ink-secondary">{title}</p>
       <div className="h-56 w-full" aria-label={`Biểu đồ ${title.toLowerCase()}: thực tế và dự báo`}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -158,7 +159,7 @@ function confidenceMeta(level: ForecastConfidenceLevel) {
 function SeriesMeta({ series, currency }: { series: ForecastSeriesDto; currency: string }) {
   if (series.status !== 'ok') {
     return (
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+      <div className="rounded-xl border border-warning-border bg-warning-soft px-3 py-2 text-xs text-warning-strong">
         {reasonText(series.reason)}
       </div>
     );
@@ -169,7 +170,7 @@ function SeriesMeta({ series, currency }: { series: ForecastSeriesDto; currency:
     .sort((left, right) => Number(left.mae) - Number(right.mae))[0];
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+    <div className="rounded-xl border border-line bg-surface-muted px-3 py-2 text-xs text-ink-secondary">
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone="sky">Mô hình: {series.model ? MODEL_LABELS[series.model] : '—'}</Badge>
         <Badge tone={confidence.tone}>{confidence.label}</Badge>
@@ -230,7 +231,7 @@ function ForecastTable({
       <table className="w-full text-sm">
         <caption className="sr-only">Giá trị dự báo theo tháng</caption>
         <thead>
-          <tr className="border-b border-slate-200 text-left text-xs text-slate-500">
+          <tr className="border-b border-line text-left text-xs text-ink-muted">
             <th className="py-2 pr-3 font-medium">Tháng</th>
             <th className="py-2 pr-3 font-medium">Thu nhập</th>
             <th className="py-2 pr-3 font-medium">Chi tiêu</th>
@@ -239,12 +240,12 @@ function ForecastTable({
         </thead>
         <tbody>
           {[...months.values()].map((row) => (
-            <tr key={row.month} className="border-b border-slate-100 last:border-0">
-              <td className="py-2 pr-3 text-slate-700">{formatMonthLabel(row.month)}</td>
-              <td className="py-2 pr-3 text-slate-700">
+            <tr key={row.month} className="border-b border-line last:border-0">
+              <td className="py-2 pr-3 text-ink-secondary">{formatMonthLabel(row.month)}</td>
+              <td className="py-2 pr-3 text-ink-secondary">
                 {row.income === null ? '—' : formatMoney(row.income, currency)}
               </td>
-              <td className="py-2 pr-3 text-slate-700">
+              <td className="py-2 pr-3 text-ink-secondary">
                 {row.expense === null ? '—' : formatMoney(row.expense, currency)}
               </td>
               <td className="py-2">
@@ -271,7 +272,7 @@ function CategoryTable({
 }) {
   if (categories.length === 0) {
     return (
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-ink-muted">
         Chưa có danh mục chi tiêu nào đủ 3 tháng dữ liệu để dự báo riêng.
       </p>
     );
@@ -281,7 +282,7 @@ function CategoryTable({
       <table className="w-full text-sm">
         <caption className="sr-only">Dự báo chi tiêu theo danh mục</caption>
         <thead>
-          <tr className="border-b border-slate-200 text-left text-xs text-slate-500">
+          <tr className="border-b border-line text-left text-xs text-ink-muted">
             <th className="py-2 pr-3 font-medium">Danh mục</th>
             <th className="py-2 pr-3 font-medium">Mô hình</th>
             <th className="py-2 pr-3 font-medium">Số tháng dữ liệu</th>
@@ -295,14 +296,14 @@ function CategoryTable({
             return (
               <tr
                 key={item.categoryId ?? item.categoryName}
-                className="border-b border-slate-100 last:border-0"
+                className="border-b border-line last:border-0"
               >
-                <td className="py-2 pr-3 text-slate-700">{item.categoryName}</td>
-                <td className="py-2 pr-3 text-slate-600">
+                <td className="py-2 pr-3 text-ink-secondary">{item.categoryName}</td>
+                <td className="py-2 pr-3 text-ink-secondary">
                   {item.model ? MODEL_LABELS[item.model] : '—'}
                 </td>
-                <td className="py-2 pr-3 text-slate-600">{item.monthsWithData}</td>
-                <td className="py-2 pr-3 text-slate-700">
+                <td className="py-2 pr-3 text-ink-secondary">{item.monthsWithData}</td>
+                <td className="py-2 pr-3 text-ink-secondary">
                   {item.horizonTotal === null ? '—' : formatMoney(item.horizonTotal, currency)}
                 </td>
                 <td className="py-2">
@@ -341,8 +342,8 @@ export function AnalyticsForecastPanel({
     <section className="card" aria-label="Dự báo tài chính">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Dự báo tài chính</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="text-lg font-semibold text-ink">Dự báo tài chính</h2>
+          <p className="mt-1 text-sm text-ink-muted">
             Tính trên máy chủ từ các tháng đã kết thúc của chính bạn, không dùng AI/LLM và không tạo
             giao dịch.
           </p>
@@ -367,15 +368,15 @@ export function AnalyticsForecastPanel({
       </div>
 
       <p
-        className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900"
+        className="mt-3 flex items-start gap-2 rounded-xl border border-warning-border bg-warning-soft px-3 py-2 text-sm font-medium text-warning-strong"
         role="note"
       >
         <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
         Giá trị dự báo, không phải số liệu thực tế
       </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-        <span className="font-medium text-slate-700">{data.currency}</span>
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
+        <span className="font-medium text-ink-secondary">{data.currency}</span>
         <span>· múi giờ {data.timezone}</span>
         <span>· số liệu đến {data.asOf}</span>
         <span>· tạo lúc {formatDateTime(data.generatedAt, data.timezone)}</span>
@@ -391,7 +392,7 @@ export function AnalyticsForecastPanel({
             title="Chưa thể dự báo"
             description={`${reasonText(data.reason)} Cần tối thiểu 3 tháng có giao dịch thu và chi đã kết thúc.`}
           />
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-ink-muted">
             Đã xét {data.dataQuality.completeMonthsConsidered} tháng, trong đó{' '}
             {data.dataQuality.monthsWithData} tháng có dữ liệu ({data.dataQuality.continuityPercent}
             % liên tục).
@@ -400,51 +401,51 @@ export function AnalyticsForecastPanel({
       ) : (
         <>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-xl border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">
+            <div className="rounded-xl border border-line p-3">
+              <p className="text-xs text-ink-muted">
                 Thu nhập dự báo ({horizonLabel.toLowerCase()})
               </p>
-              <p className="mt-1 text-lg font-semibold text-emerald-700">
+              <p className="mt-1 text-lg font-semibold text-brand-hover">
                 {data.income.horizonTotal ? formatMoney(data.income.horizonTotal, currency) : '—'}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-ink-muted">
                 Chỉ tính giao dịch thu nhập, không gồm chuyển tiền nội bộ.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Chi tiêu dự báo</p>
-              <p className="mt-1 text-lg font-semibold text-rose-600">
+            <div className="rounded-xl border border-line p-3">
+              <p className="text-xs text-ink-muted">Chi tiêu dự báo</p>
+              <p className="mt-1 text-lg font-semibold text-danger">
                 {data.expense.horizonTotal ? formatMoney(data.expense.horizonTotal, currency) : '—'}
               </p>
-              <p className="text-xs text-slate-500">Gồm phần còn lại của tháng hiện tại</p>
+              <p className="text-xs text-ink-muted">Gồm phần còn lại của tháng hiện tại</p>
             </div>
-            <div className="rounded-xl border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Dòng tiền ròng dự báo</p>
+            <div className="rounded-xl border border-line p-3">
+              <p className="text-xs text-ink-muted">Dòng tiền ròng dự báo</p>
               <p
                 className={`mt-1 text-lg font-semibold ${
-                  data.net.base && Number(data.net.base) < 0 ? 'text-rose-600' : 'text-sky-700'
+                  data.net.base && Number(data.net.base) < 0 ? 'text-danger' : 'text-info-strong'
                 }`}
               >
                 {data.net.base ? formatMoney(data.net.base, currency) : '—'}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-ink-muted">
                 {data.net.best && data.net.worst
                   ? `Tham khảo (sai số MAE): ${formatMoney(data.net.worst, currency)} → ${formatMoney(data.net.best, currency)}`
                   : 'Chưa đủ kỳ để tính dải sai số.'}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Số dư cuối tháng dự kiến</p>
+            <div className="rounded-xl border border-line p-3">
+              <p className="text-xs text-ink-muted">Số dư cuối tháng dự kiến</p>
               <p
                 className={`mt-1 text-lg font-semibold ${
                   balance.projectedBalance && Number(balance.projectedBalance) < 0
-                    ? 'text-rose-600'
-                    : 'text-slate-900'
+                    ? 'text-danger'
+                    : 'text-ink'
                 }`}
               >
                 {balance.projectedBalance ? formatMoney(balance.projectedBalance, currency) : '—'}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-ink-muted">
                 {balance.currentBalance
                   ? `Hiện tại ${formatMoney(balance.currentBalance, currency)} + thu nhập còn lại − chi tiêu còn lại`
                   : 'Chưa có số dư khả dụng.'}
@@ -456,14 +457,14 @@ export function AnalyticsForecastPanel({
             <SeriesChart
               series={data.income}
               title="Thu nhập: thực tế và dự báo"
-              color="#059669"
+              color={chartTheme.series.income}
               currency={currency}
               horizonLabel={horizonLabel}
             />
             <SeriesChart
               series={data.expense}
               title="Chi tiêu: thực tế và dự báo"
-              color="#e11d48"
+              color={chartTheme.forecast.expense}
               currency={currency}
               horizonLabel={horizonLabel}
             />
@@ -476,19 +477,17 @@ export function AnalyticsForecastPanel({
 
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             <div>
-              <h3 className="mb-2 text-sm font-semibold text-slate-800">Giá trị theo tháng</h3>
+              <h3 className="mb-2 text-sm font-semibold text-ink">Giá trị theo tháng</h3>
               <ForecastTable income={data.income} expense={data.expense} currency={currency} />
             </div>
             <div>
-              <h3 className="mb-2 text-sm font-semibold text-slate-800">
-                Dự báo chi tiêu theo danh mục
-              </h3>
+              <h3 className="mb-2 text-sm font-semibold text-ink">Dự báo chi tiêu theo danh mục</h3>
               <CategoryTable categories={data.categoryForecasts} currency={currency} />
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-            <p className="font-medium text-slate-700">Cách tính số dư cuối tháng</p>
+          <div className="mt-4 rounded-xl border border-line bg-surface-muted p-3 text-xs text-ink-secondary">
+            <p className="font-medium text-ink-secondary">Cách tính số dư cuối tháng</p>
             <p className="mt-1">
               Số dư hiện tại = số dư ban đầu của {balance.accountsIncluded} tài khoản (gồm{' '}
               {balance.accountsArchived} tài khoản đã lưu trữ) cộng mọi giao dịch đã ghi nhận. Giao
@@ -506,8 +505,8 @@ export function AnalyticsForecastPanel({
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <div>
-          <h3 className="text-sm font-semibold text-slate-800">Chất lượng dữ liệu</h3>
-          <ul className="mt-1 space-y-1 text-xs text-slate-600">
+          <h3 className="text-sm font-semibold text-ink">Chất lượng dữ liệu</h3>
+          <ul className="mt-1 space-y-1 text-xs text-ink-secondary">
             <li>
               {data.dataQuality.monthsWithData}/{data.dataQuality.completeMonthsConsidered} tháng đã
               kết thúc có dữ liệu ({data.dataQuality.continuityPercent}% liên tục).
@@ -531,8 +530,8 @@ export function AnalyticsForecastPanel({
           </ul>
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-slate-800">Giả định &amp; giới hạn</h3>
-          <ul className="mt-1 list-disc space-y-1 pl-4 text-xs text-slate-600">
+          <h3 className="text-sm font-semibold text-ink">Giả định &amp; giới hạn</h3>
+          <ul className="mt-1 list-disc space-y-1 pl-4 text-xs text-ink-secondary">
             {[...data.assumptions, ...data.limitations].map((line) => (
               <li key={line}>{line}</li>
             ))}

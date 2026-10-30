@@ -15,7 +15,7 @@ import type {
 } from '@smart-finance/shared-types';
 import { ArrowDownLeft, ArrowUpRight, PiggyBank, Receipt, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AnalyticsAiPanel } from '../components/AnalyticsAiPanel';
 import { AnalyticsBreakdownPanel } from '../components/AnalyticsBreakdownPanel';
 import { AnalyticsBudgetPanel } from '../components/AnalyticsBudgetPanel';
@@ -24,7 +24,15 @@ import { AnalyticsComparisonPanel } from '../components/AnalyticsComparisonPanel
 import { AnalyticsForecastPanel } from '../components/AnalyticsForecastPanel';
 import { AnalyticsHealthPanel } from '../components/AnalyticsHealthPanel';
 import { AnalyticsTrendCharts } from '../components/AnalyticsTrendCharts';
-import { Badge, EmptyState, ErrorAlert, PageHeader, Spinner, StatCard } from '../components/ui';
+import {
+  Badge,
+  EmptyState,
+  ErrorAlert,
+  PageHeader,
+  Skeleton,
+  StatCard,
+  TabBar,
+} from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { api, errorMessage } from '../lib/api';
 import { currentMonthRange, todayInTimeZone } from '../lib/date';
@@ -32,6 +40,7 @@ import { formatMoney, formatPercent } from '../lib/format';
 
 type PeriodKind = 'month' | 'quarter' | 'year' | 'custom';
 type PeriodStatus = 'in_progress' | 'complete';
+type AnalyticsTab = 'overview' | 'categories' | 'trends' | 'ai';
 
 const KIND_OPTIONS: Array<{ value: PeriodKind; label: string }> = [
   { value: 'month', label: 'Theo tháng' },
@@ -41,6 +50,18 @@ const KIND_OPTIONS: Array<{ value: PeriodKind; label: string }> = [
 ];
 
 const MONTH_OPTIONS = [3, 6, 12, 24];
+
+const TAB_OPTIONS: Array<{ value: AnalyticsTab; label: string }> = [
+  { value: 'overview', label: 'Tổng quan' },
+  { value: 'categories', label: 'Danh mục' },
+  { value: 'trends', label: 'Xu hướng' },
+  { value: 'ai', label: 'Phân tích AI' },
+];
+
+function parseTab(value: string | null): AnalyticsTab {
+  if (value === 'categories' || value === 'trends' || value === 'ai') return value;
+  return 'overview';
+}
 
 function pad(value: number): string {
   return String(value).padStart(2, '0');
@@ -100,6 +121,9 @@ export function AnalyticsPage() {
   const timezone = user?.timezone ?? 'Asia/Ho_Chi_Minh';
   const defaultCurrency = (user?.defaultCurrency ?? 'VND').toUpperCase();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = parseTab(searchParams.get('tab'));
+
   const initial = currentMonthRange(timezone);
   const [kind, setKind] = useState<PeriodKind>('month');
   const [month, setMonth] = useState(initial.month);
@@ -116,6 +140,11 @@ export function AnalyticsPage() {
   const [categoryType, setCategoryType] = useState<'EXPENSE' | 'INCOME'>('EXPENSE');
   const [categoryId, setCategoryId] = useState('');
   const [forecastHorizon, setForecastHorizon] = useState<ForecastHorizon>('current_month');
+
+  const onOverview = activeTab === 'overview';
+  const onCategories = activeTab === 'categories';
+  const onTrends = activeTab === 'trends';
+  const onAi = activeTab === 'ai';
 
   const currentMonth = todayInTimeZone(timezone).slice(0, 7);
   const customInvalid = kind === 'custom' && (!from || !to || from > to);
@@ -150,6 +179,9 @@ export function AnalyticsPage() {
   const healthParams = new URLSearchParams({ currency }).toString();
   const healthHistoryParams = new URLSearchParams({ currency, months: '6' }).toString();
 
+  // The overview is also the page shell: it supplies the period label and the
+  // list of currencies for the shared filter. Every other query is enabled only
+  // by the tab that renders it, so an unopened tab makes no request.
   const overviewQuery = useQuery({
     queryKey: ['analytics', 'overview', periodParams],
     queryFn: () => api.get<AnalyticsOverviewDto>(`/analytics/overview?${periodParams}`),
@@ -158,46 +190,48 @@ export function AnalyticsPage() {
   const trendsQuery = useQuery({
     queryKey: ['analytics', 'trends', rangeParams],
     queryFn: () => api.get<AnalyticsTrendsDto>(`/analytics/trends?${rangeParams}`),
-    enabled: !customInvalid,
+    enabled: !customInvalid && onTrends,
   });
   const incomeQuery = useQuery({
     queryKey: ['analytics', 'income', rangeParams],
     queryFn: () => api.get<AnalyticsIncomeDto>(`/analytics/income?${rangeParams}`),
-    enabled: !customInvalid,
+    enabled: !customInvalid && onCategories,
   });
   const expenseQuery = useQuery({
     queryKey: ['analytics', 'expenses', rangeParams],
     queryFn: () => api.get<AnalyticsExpenseDto>(`/analytics/expenses?${rangeParams}`),
-    enabled: !customInvalid,
+    enabled: !customInvalid && onCategories,
   });
   const comparisonQuery = useQuery({
     queryKey: ['analytics', 'period-comparison', periodParams],
     queryFn: () =>
       api.get<AnalyticsPeriodComparisonDto>(`/analytics/period-comparison?${periodParams}`),
-    enabled: !customInvalid,
+    enabled: !customInvalid && onOverview,
   });
   const categoriesQuery = useQuery({
     queryKey: ['analytics', 'categories', categoriesQueryKey],
     queryFn: () => api.get<AnalyticsCategoriesDto>(`/analytics/categories?${categoriesQueryKey}`),
-    enabled: !customInvalid,
+    enabled: !customInvalid && onCategories,
   });
   const budgetsQuery = useQuery({
     queryKey: ['analytics', 'budgets', budgetParams],
     queryFn: () => api.get<AnalyticsBudgetsDto>(`/analytics/budgets?${budgetParams}`),
-    enabled: !customInvalid,
+    enabled: !customInvalid && onCategories,
   });
   const budgetPaceQuery = useQuery({
     queryKey: ['analytics', 'budget-pace', budgetParams],
     queryFn: () => api.get<AnalyticsBudgetPaceDto>(`/analytics/budget-pace?${budgetParams}`),
-    enabled: !customInvalid,
+    enabled: !customInvalid && onCategories,
   });
   const forecastQuery = useQuery({
     queryKey: ['analytics', 'forecast', forecastParams],
     queryFn: () => api.get<AnalyticsForecastDto>(`/analytics/forecast?${forecastParams}`),
+    enabled: onTrends,
   });
   const healthQuery = useQuery({
     queryKey: ['analytics', 'financial-health', healthParams],
     queryFn: () => api.get<FinancialHealthDto>(`/analytics/financial-health?${healthParams}`),
+    enabled: onOverview,
   });
   const healthHistoryQuery = useQuery({
     queryKey: ['analytics', 'financial-health-history', healthHistoryParams],
@@ -205,25 +239,31 @@ export function AnalyticsPage() {
       api.get<FinancialHealthHistoryDto>(
         `/analytics/financial-health/history?${healthHistoryParams}`,
       ),
+    enabled: onOverview,
   });
 
-  const queries = [
-    overviewQuery,
-    trendsQuery,
+  const overviewQueries = [overviewQuery, comparisonQuery, healthQuery, healthHistoryQuery];
+  const categoryQueries = [
+    categoriesQuery,
     incomeQuery,
     expenseQuery,
-    comparisonQuery,
-    categoriesQuery,
     budgetsQuery,
     budgetPaceQuery,
-    forecastQuery,
-    healthQuery,
-    healthHistoryQuery,
   ];
-  const loading = queries.some((query) => query.isLoading);
-  const failure = queries.find((query) => query.error)?.error;
+  const trendQueries = [trendsQuery, forecastQuery];
+
+  const activeQueries = onOverview
+    ? overviewQueries
+    : onCategories
+      ? categoryQueries
+      : onTrends
+        ? trendQueries
+        : [];
+
+  const loading = activeQueries.some((query) => query.isLoading);
+  const failure = activeQueries.find((query) => query.error)?.error;
   const retry = () => {
-    for (const query of queries) void query.refetch();
+    for (const query of activeQueries) void query.refetch();
   };
 
   const overview = overviewQuery.data;
@@ -249,6 +289,13 @@ export function AnalyticsPage() {
   const noData =
     overview !== undefined && !overview.hasTransactions && !overview.previous.hasTransactions;
 
+  function changeTab(tab: AnalyticsTab) {
+    const next = new URLSearchParams(searchParams);
+    if (tab === 'overview') next.delete('tab');
+    else next.set('tab', tab);
+    setSearchParams(next);
+  }
+
   return (
     <div>
       <PageHeader
@@ -256,7 +303,7 @@ export function AnalyticsPage() {
         description="Phân tích dữ liệu giao dịch đã ghi nhận, tách riêng từng loại tiền tệ và theo múi giờ tài khoản."
       />
 
-      <section className="card mb-4" aria-label="Bộ lọc phân tích">
+      <section className="filter-bar" aria-label="Bộ lọc phân tích">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label className="label" htmlFor="analyticsPeriod">
@@ -376,47 +423,51 @@ export function AnalyticsPage() {
             </select>
           </div>
 
-          <div>
-            <label className="label" htmlFor="analyticsCategoryType">
-              Danh mục thu / chi
-            </label>
-            <select
-              id="analyticsCategoryType"
-              className="input"
-              value={categoryType}
-              onChange={(event) => {
-                setCategoryType(event.target.value as 'EXPENSE' | 'INCOME');
-                setCategoryId('');
-              }}
-            >
-              <option value="EXPENSE">Chi tiêu</option>
-              <option value="INCOME">Thu nhập</option>
-            </select>
-          </div>
+          {onCategories ? (
+            <div>
+              <label className="label" htmlFor="analyticsCategoryType">
+                Danh mục thu / chi
+              </label>
+              <select
+                id="analyticsCategoryType"
+                className="input"
+                value={categoryType}
+                onChange={(event) => {
+                  setCategoryType(event.target.value as 'EXPENSE' | 'INCOME');
+                  setCategoryId('');
+                }}
+              >
+                <option value="EXPENSE">Chi tiêu</option>
+                <option value="INCOME">Thu nhập</option>
+              </select>
+            </div>
+          ) : null}
 
-          <div>
-            <label className="label" htmlFor="analyticsRange">
-              Khoảng biểu đồ & phân tích tháng
-            </label>
-            <select
-              id="analyticsRange"
-              className="input"
-              value={months}
-              onChange={(event) => setMonths(Number(event.target.value))}
-            >
-              {MONTH_OPTIONS.map((count) => (
-                <option key={count} value={count}>
-                  {count} tháng
-                </option>
-              ))}
-            </select>
-          </div>
+          {onCategories || onTrends ? (
+            <div>
+              <label className="label" htmlFor="analyticsRange">
+                Khoảng biểu đồ & phân tích tháng
+              </label>
+              <select
+                id="analyticsRange"
+                className="input"
+                value={months}
+                onChange={(event) => setMonths(Number(event.target.value))}
+              >
+                {MONTH_OPTIONS.map((count) => (
+                  <option key={count} value={count}>
+                    {count} tháng
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
           {period ? (
             <>
-              <span className="text-slate-700">
+              <span className="text-ink-secondary">
                 Kỳ {period.label} ({period.from} → {period.to})
               </span>
               <PeriodBadge status={period.status} label="Kỳ hiện tại" />
@@ -424,153 +475,176 @@ export function AnalyticsPage() {
           ) : null}
           <span>
             · {trends?.rangeMonths ?? months} tháng gần nhất tính đến {anchor} · ngân sách tháng{' '}
-            {anchor} · <span className="font-medium text-slate-700">{currency}</span>
+            {anchor} · <span className="font-medium text-ink-secondary">{currency}</span>
           </span>
         </div>
 
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-ink-muted">
           Chỉ giao dịch thu nhập và chi tiêu được tính; giao dịch chuyển tiền nội bộ bị loại trừ và
           không có quy đổi tỷ giá giữa các loại tiền. Tháng không có giao dịch được hiển thị là
           &ldquo;không có dữ liệu&rdquo;, khác với tháng có giao dịch nhưng bằng 0.
         </p>
       </section>
 
+      <TabBar
+        label="Khu vực phân tích"
+        tabs={TAB_OPTIONS}
+        value={activeTab}
+        onChange={changeTab}
+        idBase="analytics-tabs"
+        panelId="analytics-tabpanel"
+      />
+
       {customInvalid ? (
-        <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <p
+          className="mt-4 rounded-xl border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong"
+          role="status"
+        >
           Khoảng ngày chưa hợp lệ: &ldquo;Từ ngày&rdquo; phải trước hoặc bằng &ldquo;Đến
           ngày&rdquo;.
         </p>
       ) : null}
 
-      {loading ? (
-        <Spinner label="Đang tính toán xu hướng..." />
-      ) : failure ? (
-        <ErrorAlert message={errorMessage(failure)} onRetry={retry} />
-      ) : overview &&
-        trends &&
-        income &&
-        expense &&
-        comparison &&
-        categories &&
-        budgets &&
-        budgetPace &&
-        forecast &&
-        health &&
-        healthHistory ? (
-        <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            <StatCard
-              label="Thu nhập"
-              value={formatMoney(overview.income, currency)}
-              icon={<ArrowDownLeft className="h-5 w-5 text-emerald-600" />}
-              hint={
-                <>
-                  Kỳ trước: {formatMoney(overview.previous.income, currency)} (
-                  {formatPercent(overview.changes.income.percent)})
-                </>
-              }
-            />
-            <StatCard
-              label="Chi tiêu"
-              value={formatMoney(overview.expense, currency)}
-              icon={<ArrowUpRight className="h-5 w-5 text-rose-500" />}
-              hint={
-                <>
-                  Kỳ trước: {formatMoney(overview.previous.expense, currency)} (
-                  {formatPercent(overview.changes.expense.percent)})
-                </>
-              }
-            />
-            <StatCard
-              label="Dòng tiền ròng"
-              value={formatMoney(overview.net, currency)}
-              icon={<Wallet className="h-5 w-5 text-sky-600" />}
-              valueClass={Number(overview.net) < 0 ? 'text-rose-600' : 'text-emerald-700'}
-              hint={
-                <>
-                  Chênh lệch: {Number(overview.changes.net.amount) > 0 ? '+' : ''}
-                  {formatMoney(overview.changes.net.amount, currency)}
-                </>
-              }
-            />
-            <StatCard
-              label="Tỷ lệ tiết kiệm"
-              value={savingsRateLabel(overview.savingsRate)}
-              icon={<PiggyBank className="h-5 w-5 text-violet-500" />}
-              hint={
-                overview.savingsRate === null
-                  ? 'Kỳ này chưa có thu nhập để tính tỷ lệ.'
-                  : `Kỳ trước: ${savingsRateLabel(overview.previous.savingsRate)}${
-                      overview.changes.savingsRatePoints === null
-                        ? ''
-                        : ` · ${overview.changes.savingsRatePoints > 0 ? '+' : ''}${overview.changes.savingsRatePoints.toFixed(1)} điểm %`
-                    }`
-              }
-            />
-            <StatCard
-              label="Số giao dịch"
-              value={overview.transactionCount.toLocaleString('vi-VN')}
-              icon={<Receipt className="h-5 w-5 text-slate-500" />}
-              hint={`Kỳ trước: ${overview.previous.transactionCount.toLocaleString('vi-VN')}`}
-            />
+      <div
+        id="analytics-tabpanel"
+        role="tabpanel"
+        aria-labelledby={`analytics-tabs-tab-${activeTab}`}
+        tabIndex={0}
+        className="mt-4 focus-visible:outline-none"
+      >
+        {loading ? (
+          <div role="status" aria-label="Đang tính toán xu hướng">
+            <p className="mb-3 text-sm text-ink-muted">Đang tính toán xu hướng...</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {Array.from({ length: 5 }, (_, index) => (
+                <Skeleton key={index} className="h-24" />
+              ))}
+            </div>
+            <Skeleton className="mt-4 h-80" />
           </div>
-
-          {noData ? (
-            <div className="mt-4">
-              <EmptyState
-                title={`Chưa có giao dịch thu hoặc chi trong kỳ ${period?.label ?? ''}`}
-                description="Chọn kỳ khác, đổi loại tiền tệ hoặc thêm giao dịch để xem xu hướng."
-                action={
-                  <Link to="/transactions/new" className="btn-primary">
-                    Thêm giao dịch
-                  </Link>
+        ) : failure ? (
+          <ErrorAlert message={errorMessage(failure)} onRetry={retry} />
+        ) : onOverview && overview && comparison && health && healthHistory ? (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              <StatCard
+                label="Thu nhập"
+                value={formatMoney(overview.income, currency)}
+                icon={<ArrowDownLeft className="h-5 w-5 text-income" />}
+                hint={
+                  <>
+                    Kỳ trước: {formatMoney(overview.previous.income, currency)} (
+                    {formatPercent(overview.changes.income.percent)})
+                  </>
                 }
               />
+              <StatCard
+                label="Chi tiêu"
+                value={formatMoney(overview.expense, currency)}
+                icon={<ArrowUpRight className="h-5 w-5 text-expense" />}
+                hint={
+                  <>
+                    Kỳ trước: {formatMoney(overview.previous.expense, currency)} (
+                    {formatPercent(overview.changes.expense.percent)})
+                  </>
+                }
+              />
+              <StatCard
+                label="Dòng tiền ròng"
+                value={formatMoney(overview.net, currency)}
+                icon={<Wallet className="h-5 w-5 text-info" />}
+                valueClass={Number(overview.net) < 0 ? 'text-danger' : 'text-brand-hover'}
+                hint={
+                  <>
+                    Chênh lệch: {Number(overview.changes.net.amount) > 0 ? '+' : ''}
+                    {formatMoney(overview.changes.net.amount, currency)}
+                  </>
+                }
+              />
+              <StatCard
+                label="Tỷ lệ tiết kiệm"
+                value={savingsRateLabel(overview.savingsRate)}
+                icon={<PiggyBank className="h-5 w-5 text-accent" />}
+                hint={
+                  overview.savingsRate === null
+                    ? 'Kỳ này chưa có thu nhập để tính tỷ lệ.'
+                    : `Kỳ trước: ${savingsRateLabel(overview.previous.savingsRate)}${
+                        overview.changes.savingsRatePoints === null
+                          ? ''
+                          : ` · ${overview.changes.savingsRatePoints > 0 ? '+' : ''}${overview.changes.savingsRatePoints.toFixed(1)} điểm %`
+                      }`
+                }
+              />
+              <StatCard
+                label="Số giao dịch"
+                value={overview.transactionCount.toLocaleString('vi-VN')}
+                icon={<Receipt className="h-5 w-5 text-ink-muted" />}
+                hint={`Kỳ trước: ${overview.previous.transactionCount.toLocaleString('vi-VN')}`}
+              />
             </div>
-          ) : null}
 
-          <AnalyticsTrendCharts data={trends} currency={currency} timezone={overview.timezone} />
+            {noData ? (
+              <div className="mt-4">
+                <EmptyState
+                  title={`Chưa có giao dịch thu hoặc chi trong kỳ ${period?.label ?? ''}`}
+                  description="Chọn kỳ khác, đổi loại tiền tệ hoặc thêm giao dịch để xem xu hướng."
+                  action={
+                    <Link to="/transactions/new" className="btn-primary">
+                      Thêm giao dịch
+                    </Link>
+                  }
+                />
+              </div>
+            ) : null}
 
-          <div className="mt-4 grid gap-4 xl:grid-cols-2">
-            <AnalyticsBreakdownPanel kind="income" data={income} currency={currency} />
-            <AnalyticsBreakdownPanel kind="expense" data={expense} currency={currency} />
-          </div>
+            <div className="mt-4">
+              <AnalyticsComparisonPanel data={comparison} currency={currency} />
+            </div>
 
-          <div className="mt-4">
-            <AnalyticsComparisonPanel data={comparison} currency={currency} />
-          </div>
+            <div className="mt-4">
+              <AnalyticsHealthPanel data={health} history={healthHistory} />
+            </div>
+          </>
+        ) : onCategories && categories && income && expense && budgets && budgetPace ? (
+          <>
+            <div className="grid gap-4 xl:grid-cols-2">
+              <AnalyticsBreakdownPanel kind="income" data={income} currency={currency} />
+              <AnalyticsBreakdownPanel kind="expense" data={expense} currency={currency} />
+            </div>
 
-          <div className="mt-4">
-            <AnalyticsCategoryPanel
-              data={categories}
+            <div className="mt-4">
+              <AnalyticsCategoryPanel
+                data={categories}
+                currency={currency}
+                selectedCategoryId={categoryId}
+                onSelectCategory={setCategoryId}
+              />
+            </div>
+
+            <div className="mt-4">
+              <AnalyticsBudgetPanel data={budgets} pace={budgetPace} currency={currency} />
+            </div>
+          </>
+        ) : onTrends && trends && forecast ? (
+          <>
+            <AnalyticsTrendCharts
+              data={trends}
               currency={currency}
-              selectedCategoryId={categoryId}
-              onSelectCategory={setCategoryId}
+              timezone={overview?.timezone ?? timezone}
             />
-          </div>
-
-          <div className="mt-4">
-            <AnalyticsBudgetPanel data={budgets} pace={budgetPace} currency={currency} />
-          </div>
-
-          <div className="mt-4">
-            <AnalyticsForecastPanel
-              data={forecast}
-              currency={currency}
-              horizon={forecastHorizon}
-              onHorizonChange={setForecastHorizon}
-            />
-          </div>
-
-          <div className="mt-4">
-            <AnalyticsHealthPanel data={health} history={healthHistory} />
-          </div>
-
-          <div className="mt-4">
-            <AnalyticsAiPanel currency={currency} />
-          </div>
-        </>
-      ) : null}
+            <div className="mt-4">
+              <AnalyticsForecastPanel
+                data={forecast}
+                currency={currency}
+                horizon={forecastHorizon}
+                onHorizonChange={setForecastHorizon}
+              />
+            </div>
+          </>
+        ) : onAi ? (
+          <AnalyticsAiPanel currency={currency} />
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -3,14 +3,24 @@ import type {
   AlertScanSummaryDto,
   PaginatedDto,
   SpendingAlertDto,
+  SpendingAlertSeverity,
   SpendingAlertStatus,
   SpendingAlertType,
 } from '@smart-finance/shared-types';
-import { RefreshCw } from 'lucide-react';
+import { Filter, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertDetail } from '../components/AlertDetail';
-import { Badge, cn, EmptyState, ErrorAlert, Modal, PageHeader, Spinner } from '../components/ui';
+import {
+  Badge,
+  cn,
+  EmptyState,
+  ErrorAlert,
+  Modal,
+  PageHeader,
+  Pagination,
+  Spinner,
+} from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { api, ApiError, errorMessage } from '../lib/api';
 import {
@@ -37,6 +47,16 @@ const STATUS_OPTIONS: SpendingAlertStatus[] = [
   'DISMISSED',
   'MARKED_NORMAL',
 ];
+
+/**
+ * Severity is the first thing a user needs when scanning the list, so it also
+ * drives the card accent. Status colours stay in the shared Badge.
+ */
+const SEVERITY_ACCENTS: Record<SpendingAlertSeverity, string> = {
+  HIGH: 'border-l-expense',
+  MEDIUM: 'border-l-warning',
+  LOW: 'border-l-line-strong',
+};
 
 function scanFailureMessage(error: unknown): string {
   if (error instanceof ApiError && (error.status === 429 || error.code === 'RATE_LIMITED')) {
@@ -67,31 +87,29 @@ function ScanSummary({ summary }: { summary: AlertScanSummaryDto }) {
   return (
     <section className="card mb-4" role="status" aria-live="polite">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="font-semibold text-slate-900">Kết quả quét</h2>
+        <h2 className="font-semibold text-ink">Kết quả quét</h2>
         <Badge tone={truncated ? 'amber' : 'emerald'}>
           {truncated ? 'Bị giới hạn' : 'Hoàn tất'}
         </Badge>
       </div>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm text-ink-secondary">
         Đã phát hiện {summary.detected} cảnh báo · Mới lưu {summary.created} · Đã có từ trước{' '}
         {summary.alreadyPresent}.
       </p>
-      <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
+      <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-secondary">
         {ALERT_TYPES.map((type) => (
           <li key={type}>
             {ALERT_TYPE_LABELS[type]}:{' '}
-            <span className="font-semibold text-slate-800">
-              {summary.detectedByType[type] ?? 0}
-            </span>
+            <span className="font-semibold text-ink">{summary.detectedByType[type] ?? 0}</span>
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm text-ink-secondary">
         Đã xét {summary.scannedTransactions} giao dịch trong {summary.window.currentDays} ngày của
         tháng {formatMonthLabel(summary.window.currentMonth)}.
       </p>
       {truncated ? (
-        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <div className="mt-3 rounded-xl border border-warning-border bg-warning-soft p-3 text-sm text-warning-strong">
           <p className="font-semibold">Lần quét này chưa đầy đủ.</p>
           <p className="mt-1">
             Một giới hạn xử lý đã bị chạm, nên chưa phải toàn bộ dữ liệu được kiểm tra:
@@ -118,6 +136,7 @@ export function AlertsPage() {
   const [status, setStatus] = useState<SpendingAlertStatus | ''>('');
   const [type, setType] = useState<SpendingAlertType | ''>('');
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(true);
   const [activeAlert, setActiveAlert] = useState<SpendingAlertDto | null>(null);
   const [scanSummary, setScanSummary] = useState<AlertScanSummaryDto | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
@@ -156,11 +175,20 @@ export function AlertsPage() {
     }
   }, [result, page]);
 
+  const filtersActive = status !== '' || type !== '';
+
   function resetFilters() {
     setStatus('');
     setType('');
     setPage(1);
   }
+
+  const filterSummary = [
+    status ? `Trạng thái: ${ALERT_STATUS_LABELS[status]}` : null,
+    type ? `Loại: ${ALERT_TYPE_LABELS[type]}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <div>
@@ -183,61 +211,91 @@ export function AlertsPage() {
         }
       />
 
-      <div className="card mb-4">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <label className="label" htmlFor="alertFilterStatus">
-              Trạng thái
-            </label>
-            <select
-              id="alertFilterStatus"
-              className="input"
-              value={status}
-              onChange={(event) => {
-                setStatus(event.target.value as SpendingAlertStatus | '');
-                setPage(1);
-              }}
-            >
-              <option value="">Tất cả</option>
-              {STATUS_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {ALERT_STATUS_LABELS[option]}
-                </option>
-              ))}
-            </select>
+      <section className="filter-bar" aria-label="Bộ lọc cảnh báo">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <Filter className="h-4 w-4 shrink-0 text-ink-muted" aria-hidden />
+            <h2 className="text-sm font-semibold text-ink">Bộ lọc</h2>
+            <span className="truncate text-xs text-ink-muted">
+              {filterSummary || 'Tất cả cảnh báo'}
+            </span>
           </div>
-          <div>
-            <label className="label" htmlFor="alertFilterType">
-              Loại cảnh báo
-            </label>
-            <select
-              id="alertFilterType"
-              className="input"
-              value={type}
-              onChange={(event) => {
-                setType(event.target.value as SpendingAlertType | '');
-                setPage(1);
-              }}
-            >
-              <option value="">Tất cả</option>
-              {ALERT_TYPES.map((option) => (
-                <option key={option} value={option}>
-                  {ALERT_TYPE_LABELS[option]}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="mt-3 flex justify-end">
           <button
             type="button"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900"
-            onClick={resetFilters}
+            className="btn-ghost btn-sm"
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen((open) => !open)}
           >
-            Xoá bộ lọc
+            {filtersOpen ? 'Thu gọn bộ lọc' : 'Mở bộ lọc'}
           </button>
         </div>
-      </div>
+
+        {filtersOpen ? (
+          <>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="label" htmlFor="alertFilterStatus">
+                  Trạng thái
+                </label>
+                <select
+                  id="alertFilterStatus"
+                  className="input"
+                  value={status}
+                  onChange={(event) => {
+                    setStatus(event.target.value as SpendingAlertStatus | '');
+                    setPage(1);
+                  }}
+                >
+                  <option value="">Tất cả</option>
+                  {STATUS_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {ALERT_STATUS_LABELS[option]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label" htmlFor="alertFilterType">
+                  Loại cảnh báo
+                </label>
+                <select
+                  id="alertFilterType"
+                  className="input"
+                  value={type}
+                  onChange={(event) => {
+                    setType(event.target.value as SpendingAlertType | '');
+                    setPage(1);
+                  }}
+                >
+                  <option value="">Tất cả</option>
+                  {ALERT_TYPES.map((option) => (
+                    <option key={option} value={option}>
+                      {ALERT_TYPE_LABELS[option]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs text-ink-muted">
+                <strong className="text-ink-secondary">Mới</strong> là chưa xử lý ·{' '}
+                <strong className="text-ink-secondary">Đã xem</strong> là bạn đã mở cảnh báo ·{' '}
+                <strong className="text-ink-secondary">Đã xử lý</strong> gồm “Bỏ qua” và “Bình
+                thường”.
+              </p>
+              {filtersActive ? (
+                <button
+                  type="button"
+                  className="text-sm font-medium text-ink-secondary hover:text-ink"
+                  onClick={resetFilters}
+                >
+                  Xoá bộ lọc
+                </button>
+              ) : null}
+            </div>
+          </>
+        ) : null}
+      </section>
 
       {scanError ? (
         <div className="mb-4">
@@ -266,15 +324,21 @@ export function AlertsPage() {
         />
       ) : (
         <>
-          <ul className="space-y-3">
+          <ul className="space-y-3" aria-label="Danh sách cảnh báo">
             {result?.items.map((alert) => (
-              <li key={alert.id} className="card">
-                <div className="flex flex-wrap items-start justify-between gap-3">
+              <li
+                key={alert.id}
+                className={cn(
+                  'min-w-0 overflow-hidden rounded-2xl border border-l-4 border-line bg-surface shadow-card',
+                  SEVERITY_ACCENTS[alert.severity],
+                )}
+              >
+                <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-slate-900">
+                      <h3 className="text-sm font-semibold text-ink">
                         {ALERT_TYPE_LABELS[alert.type]}
-                      </span>
+                      </h3>
                       <Badge tone={ALERT_SEVERITY_TONES[alert.severity]}>
                         {`Mức độ: ${ALERT_SEVERITY_LABELS[alert.severity]}`}
                       </Badge>
@@ -282,8 +346,10 @@ export function AlertsPage() {
                         {`Trạng thái: ${ALERT_STATUS_LABELS[alert.status]}`}
                       </Badge>
                     </div>
-                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">{alert.explanation}</p>
-                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                    <p className="mt-2 line-clamp-2 break-words text-sm text-ink-secondary">
+                      {alert.explanation}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
                       <span>Phát hiện: {formatDateTime(alert.createdAt, timezone)}</span>
                       {alert.categoryName ? <span>Danh mục: {alert.categoryName}</span> : null}
                       {alert.periodStart ? (
@@ -295,7 +361,7 @@ export function AlertsPage() {
                       {alert.transactionId ? (
                         <Link
                           to={`/transactions/${alert.transactionId}/edit`}
-                          className="font-medium text-emerald-700 hover:underline"
+                          className="font-medium text-brand hover:underline"
                         >
                           Xem giao dịch liên quan
                         </Link>
@@ -304,7 +370,7 @@ export function AlertsPage() {
                   </div>
                   <button
                     type="button"
-                    className="btn-secondary"
+                    className="btn-secondary w-full shrink-0 sm:w-auto"
                     onClick={() => setActiveAlert(alert)}
                     aria-label={`Xem chi tiết: ${ALERT_TYPE_LABELS[alert.type]} phát hiện ${formatDateTime(
                       alert.createdAt,
@@ -318,29 +384,15 @@ export function AlertsPage() {
             ))}
           </ul>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
-            <span>
-              Trang {result?.page} / {Math.max(result?.totalPages ?? 1, 1)} · {result?.total ?? 0}{' '}
-              cảnh báo
-            </span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className="btn-secondary py-1.5"
-                disabled={page <= 1}
-                onClick={() => setPage((value) => Math.max(1, value - 1))}
-              >
-                Trước
-              </button>
-              <button
-                type="button"
-                className="btn-secondary py-1.5"
-                disabled={page >= (result?.totalPages ?? 1)}
-                onClick={() => setPage((value) => value + 1)}
-              >
-                Sau
-              </button>
-            </div>
+          <div className="mt-4">
+            <Pagination
+              page={result?.page ?? page}
+              totalPages={result?.totalPages ?? 0}
+              total={result?.total ?? 0}
+              itemLabel="cảnh báo"
+              onPageChange={setPage}
+              disabled={alertsQuery.isFetching}
+            />
           </div>
         </>
       )}
@@ -349,6 +401,7 @@ export function AlertsPage() {
         open={activeAlert !== null}
         title="Chi tiết cảnh báo"
         onClose={() => setActiveAlert(null)}
+        size="lg"
       >
         {activeAlert ? (
           <AlertDetail

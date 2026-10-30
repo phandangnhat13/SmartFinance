@@ -18,7 +18,7 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { cn } from './ui';
@@ -206,7 +206,7 @@ function SidebarContent({
           )}
         >
           <span
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-slate-200 text-sm font-semibold text-ink-secondary"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-line text-sm font-semibold text-ink-secondary"
             aria-hidden
           >
             {user?.displayName?.slice(0, 1).toUpperCase() ?? '?'}
@@ -240,6 +240,7 @@ export function AppLayout() {
   const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(readCollapsed);
+  const drawerRef = useRef<HTMLElement>(null);
   const location = useLocation();
   const meta = pageMeta(location.pathname);
 
@@ -255,19 +256,46 @@ export function AppLayout() {
     });
   }
 
-  // The mobile navigation behaves like a dialog: Escape closes it and the page
-  // behind it does not scroll while it is open.
+  // The mobile navigation behaves like a dialog: Escape closes it, focus stays
+  // inside it while open, and the page behind it does not scroll.
   useEffect(() => {
     if (!mobileOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
+    const focusable = () =>
+      Array.from(
+        drawerRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      );
+    focusable()[0]?.focus();
+
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMobileOpen(false);
+      if (event.key === 'Escape') {
+        setMobileOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const items = focusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
     };
+
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus?.();
     };
   }, [mobileOpen]);
 
@@ -353,6 +381,8 @@ export function AppLayout() {
                 onClick={() => setMobileOpen(true)}
                 className="icon-btn lg:hidden"
                 aria-label="Mở menu"
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-navigation"
               >
                 <Menu className="h-5 w-5" />
               </button>
@@ -371,15 +401,17 @@ export function AppLayout() {
       {mobileOpen ? (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
-            className="absolute inset-0 bg-slate-900/40"
+            className="absolute inset-0 bg-ink/40"
             onClick={() => setMobileOpen(false)}
             role="presentation"
           />
           <aside
+            id="mobile-navigation"
+            ref={drawerRef}
             role="dialog"
             aria-modal="true"
             aria-label="Điều hướng"
-            className="absolute inset-y-0 left-0 w-72 max-w-[85%] bg-surface p-4 shadow-pop"
+            className="absolute inset-y-0 left-0 w-72 max-w-[85%] overflow-y-auto bg-surface p-4 shadow-pop"
           >
             <button
               type="button"

@@ -354,7 +354,7 @@ test('exposes the expenses slice and isolates the USD currency', async () => {
 });
 
 test('renders actual and forecast figures with explicit labels and data quality', async () => {
-  await page.goto('/analytics');
+  await page.goto('/analytics?tab=trends');
   const panel = page.getByRole('region', { name: 'Dự báo tài chính' });
   await expect(panel).toBeVisible();
 
@@ -373,7 +373,7 @@ test('renders actual and forecast figures with explicit labels and data quality'
 });
 
 test('re-requests the forecast when the horizon changes', async () => {
-  await page.goto('/analytics');
+  await page.goto('/analytics?tab=trends');
   const panel = page.getByRole('region', { name: 'Dự báo tài chính' });
   await expect(panel).toBeVisible();
 
@@ -396,7 +396,7 @@ test('re-requests the forecast when the horizon changes', async () => {
 });
 
 test('withholds the forecast for a user without complete months', async () => {
-  await pageB.goto('/analytics');
+  await pageB.goto('/analytics?tab=trends');
   const panel = pageB.getByRole('region', { name: 'Dự báo tài chính' });
   await expect(panel).toBeVisible();
 

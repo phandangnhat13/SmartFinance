@@ -253,7 +253,10 @@ describe('SavingsAssistantPanel — explanation', () => {
         'Kế hoạch tháng này phân bổ 2.375.000 ₫ trên 1 mục tiêu đang thực hiện.',
       ),
     ).toBeInTheDocument();
+    // Calculated figures and the fallback prose carry different labels, so a
+    // rule-based answer is never mistaken for a model answer.
     expect(screen.getByText('Hệ thống tính')).toBeInTheDocument();
+    expect(screen.getByText('Không dùng AI')).toBeInTheDocument();
     expect(screen.getByText(/AI đang tắt/)).toBeInTheDocument();
     expect(screen.getByText('20.000.000 ₫')).toBeInTheDocument();
     expect(screen.getByText('Du lịch')).toBeInTheDocument();

@@ -18,6 +18,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
   Badge,
+  ConfirmDialog,
   EmptyState,
   ErrorAlert,
   FieldError,
@@ -91,9 +92,9 @@ function StatusBadge({ goal }: { goal: GoalDto }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold text-slate-900">{value}</p>
+    <div className="rounded-xl bg-surface-muted p-3">
+      <p className="text-xs text-ink-muted">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold text-ink">{value}</p>
     </div>
   );
 }
@@ -115,6 +116,11 @@ export function GoalsPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<GoalDto | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    goal: GoalDto;
+    contribution: GoalContributionDto;
+  } | null>(null);
 
   const goalsQuery = useQuery({
     queryKey: ['goals', includeArchived],
@@ -363,14 +369,12 @@ export function GoalsPage() {
     }
   }
 
-  function confirmArchive(goal: GoalDto) {
-    if (window.confirm(`Lưu trữ mục tiêu "${goal.name}"?`)) archiveGoal.mutate(goal.id);
+  function requestArchive(goal: GoalDto) {
+    setArchiveTarget(goal);
   }
 
-  function confirmDeleteContribution(goal: GoalDto, contribution: GoalContributionDto) {
-    if (window.confirm(`Xóa khoản góp ${formatMoney(contribution.amount, goal.currency)}?`)) {
-      deleteContribution.mutate({ goalId: goal.id, contributionId: contribution.id });
-    }
+  function requestDeleteContribution(goal: GoalDto, contribution: GoalContributionDto) {
+    setDeleteTarget({ goal, contribution });
   }
 
   return (
@@ -387,7 +391,7 @@ export function GoalsPage() {
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         {currencies.length > 0 ? (
-          <label className="flex items-center gap-2 text-sm text-slate-600">
+          <label className="flex items-center gap-2 text-sm text-ink-secondary">
             <span>Tiền tệ</span>
             <select
               className="input w-auto"
@@ -403,12 +407,12 @@ export function GoalsPage() {
             </select>
           </label>
         ) : null}
-        <label className="ml-auto flex items-center gap-2 text-sm text-slate-600">
+        <label className="ml-auto flex items-center gap-2 text-sm text-ink-secondary">
           <input
             type="checkbox"
             checked={includeArchived}
             onChange={(event) => setIncludeArchived(event.target.checked)}
-            className="h-4 w-4 rounded border-slate-300"
+            className="h-4 w-4 rounded border-line-strong"
           />
           Hiện mục tiêu đã lưu trữ
         </label>
@@ -459,12 +463,12 @@ export function GoalsPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-700">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand">
                       <Target className="h-5 w-5" aria-hidden />
                     </span>
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-slate-900">{goal.name}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="truncate font-semibold text-ink">{goal.name}</p>
+                      <p className="text-xs text-ink-muted">
                         {goal.targetDate
                           ? `Hạn ${formatDate(goal.targetDate, timezone)}`
                           : 'Không đặt hạn'}
@@ -478,15 +482,15 @@ export function GoalsPage() {
                 </div>
 
                 {goal.description ? (
-                  <p className="mt-2 line-clamp-2 text-sm text-slate-600">{goal.description}</p>
+                  <p className="mt-2 line-clamp-2 text-sm text-ink-secondary">{goal.description}</p>
                 ) : null}
 
                 <div className="mt-4">
                   <div className="mb-1 flex flex-wrap items-baseline justify-between gap-1 text-sm">
-                    <span className="font-semibold text-slate-800">
+                    <span className="font-semibold text-ink">
                       {formatMoney(goal.savedAmount, goal.currency)}
                     </span>
-                    <span className="text-slate-500">
+                    <span className="text-ink-muted">
                       / {formatMoney(goal.targetAmount, goal.currency)}
                     </span>
                   </div>
@@ -500,35 +504,35 @@ export function GoalsPage() {
                           : 'amber'
                     }
                   />
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-ink-muted">
                     {Math.round(goal.percentage)}%
                     {goal.status !== 'COMPLETED'
                       ? ` · còn thiếu ${formatMoney(goal.remainingAmount, goal.currency)}`
                       : ' · đã hoàn thành'}
                   </p>
                   {goal.displayStatus === 'OVERDUE' ? (
-                    <p className="mt-1 text-xs font-medium text-rose-600">
+                    <p className="mt-1 text-xs font-medium text-expense">
                       Đã quá hạn
                       {goal.targetDate ? ` từ ${formatDate(goal.targetDate, timezone)}` : ''}.
                     </p>
                   ) : null}
                   {goal.displayStatus === 'PAUSED' ? (
-                    <p className="mt-1 text-xs text-amber-700">
+                    <p className="mt-1 text-xs text-warning-strong">
                       Đang tạm dừng nên không yêu cầu tiết kiệm thêm.
                     </p>
                   ) : null}
                   {goal.requiredMonthlySaving && Number(goal.requiredMonthlySaving) > 0 ? (
-                    <p className="mt-1 text-xs text-slate-600">
+                    <p className="mt-1 text-xs text-ink-secondary">
                       Cần tiết kiệm {formatMoney(goal.requiredMonthlySaving, goal.currency)}/tháng.
                     </p>
                   ) : null}
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-1 border-t border-slate-100 pt-3">
+                <div className="mt-3 flex flex-wrap items-center gap-1 border-t border-line pt-3">
                   <button
                     type="button"
                     onClick={() => openDetail(goal)}
-                    className="rounded-lg px-2 py-2 text-xs font-medium text-sky-700 hover:bg-sky-50"
+                    className="rounded-lg px-2 py-2 text-xs font-medium text-brand hover:bg-brand-soft"
                   >
                     Chi tiết
                   </button>
@@ -536,7 +540,7 @@ export function GoalsPage() {
                     type="button"
                     onClick={() => openContribution(goal)}
                     disabled={goal.status !== 'ACTIVE'}
-                    className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-40"
+                    className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium text-income hover:bg-brand-soft disabled:opacity-40"
                   >
                     <HandCoins className="h-4 w-4" aria-hidden /> Góp thêm
                   </button>
@@ -545,15 +549,15 @@ export function GoalsPage() {
                       <button
                         type="button"
                         onClick={() => openEdit(goal)}
-                        className="ml-auto rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                        className="ml-auto rounded-lg p-2 text-ink-muted hover:bg-surface-muted hover:text-ink"
                         aria-label={`Sửa ${goal.name}`}
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
                         type="button"
-                        onClick={() => confirmArchive(goal)}
-                        className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                        onClick={() => requestArchive(goal)}
+                        className="rounded-lg p-2 text-ink-muted hover:bg-surface-muted hover:text-ink"
                         aria-label={`Lưu trữ ${goal.name}`}
                       >
                         <Archive className="h-4 w-4" />
@@ -632,7 +636,7 @@ export function GoalsPage() {
                 ))}
               </select>
               {editing ? (
-                <p className="mt-1 text-xs text-slate-500">Không thể đổi tiền tệ sau khi tạo.</p>
+                <p className="mt-1 text-xs text-ink-muted">Không thể đổi tiền tệ sau khi tạo.</p>
               ) : null}
               <FieldError message={goalForm.formState.errors.currency?.message} />
             </div>
@@ -648,7 +652,7 @@ export function GoalsPage() {
                 {...goalForm.register('startDate')}
               />
               {editing && editing.contributions.length > 0 ? (
-                <p className="mt-1 text-xs text-slate-500">Đã khóa vì mục tiêu đã có khoản góp.</p>
+                <p className="mt-1 text-xs text-ink-muted">Đã khóa vì mục tiêu đã có khoản góp.</p>
               ) : null}
               <FieldError message={goalForm.formState.errors.startDate?.message} />
             </div>
@@ -666,7 +670,7 @@ export function GoalsPage() {
             </div>
           </div>
           {editing ? (
-            <p className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+            <p className="rounded-xl bg-surface-muted p-3 text-xs text-ink-secondary">
               Đã tiết kiệm {formatMoney(editing.savedAmount, editing.currency)}. Số tiền mục tiêu
               không được thấp hơn số này; thêm khoản góp bằng nút “Góp thêm”.
             </p>
@@ -709,7 +713,7 @@ export function GoalsPage() {
         >
           {formError ? <ErrorAlert message={formError} /> : null}
           {contributionTarget ? (
-            <p className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+            <p className="rounded-xl bg-surface-muted p-3 text-xs text-ink-secondary">
               Còn có thể góp{' '}
               {formatMoney(
                 Number(contributionTarget.goal.remainingAmount) +
@@ -771,7 +775,7 @@ export function GoalsPage() {
       </Modal>
 
       <Modal
-        open={detailGoal !== null}
+        open={detailGoal !== null && archiveTarget === null && deleteTarget === null}
         title={detailGoal ? detailGoal.name : 'Chi tiết mục tiêu'}
         onClose={closeDetail}
         footer={
@@ -825,7 +829,7 @@ export function GoalsPage() {
                 <button
                   type="button"
                   className="btn-secondary"
-                  onClick={() => confirmArchive(detailGoal)}
+                  onClick={() => requestArchive(detailGoal)}
                 >
                   <Archive className="h-4 w-4" aria-hidden /> Lưu trữ
                 </button>
@@ -839,17 +843,17 @@ export function GoalsPage() {
             {detailError ? <ErrorAlert message={detailError} /> : null}
             <div className="flex items-center justify-between gap-3">
               <StatusBadge goal={detailGoal} />
-              <span className="text-sm font-medium text-slate-600">{detailGoal.currency}</span>
+              <span className="text-sm font-medium text-ink-secondary">{detailGoal.currency}</span>
             </div>
             {detailGoal.description ? (
-              <p className="text-sm text-slate-600">{detailGoal.description}</p>
+              <p className="text-sm text-ink-secondary">{detailGoal.description}</p>
             ) : null}
             <div>
               <div className="mb-1 flex flex-wrap items-baseline justify-between gap-1 text-sm">
-                <span className="font-semibold text-slate-800">
+                <span className="font-semibold text-ink">
                   {formatMoney(detailGoal.savedAmount, detailGoal.currency)}
                 </span>
-                <span className="text-slate-500">
+                <span className="text-ink-muted">
                   / {formatMoney(detailGoal.targetAmount, detailGoal.currency)}
                 </span>
               </div>
@@ -892,39 +896,39 @@ export function GoalsPage() {
               <Stat label="Ngày bắt đầu" value={formatDate(detailGoal.startDate, timezone)} />
             </div>
             {detailGoal.displayStatus === 'OVERDUE' ? (
-              <p className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
+              <p className="rounded-xl border border-danger-border bg-danger-soft p-3 text-xs text-danger-strong">
                 Mục tiêu đã quá hạn nhưng vẫn đang thực hiện. Bạn có thể tiếp tục góp hoặc cập nhật
                 ngày đích.
               </p>
             ) : null}
             {detailGoal.displayStatus === 'PAUSED' ? (
-              <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+              <p className="rounded-xl border border-warning-border bg-warning-soft p-3 text-xs text-warning-strong">
                 Mục tiêu đang tạm dừng: không yêu cầu tiết kiệm thêm và không ghi nhận khoản góp
                 mới.
               </p>
             ) : null}
             {detailGoal.status === 'COMPLETED' ? (
-              <p className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+              <p className="rounded-xl border border-brand/30 bg-brand-soft p-3 text-xs text-brand-hover">
                 Mục tiêu đã hoàn thành nên không cần tiết kiệm thêm.
               </p>
             ) : null}
 
             <div>
-              <h3 className="mb-2 text-sm font-semibold text-slate-900">Các khoản đã góp</h3>
+              <h3 className="mb-2 text-sm font-semibold text-ink">Các khoản đã góp</h3>
               {detailGoal.contributions.length === 0 ? (
-                <p className="text-sm text-slate-500">Chưa ghi nhận khoản góp nào.</p>
+                <p className="text-sm text-ink-muted">Chưa ghi nhận khoản góp nào.</p>
               ) : (
-                <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+                <ul className="divide-y divide-line rounded-xl border border-line">
                   {detailGoal.contributions.map((contribution) => (
                     <li
                       key={contribution.id}
                       className="flex flex-wrap items-center justify-between gap-2 p-3"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-ink">
                           {formatMoney(contribution.amount, detailGoal.currency)}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-ink-muted">
                           {formatDate(contribution.contributedAt, timezone)}
                           {contribution.note ? ` · ${contribution.note}` : ''}
                         </p>
@@ -937,15 +941,15 @@ export function GoalsPage() {
                               openContribution(detailGoal, contribution);
                               closeDetail();
                             }}
-                            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                            className="rounded-lg p-2 text-ink-muted hover:bg-surface-muted hover:text-ink"
                             aria-label="Sửa khoản góp"
                           >
                             <Pencil className="h-4 w-4" />
                           </button>
                           <button
                             type="button"
-                            onClick={() => confirmDeleteContribution(detailGoal, contribution)}
-                            className="rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-700"
+                            onClick={() => requestDeleteContribution(detailGoal, contribution)}
+                            className="rounded-lg p-2 text-ink-muted hover:bg-expense/10 hover:text-expense"
                             aria-label="Xóa khoản góp"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -962,6 +966,63 @@ export function GoalsPage() {
           </div>
         ) : null}
       </Modal>
+
+      <ConfirmDialog
+        open={archiveTarget !== null}
+        title="Lưu trữ mục tiêu"
+        description={
+          archiveTarget ? (
+            <>
+              Mục tiêu <strong>{archiveTarget.name}</strong> sẽ được ẩn khỏi danh sách. Các khoản
+              góp đã ghi nhận vẫn được giữ lại và bạn có thể xem lại bằng mục “Hiện mục tiêu đã lưu
+              trữ”.
+            </>
+          ) : null
+        }
+        confirmLabel="Lưu trữ"
+        tone="primary"
+        pending={archiveGoal.isPending}
+        onClose={() => {
+          if (!archiveGoal.isPending) setArchiveTarget(null);
+        }}
+        onConfirm={() => {
+          if (!archiveTarget || archiveGoal.isPending) return;
+          const id = archiveTarget.id;
+          setArchiveTarget(null);
+          archiveGoal.mutate(id);
+        }}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Xoá khoản góp"
+        description={
+          deleteTarget ? (
+            <>
+              Xoá khoản góp{' '}
+              <strong>
+                {formatMoney(deleteTarget.contribution.amount, deleteTarget.goal.currency)}
+              </strong>{' '}
+              khỏi mục tiêu “{deleteTarget.goal.name}”? Số tiết kiệm của mục tiêu sẽ giảm tương ứng.
+            </>
+          ) : null
+        }
+        confirmLabel="Xoá khoản góp"
+        tone="danger"
+        pending={deleteContribution.isPending}
+        onClose={() => {
+          if (!deleteContribution.isPending) setDeleteTarget(null);
+        }}
+        onConfirm={() => {
+          if (!deleteTarget || deleteContribution.isPending) return;
+          const target = deleteTarget;
+          setDeleteTarget(null);
+          deleteContribution.mutate({
+            goalId: target.goal.id,
+            contributionId: target.contribution.id,
+          });
+        }}
+      />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { chartTheme } from '../lib/chartTheme';
 import { formatDateOnly, formatMoney, formatMonthLabel, formatPercent } from '../lib/format';
 import { Badge, ProgressBar } from './ui';
 
@@ -49,9 +50,9 @@ function exhaustionText(item: BudgetAnalyticsItemDto): string {
 }
 
 function spentColor(item: BudgetAnalyticsItemDto): string {
-  if (item.status === 'EXCEEDED') return '#f43f5e';
-  if (item.status === 'WARNING') return '#f59e0b';
-  return '#059669';
+  if (item.status === 'EXCEEDED') return chartTheme.budget.exceeded;
+  if (item.status === 'WARNING') return chartTheme.budget.warning;
+  return chartTheme.budget.onTrack;
 }
 
 /**
@@ -79,10 +80,8 @@ export function AnalyticsBudgetPanel({
   return (
     <section className="card" aria-label="Ngân sách tháng">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold text-slate-900">
-          Ngân sách tháng {formatMonthLabel(data.month)}
-        </h2>
-        <p className="text-xs text-slate-500">
+        <h2 className="font-semibold text-ink">Ngân sách tháng {formatMonthLabel(data.month)}</h2>
+        <p className="text-xs text-ink-muted">
           {data.items.length} ngân sách · đơn vị {currency} · tính đến {formatDateOnly(data.asOf)}
         </p>
       </div>
@@ -96,11 +95,11 @@ export function AnalyticsBudgetPanel({
       </div>
 
       {data.items.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center">
-          <p className="font-medium text-slate-800">
+        <div className="mt-4 rounded-xl border border-dashed border-line-strong px-4 py-8 text-center">
+          <p className="font-medium text-ink">
             Chưa có ngân sách cho tháng {formatMonthLabel(data.month)}
           </p>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-ink-muted">
             Tạo ngân sách tháng để theo dõi hạn mức, tốc độ chi và ngày dự kiến dùng hết.
           </p>
           <Link to="/budgets" className="btn-primary mt-3 inline-flex">
@@ -109,16 +108,21 @@ export function AnalyticsBudgetPanel({
         </div>
       ) : (
         <>
-          <div className="mt-5 h-64 w-full border-t border-slate-100 pt-4">
-            <h3 className="text-sm font-semibold text-slate-800">Hạn mức và thực chi</h3>
+          <div className="mt-5 h-64 w-full border-t border-line pt-4">
+            <h3 className="text-sm font-semibold text-ink">Hạn mức và thực chi</h3>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 24 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
                 <XAxis type="number" tick={{ fontSize: 12 }} />
                 <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 12 }} />
                 <Tooltip formatter={(value: number) => formatMoney(value, currency)} />
                 <Legend />
-                <Bar dataKey="limit" name="Hạn mức" fill="#cbd5e1" isAnimationActive={false} />
+                <Bar
+                  dataKey="limit"
+                  name="Hạn mức"
+                  fill={chartTheme.budget.limit}
+                  isAnimationActive={false}
+                />
                 <Bar dataKey="spent" name="Đã chi" isAnimationActive={false}>
                   {chartData.map((entry, index) => (
                     <Cell key={`${entry.name}-${index}`} fill={spentColor(data.items[index])} />
@@ -128,22 +132,22 @@ export function AnalyticsBudgetPanel({
             </ResponsiveContainer>
           </div>
 
-          <ul className="mt-4 space-y-4 border-t border-slate-100 pt-4">
+          <ul className="mt-4 space-y-4 border-t border-line pt-4">
             {data.items.map((item) => {
               const meta = statusMeta[item.status];
               const itemPace = paceByBudget.get(item.id);
               const usage = item.usagePercent ?? 0;
               return (
-                <li key={item.id} className="rounded-xl border border-slate-200 p-3">
+                <li key={item.id} className="rounded-xl border border-line p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium text-slate-800">{item.name}</span>
+                      <span className="font-medium text-ink">{item.name}</span>
                       <Badge tone={meta.tone}>{meta.label}</Badge>
                       {item.categoryName ? (
-                        <span className="text-xs text-slate-500">· {item.categoryName}</span>
+                        <span className="text-xs text-ink-muted">· {item.categoryName}</span>
                       ) : null}
                     </div>
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="text-sm font-semibold text-ink">
                       {formatMoney(item.spent, currency)} /{' '}
                       {formatMoney(item.limitAmount, currency)}
                     </span>
@@ -162,7 +166,7 @@ export function AnalyticsBudgetPanel({
                     />
                   </div>
 
-                  <div className="mt-1 flex flex-wrap justify-between gap-2 text-xs text-slate-500">
+                  <div className="mt-1 flex flex-wrap justify-between gap-2 text-xs text-ink-muted">
                     <span>
                       {item.usagePercent === null
                         ? 'Không có hạn mức dương để tính tỷ lệ'
@@ -174,23 +178,23 @@ export function AnalyticsBudgetPanel({
                     </span>
                   </div>
 
-                  <div className="mt-2 grid gap-2 text-xs text-slate-600 sm:grid-cols-3">
+                  <div className="mt-2 grid gap-2 text-xs text-ink-secondary sm:grid-cols-3">
                     <p>
-                      <span className="text-slate-500">Mức chi tuyến tính đến hôm nay:</span>{' '}
+                      <span className="text-ink-muted">Mức chi tuyến tính đến hôm nay:</span>{' '}
                       {item.expectedSpend ? formatMoney(item.expectedSpend, currency) : '—'}
                     </p>
                     <p>
-                      <span className="text-slate-500">Chênh lệch so với mức tuyến tính:</span>{' '}
+                      <span className="text-ink-muted">Chênh lệch so với mức tuyến tính:</span>{' '}
                       {item.variance ? formatMoney(item.variance, currency) : '—'}
                     </p>
                     <p>
-                      <span className="text-slate-500">Tốc độ chi:</span>{' '}
+                      <span className="text-ink-muted">Tốc độ chi:</span>{' '}
                       {item.pacePercent === null ? '—' : formatPercent(item.pacePercent)} so với mức
                       tuyến tính
                     </p>
                   </div>
 
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-ink-muted">
                     {exhaustionText(item)}
                     {itemPace?.estimatedExhaustionDate
                       ? ' Đây là ước tính ngoại suy tuyến tính từ chi tiêu đã ghi nhận, không phải dự báo chắc chắn.'
@@ -203,7 +207,7 @@ export function AnalyticsBudgetPanel({
         </>
       )}
 
-      <p className="mt-3 text-xs text-slate-500">
+      <p className="mt-3 text-xs text-ink-muted">
         Ngân sách không lưu loại tiền tệ: hạn mức được đọc theo {currency} và chỉ chi tiêu cùng loại
         tiền được tính. Hệ thống không tự thay đổi ngân sách. Trạng thái dựa trên các ngưỡng cảnh
         báo của chính ngân sách (thấp nhất dưới 100%) và ngày kết thúc kỳ.

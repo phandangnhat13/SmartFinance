@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { ErrorAlert, FieldError, Modal, PageHeader } from '../components/ui';
+import { ErrorAlert, FieldError, Modal, PageHeader, PasswordInput } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { api, downloadFile, errorMessage } from '../lib/api';
 
@@ -44,6 +44,7 @@ export function SettingsPage() {
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileNotice, setProfileNotice] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -94,11 +95,15 @@ export function SettingsPage() {
   }
 
   async function handleExport() {
+    if (exporting) return;
     setExportError(null);
+    setExporting(true);
     try {
       await downloadFile('/users/me/export', 'smart-finance-data.json');
     } catch (error) {
       setExportError(errorMessage(error));
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -118,16 +123,27 @@ export function SettingsPage() {
         description="Thông tin hồ sơ, dữ liệu cá nhân và tuỳ chọn hiển thị."
       />
 
-      <section className="card mb-6">
-        <h2 className="font-semibold text-slate-900">Hồ sơ</h2>
-        <p className="mt-1 text-sm text-slate-500">Email đăng nhập: {user?.email}</p>
+      <section className="card mb-6" aria-labelledby="profile-heading">
+        <div className="card-header">
+          <div className="min-w-0">
+            <h2 id="profile-heading" className="card-title">
+              Hồ sơ
+            </h2>
+            <p className="mt-1 break-words text-sm text-ink-muted">
+              Email đăng nhập: {user?.email}
+            </p>
+          </div>
+        </div>
         {profileError ? (
           <div className="mt-4">
             <ErrorAlert message={profileError} />
           </div>
         ) : null}
         {profileNotice ? (
-          <p className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">
+          <p
+            role="status"
+            className="mt-4 rounded-xl border border-brand/30 bg-brand-soft p-3 text-sm text-brand-hover"
+          >
             {profileNotice}
           </p>
         ) : null}
@@ -135,27 +151,51 @@ export function SettingsPage() {
           className="mt-4 space-y-4"
           onSubmit={profileForm.handleSubmit(onSubmitProfile)}
           noValidate
+          aria-busy={profileForm.formState.isSubmitting}
         >
           <div>
             <label className="label" htmlFor="displayName">
               Tên hiển thị
             </label>
-            <input id="displayName" className="input" {...profileForm.register('displayName')} />
-            <FieldError message={profileForm.formState.errors.displayName?.message} />
+            <input
+              id="displayName"
+              autoComplete="name"
+              className="input"
+              aria-invalid={profileForm.formState.errors.displayName ? true : undefined}
+              aria-describedby={
+                profileForm.formState.errors.displayName ? 'displayName-error' : undefined
+              }
+              {...profileForm.register('displayName')}
+            />
+            <FieldError
+              id="displayName-error"
+              message={profileForm.formState.errors.displayName?.message}
+            />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="label" htmlFor="timezone">
                 Múi giờ
               </label>
-              <select id="timezone" className="input" {...profileForm.register('timezone')}>
+              <select
+                id="timezone"
+                className="input"
+                aria-invalid={profileForm.formState.errors.timezone ? true : undefined}
+                aria-describedby={
+                  profileForm.formState.errors.timezone ? 'timezone-error' : undefined
+                }
+                {...profileForm.register('timezone')}
+              >
                 {TIMEZONES.map((zone) => (
                   <option key={zone} value={zone}>
                     {zone}
                   </option>
                 ))}
               </select>
-              <FieldError message={profileForm.formState.errors.timezone?.message} />
+              <FieldError
+                id="timezone-error"
+                message={profileForm.formState.errors.timezone?.message}
+              />
             </div>
             <div>
               <label className="label" htmlFor="defaultCurrency">
@@ -164,6 +204,10 @@ export function SettingsPage() {
               <select
                 id="defaultCurrency"
                 className="input"
+                aria-invalid={profileForm.formState.errors.defaultCurrency ? true : undefined}
+                aria-describedby={
+                  profileForm.formState.errors.defaultCurrency ? 'defaultCurrency-error' : undefined
+                }
                 {...profileForm.register('defaultCurrency')}
               >
                 {CURRENCIES.map((currency) => (
@@ -172,21 +216,24 @@ export function SettingsPage() {
                   </option>
                 ))}
               </select>
-              <FieldError message={profileForm.formState.errors.defaultCurrency?.message} />
+              <FieldError
+                id="defaultCurrency-error"
+                message={profileForm.formState.errors.defaultCurrency?.message}
+              />
             </div>
           </div>
           <label
             htmlFor="allowAiResearch"
-            className="flex cursor-pointer items-start gap-3 rounded-xl bg-slate-50 p-4"
+            className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-surface-muted p-4 transition focus-within:ring-2 focus-within:ring-brand/50"
           >
             <input
               id="allowAiResearch"
               type="checkbox"
-              className="mt-0.5 h-4 w-4 rounded border-slate-300"
+              className="mt-0.5 h-4 w-4 rounded border-line-strong"
               {...profileForm.register('allowAiResearch')}
             />
-            <span className="text-sm text-slate-600">
-              <span className="font-medium text-slate-800">
+            <span className="text-sm text-ink-secondary">
+              <span className="font-medium text-ink">
                 Cho phép dùng phản hồi AI đã ẩn danh để cải thiện mô hình
               </span>
               <span className="mt-1 block">
@@ -208,26 +255,41 @@ export function SettingsPage() {
         </form>
       </section>
 
-      <section className="card mb-6">
-        <h2 className="font-semibold text-slate-900">Dữ liệu của bạn</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Tải xuống toàn bộ tài khoản, giao dịch, ngân sách và mục tiêu dưới dạng JSON.
-        </p>
+      <section className="card mb-6" aria-labelledby="data-heading">
+        <div className="card-header">
+          <div className="min-w-0">
+            <h2 id="data-heading" className="card-title">
+              Dữ liệu của bạn
+            </h2>
+            <p className="mt-1 text-sm text-ink-muted">
+              Tải xuống toàn bộ tài khoản, giao dịch, ngân sách và mục tiêu dưới dạng JSON.
+            </p>
+          </div>
+        </div>
         {exportError ? (
           <div className="mt-4">
             <ErrorAlert message={exportError} />
           </div>
         ) : null}
-        <button type="button" className="btn-secondary mt-4" onClick={() => void handleExport()}>
-          <Download className="h-4 w-4" aria-hidden /> Xuất dữ liệu JSON
+        <button
+          type="button"
+          className="btn-secondary mt-4"
+          onClick={() => void handleExport()}
+          disabled={exporting}
+        >
+          <Download className="h-4 w-4" aria-hidden />
+          {exporting ? 'Đang xuất...' : 'Xuất dữ liệu JSON'}
         </button>
       </section>
 
-      <section className="card border-rose-200">
-        <h2 className="flex items-center gap-2 font-semibold text-rose-700">
+      <section className="card border-danger-border" aria-labelledby="danger-heading">
+        <h2
+          id="danger-heading"
+          className="flex items-center gap-2 text-base font-semibold text-danger-strong"
+        >
           <AlertTriangle className="h-4 w-4" aria-hidden /> Vùng nguy hiểm
         </h2>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-ink-secondary">
           Xoá tài khoản sẽ xoá vĩnh viễn mọi giao dịch, ngân sách và mục tiêu. Không thể hoàn tác.
         </p>
         <button
@@ -243,27 +305,48 @@ export function SettingsPage() {
         </button>
       </section>
 
-      <Modal open={deleteOpen} title="Xác nhận xoá tài khoản" onClose={() => setDeleteOpen(false)}>
+      <Modal
+        open={deleteOpen}
+        title="Xác nhận xoá tài khoản"
+        onClose={() => {
+          if (deleteAccount.isPending) return;
+          setDeleteOpen(false);
+          setDeleteError(null);
+        }}
+      >
         <form className="space-y-4" onSubmit={deleteForm.handleSubmit(onSubmitDelete)} noValidate>
           {deleteError ? <ErrorAlert message={deleteError} /> : null}
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-ink-secondary">
             Hành động này không thể hoàn tác. Nhập mật khẩu hiện tại để xác nhận.
           </p>
           <div>
             <label className="label" htmlFor="deletePassword">
               Mật khẩu
             </label>
-            <input
+            <PasswordInput
               id="deletePassword"
-              type="password"
               autoComplete="current-password"
-              className="input"
+              aria-invalid={deleteForm.formState.errors.password ? true : undefined}
+              aria-describedby={
+                deleteForm.formState.errors.password ? 'deletePassword-error' : undefined
+              }
               {...deleteForm.register('password')}
             />
-            <FieldError message={deleteForm.formState.errors.password?.message} />
+            <FieldError
+              id="deletePassword-error"
+              message={deleteForm.formState.errors.password?.message}
+            />
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" className="btn-secondary" onClick={() => setDeleteOpen(false)}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                setDeleteOpen(false);
+                setDeleteError(null);
+              }}
+              disabled={deleteAccount.isPending}
+            >
               Huỷ
             </button>
             <button type="submit" className="btn-danger" disabled={deleteAccount.isPending}>

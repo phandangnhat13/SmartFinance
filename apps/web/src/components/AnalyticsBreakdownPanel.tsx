@@ -8,10 +8,10 @@ type Props =
 
 function Tile({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl bg-slate-50 px-3 py-2">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold text-slate-800">{value}</p>
-      {hint ? <p className="mt-0.5 text-xs text-slate-500">{hint}</p> : null}
+    <div className="rounded-xl bg-surface-muted px-3 py-2">
+      <p className="text-xs text-ink-muted">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold text-ink">{value}</p>
+      {hint ? <p className="mt-0.5 text-xs text-ink-muted">{hint}</p> : null}
     </div>
   );
 }
@@ -37,14 +37,17 @@ export function AnalyticsBreakdownPanel(props: Props) {
   return (
     <section className="card" aria-label={title}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold text-slate-900">{title}</h2>
-        <p className="text-xs text-slate-500">
+        <h2 className="font-semibold text-ink">{title}</h2>
+        <p className="text-xs text-ink-muted">
           {data.rangeMonths} tháng gần nhất · đơn vị {currency} · múi giờ {data.timezone}
         </p>
       </div>
 
       {noData ? (
-        <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600" role="status">
+        <p
+          className="mt-4 rounded-lg bg-surface-muted px-3 py-2 text-sm text-ink-secondary"
+          role="status"
+        >
           Không có giao dịch {isIncome ? 'thu nhập' : 'chi tiêu'} trong khoảng này.
         </p>
       ) : (
@@ -100,7 +103,7 @@ export function AnalyticsBreakdownPanel(props: Props) {
                 trước
               </caption>
               <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                <tr className="text-left text-xs uppercase tracking-wide text-ink-muted">
                   <th scope="col" className="py-2 pr-3 font-medium">
                     Tháng
                   </th>
@@ -112,28 +115,28 @@ export function AnalyticsBreakdownPanel(props: Props) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-line">
                 {data.points.map((point) => (
                   <tr key={point.month}>
-                    <th scope="row" className="py-2 pr-3 text-left font-medium text-slate-700">
+                    <th scope="row" className="py-2 pr-3 text-left font-medium text-ink-secondary">
                       {formatMonthLabel(point.month)}
                       {point.monthStatus === 'in_progress' ? (
-                        <span className="ml-1 text-xs font-normal text-slate-500">
+                        <span className="ml-1 text-xs font-normal text-ink-muted">
                           (đang diễn ra)
                         </span>
                       ) : null}
                     </th>
                     {point.hasTransactions ? (
                       <>
-                        <td className="py-2 pr-3 text-right text-slate-700">
+                        <td className="py-2 pr-3 text-right text-ink-secondary">
                           {formatMoney(point.amount, currency)}
                         </td>
-                        <td className="py-2 text-right text-slate-600">
+                        <td className="py-2 text-right text-ink-secondary">
                           {point.changePercent === null ? '—' : formatPercent(point.changePercent)}
                         </td>
                       </>
                     ) : (
-                      <td className="py-2 text-center text-slate-400" colSpan={2}>
+                      <td className="py-2 text-center text-ink-muted" colSpan={2}>
                         Không có dữ liệu
                       </td>
                     )}
@@ -146,10 +149,10 @@ export function AnalyticsBreakdownPanel(props: Props) {
       )}
 
       {props.kind === 'income' ? (
-        <div className="mt-5 border-t border-slate-100 pt-4">
-          <h3 className="text-sm font-semibold text-slate-800">Cơ cấu nguồn thu theo danh mục</h3>
+        <div className="mt-5 border-t border-line pt-4">
+          <h3 className="text-sm font-semibold text-ink">Cơ cấu nguồn thu theo danh mục</h3>
           {props.data.sources.length === 0 ? (
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-ink-muted">
               Chưa có thu nhập để phân chia theo danh mục.
             </p>
           ) : (
@@ -157,28 +160,28 @@ export function AnalyticsBreakdownPanel(props: Props) {
               {props.data.sources.map((source) => (
                 <li key={source.categoryId ?? 'uncategorised'}>
                   <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-                    <span className="font-medium text-slate-800">{source.categoryName}</span>
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-medium text-ink">{source.categoryName}</span>
+                    <span className="font-semibold text-ink">
                       {formatMoney(source.total, currency)}
                     </span>
                   </div>
                   <div className="mt-1.5">
                     <ProgressBar value={source.sharePercent} />
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-ink-muted">
                     {source.sharePercent.toFixed(1)}% tổng thu · {source.transactionCount} giao dịch
                   </p>
                 </li>
               ))}
             </ul>
           )}
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-ink-muted">
             Nguồn thu được nhóm theo danh mục bạn đã gán cho giao dịch; hệ thống không suy đoán
             nguồn thu từ mô tả hay số tiền.
           </p>
         </div>
       ) : (
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-ink-muted">
           Các chỉ số trên chỉ mô tả diễn biến số tiền chi tiêu trong khoảng đã chọn và không kết
           luận về thói quen chi tiêu của bạn.
         </p>

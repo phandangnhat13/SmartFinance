@@ -426,7 +426,7 @@ test('groups categories by id, keeps archived history and flags notable increase
   });
 
   // The page prints the same figures and the badges, not its own maths.
-  await page.goto('/analytics');
+  await page.goto('/analytics?tab=categories');
   const categoryPanel = page.locator('section[aria-label="Phân tích theo danh mục"]');
   await expect(categoryPanel).toBeVisible();
   await expect(categoryPanel).toContainText(foodCategoryName);
@@ -583,7 +583,7 @@ test('classifies budgets and reports pace without writing any data', async () =>
   expect(idsAfter).toEqual(idsBefore);
 
   // The page renders the statuses and pace wording from the API response.
-  await page.goto('/analytics');
+  await page.goto('/analytics?tab=categories');
   const budgetPanel = page.locator('section[aria-label="Ngân sách tháng"]');
   await expect(budgetPanel).toBeVisible();
   await expect(
@@ -608,7 +608,7 @@ test('classifies budgets and reports pace without writing any data', async () =>
 });
 
 test('switches category type and shows the empty budget state for a new user', async () => {
-  await page.goto('/analytics');
+  await page.goto('/analytics?tab=categories');
   const categoryPanel = page.locator('section[aria-label="Phân tích theo danh mục"]');
   await expect(categoryPanel).toContainText(foodCategoryName);
 
@@ -630,7 +630,7 @@ test('switches category type and shows the empty budget state for a new user', a
   await expect(categoryPanel.getByText(ARCHIVED_NAME, { exact: true })).toHaveCount(0);
 
   // The same analytics page is genuinely empty for a brand-new user.
-  await pageB.goto('/analytics');
+  await pageB.goto('/analytics?tab=categories');
   await expect(pageB.getByRole('heading', { name: 'Xu hướng thu nhập & chi tiêu' })).toBeVisible();
   const budgetPanelB = pageB.locator('section[aria-label="Ngân sách tháng"]');
   await expect(budgetPanelB).toBeVisible();

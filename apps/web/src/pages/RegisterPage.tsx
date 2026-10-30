@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { AuthLayout } from '../components/AuthLayout';
-import { ErrorAlert, FieldError } from '../components/ui';
+import { ErrorAlert, FieldError, PasswordInput } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { errorMessage } from '../lib/api';
 
@@ -54,8 +54,8 @@ export function RegisterPage() {
   return (
     <AuthLayout>
       <div className="card">
-        <h1 className="text-2xl font-bold text-slate-900">Tạo tài khoản</h1>
-        <p className="mt-1 text-sm text-slate-500">Bắt đầu theo dõi dòng tiền trong vài phút.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-ink">Tạo tài khoản</h1>
+        <p className="mt-1 text-sm text-ink-muted">Bắt đầu theo dõi dòng tiền trong vài phút.</p>
 
         {error ? (
           <div className="mt-4">
@@ -63,18 +63,27 @@ export function RegisterPage() {
           </div>
         ) : null}
 
-        <form className="mt-5 space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form
+          className="mt-5 space-y-4"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          aria-busy={isSubmitting}
+        >
           <div>
             <label className="label" htmlFor="displayName">
               Tên hiển thị
             </label>
             <input
               id="displayName"
+              autoComplete="name"
               className="input"
               placeholder="Nguyễn Văn An"
+              aria-invalid={errors.displayName ? true : undefined}
+              aria-describedby={errors.displayName ? 'displayName-error' : undefined}
+              disabled={isSubmitting}
               {...register('displayName')}
             />
-            <FieldError message={errors.displayName?.message} />
+            <FieldError id="displayName-error" message={errors.displayName?.message} />
           </div>
           <div>
             <label className="label" htmlFor="email">
@@ -86,45 +95,54 @@ export function RegisterPage() {
               autoComplete="email"
               className="input"
               placeholder="ban@example.com"
+              aria-invalid={errors.email ? true : undefined}
+              aria-describedby={errors.email ? 'email-error' : undefined}
+              disabled={isSubmitting}
               {...register('email')}
             />
-            <FieldError message={errors.email?.message} />
+            <FieldError id="email-error" message={errors.email?.message} />
           </div>
           <div>
             <label className="label" htmlFor="password">
               Mật khẩu
             </label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="new-password"
-              className="input"
               placeholder="Ít nhất 8 ký tự"
+              aria-invalid={errors.password ? true : undefined}
+              aria-describedby={errors.password ? 'password-error' : undefined}
+              disabled={isSubmitting}
               {...register('password')}
             />
-            <FieldError message={errors.password?.message} />
+            <FieldError id="password-error" message={errors.password?.message} />
           </div>
           <div>
             <label className="label" htmlFor="confirmPassword">
               Xác nhận mật khẩu
             </label>
-            <input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               autoComplete="new-password"
-              className="input"
+              placeholder="Nhập lại mật khẩu"
+              aria-invalid={errors.confirmPassword ? true : undefined}
+              aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
+              disabled={isSubmitting}
               {...register('confirmPassword')}
             />
-            <FieldError message={errors.confirmPassword?.message} />
+            <FieldError id="confirmPassword-error" message={errors.confirmPassword?.message} />
           </div>
           <button type="submit" className="btn-primary w-full" disabled={isSubmitting}>
             {isSubmitting ? 'Đang tạo tài khoản...' : 'Đăng ký'}
           </button>
         </form>
 
-        <p className="mt-5 text-center text-sm text-slate-500">
+        <p className="mt-5 text-center text-sm text-ink-muted">
           Đã có tài khoản?{' '}
-          <Link to="/login" className="font-semibold text-emerald-700 hover:underline">
+          <Link
+            to="/login"
+            className="font-semibold text-brand-hover underline-offset-2 hover:underline"
+          >
             Đăng nhập
           </Link>
         </p>

@@ -224,6 +224,8 @@ describe('AnalyticsAiPanel — summary', () => {
 
     const prose = within(screen.getByTestId('ai-analytics-summary-text'));
     expect(prose.getByText(/không thay thế số liệu chính thức/)).toBeInTheDocument();
+    // A rule-based fallback is labelled "Không dùng AI", never as model output.
+    expect(prose.getByText('Không dùng AI')).toBeInTheDocument();
     expect(prose.getByText(/AI đang tắt/)).toBeInTheDocument();
     expect(prose.getByText('Chỉ dựa trên dữ liệu đã ghi nhận.')).toBeInTheDocument();
     expect(

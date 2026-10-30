@@ -1,24 +1,27 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { BudgetProgressDto, CategoryDto } from '@smart-finance/shared-types';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Pencil, Plus, Trash2, Wallet } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
   Badge,
+  ConfirmDialog,
   EmptyState,
   ErrorAlert,
   FieldError,
   Modal,
   PageHeader,
   ProgressBar,
-  Spinner,
+  Skeleton,
+  StatCard,
 } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { api, errorMessage } from '../lib/api';
 import { currentMonthRange } from '../lib/date';
 import { formatMoney } from '../lib/format';
+import { useMediaQuery } from '../lib/useMediaQuery';
 
 const MONEY_REGEX = /^(?:0|[1-9]\d{0,14})(?:\.\d{1,2})?$/;
 
@@ -32,6 +35,20 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
+type StatusFilter = 'all' | BudgetProgressDto['status'];
+
+const STATUS_LABELS: Record<BudgetProgressDto['status'], string> = {
+  OK: 'Trong mức',
+  WARNING: 'Sắp chạm',
+  EXCEEDED: 'Vượt hạn mức',
+};
+
+const STATUS_FILTERS: Array<{ value: StatusFilter; label: string }> = [
+  { value: 'all', label: 'Tất cả trạng thái' },
+  { value: 'OK', label: 'Trong mức' },
+  { value: 'WARNING', label: 'Sắp chạm' },
+  { value: 'EXCEEDED', label: 'Vượt hạn mức' },
+];
 
 function parseThresholds(value: string): number[] {
   return value
@@ -40,17 +57,73 @@ function parseThresholds(value: string): number[] {
     .filter((value) => Number.isInteger(value) && value >= 1 && value <= 200);
 }
 
+function statusTone(status: BudgetProgressDto['status']): 'emerald' | 'amber' | 'rose' {
+  if (status === 'EXCEEDED') return 'rose';
+  if (status === 'WARNING') return 'amber';
+  return 'emerald';
+}
+
+function BudgetActions({
+  budget,
+  onEdit,
+  onDelete,
+}: {
+  budget: BudgetProgressDto;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex shrink-0 justify-end gap-1">
+      <button
+        type="button"
+        onClick={onEdit}
+        className="icon-btn"
+        aria-label={`Sửa ${budget.name}`}
+        title="Sửa"
+      >
+        <Pencil className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={onDelete}
+        className="icon-btn text-danger hover:bg-danger-soft"
+        aria-label={`Xoá ${budget.name}`}
+        title="Xoá"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function BudgetAlerts({ budget }: { budget: BudgetProgressDto }) {
+  if (budget.alerts.length === 0) return null;
+  return (
+    <ul className="mt-2 space-y-1 rounded-lg bg-warning-soft px-2.5 py-2 text-xs text-warning-strong">
+      {budget.alerts.map((alert) => (
+        <li key={`${alert.threshold}-${alert.message}`} className="flex gap-1.5">
+          <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
+          <span>{alert.message}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function BudgetsPage() {
   const { user } = useAuth();
   const timezone = user?.timezone ?? 'Asia/Ho_Chi_Minh';
   const defaultMonth = currentMonthRange(timezone).month;
   const queryClient = useQueryClient();
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const [month, setMonth] = useState(defaultMonth);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<BudgetProgressDto | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<BudgetProgressDto | null>(null);
 
   const budgetsQuery = useQuery({
     queryKey: ['budgets', month],
@@ -96,7 +169,10 @@ export function BudgetsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/budgets/${id}`),
-    onSuccess: invalidate,
+    onSuccess: async () => {
+      setDeleteTarget(null);
+      await invalidate();
+    },
     onError: (error) => setActionError(errorMessage(error)),
   });
 
@@ -131,6 +207,20 @@ export function BudgetsPage() {
   const budgets = budgetsQuery.data?.items ?? [];
   const currency = user?.defaultCurrency ?? 'VND';
 
+  const counts = {
+    OK: budgets.filter((budget) => budget.status === 'OK').length,
+    WARNING: budgets.filter((budget) => budget.status === 'WARNING').length,
+    EXCEEDED: budgets.filter((budget) => budget.status === 'EXCEEDED').length,
+  };
+  // Display-only sums of the amounts the API already returns for each budget.
+  const totalLimit = budgets.reduce((sum, budget) => sum + Number(budget.limitAmount), 0);
+  const totalSpent = budgets.reduce((sum, budget) => sum + Number(budget.spent), 0);
+  const totalRemaining = budgets.reduce((sum, budget) => sum + Number(budget.remaining), 0);
+  const needsAttention = counts.WARNING + counts.EXCEEDED;
+
+  const visibleBudgets =
+    statusFilter === 'all' ? budgets : budgets.filter((budget) => budget.status === statusFilter);
+
   return (
     <div>
       <PageHeader
@@ -143,18 +233,44 @@ export function BudgetsPage() {
         }
       />
 
-      <div className="card mb-4 flex flex-wrap items-center gap-3">
-        <label className="label mb-0" htmlFor="budgetMonth">
-          Tháng
-        </label>
-        <input
-          id="budgetMonth"
-          type="month"
-          className="input max-w-[180px]"
-          value={month}
-          onChange={(event) => setMonth(event.target.value || defaultMonth)}
-        />
-      </div>
+      <section className="card mb-4" aria-label="Bộ lọc ngân sách">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <label className="label" htmlFor="budgetMonth">
+              Tháng
+            </label>
+            <input
+              id="budgetMonth"
+              type="month"
+              className="input"
+              value={month}
+              onChange={(event) => setMonth(event.target.value || defaultMonth)}
+            />
+          </div>
+          <div>
+            <label className="label" htmlFor="budgetStatus">
+              Trạng thái
+            </label>
+            <select
+              id="budgetStatus"
+              className="input"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+            >
+              {STATUS_FILTERS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-end">
+            <p className="text-xs text-ink-muted">
+              {budgets.length} ngân sách trong tháng {month}
+            </p>
+          </div>
+        </div>
+      </section>
 
       {actionError ? (
         <div className="mb-4">
@@ -163,7 +279,15 @@ export function BudgetsPage() {
       ) : null}
 
       {budgetsQuery.isLoading ? (
-        <Spinner label="Đang tải ngân sách..." />
+        <div role="status" aria-label="Đang tải ngân sách">
+          <p className="sr-only">Đang tải ngân sách...</p>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="h-24" />
+            ))}
+          </div>
+          <Skeleton className="mt-4 h-72" />
+        </div>
       ) : budgetsQuery.error ? (
         <ErrorAlert
           message={errorMessage(budgetsQuery.error)}
@@ -180,78 +304,176 @@ export function BudgetsPage() {
           }
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {budgets.map((budget) => {
-            const tone =
-              budget.status === 'EXCEEDED'
-                ? 'rose'
-                : budget.status === 'WARNING'
-                  ? 'amber'
-                  : 'emerald';
-            return (
-              <article key={budget.id} className="card">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-slate-900">{budget.name}</p>
-                    <p className="text-xs text-slate-500">
-                      {budget.categoryName ?? 'Toàn bộ chi tiêu'} · {month}
-                    </p>
-                  </div>
-                  <Badge tone={tone}>
-                    {budget.status === 'EXCEEDED'
-                      ? 'Vượt hạn mức'
-                      : budget.status === 'WARNING'
-                        ? 'Sắp chạm'
-                        : 'Trong mức'}
-                  </Badge>
-                </div>
-                <div className="mt-4">
-                  <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="text-slate-600">
-                      Đã chi {formatMoney(budget.spent, currency)}
-                    </span>
-                    <span className="font-semibold text-slate-800">
-                      {Math.round(budget.percentage)}%
-                    </span>
-                  </div>
-                  <ProgressBar value={budget.percentage} tone={tone} />
-                  <p className="mt-1 text-xs text-slate-500">
-                    Hạn mức {formatMoney(budget.limitAmount, currency)} · còn lại{' '}
-                    {formatMoney(budget.remaining, currency)}
-                  </p>
-                </div>
-                {budget.alerts.length > 0 ? (
-                  <ul className="mt-3 space-y-1 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-                    {budget.alerts.map((alert) => (
-                      <li key={`${alert.threshold}-${alert.message}`}>{alert.message}</li>
-                    ))}
-                  </ul>
-                ) : null}
-                <div className="mt-3 flex justify-end gap-1 border-t border-slate-100 pt-3">
-                  <button
-                    type="button"
-                    onClick={() => openEdit(budget)}
-                    className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-                    aria-label={`Sửa ${budget.name}`}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (window.confirm(`Xoá ngân sách "${budget.name}"?`))
-                        deleteMutation.mutate(budget.id);
-                    }}
-                    className="rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
-                    aria-label={`Xoá ${budget.name}`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              label="Tổng hạn mức"
+              value={formatMoney(totalLimit, currency)}
+              icon={<Wallet className="h-5 w-5 text-brand" />}
+              hint={`${budgets.length} ngân sách · tháng ${month}`}
+            />
+            <StatCard label="Đã chi" value={formatMoney(totalSpent, currency)} />
+            <StatCard
+              label="Còn lại"
+              value={formatMoney(totalRemaining, currency)}
+              valueClass={totalRemaining < 0 ? 'text-danger' : 'text-brand-hover'}
+            />
+            <StatCard
+              label="Cần chú ý"
+              value={String(needsAttention)}
+              icon={<AlertTriangle className="h-5 w-5 text-warning" />}
+              hint={`${counts.EXCEEDED} vượt hạn mức · ${counts.WARNING} sắp chạm`}
+            />
+          </div>
+
+          <section className="mt-4" aria-label="Danh sách ngân sách">
+            <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="section-title">Danh sách ngân sách</h2>
+              <p className="text-xs text-ink-muted">
+                Hiển thị {visibleBudgets.length}/{budgets.length} ngân sách
+              </p>
+            </div>
+
+            {visibleBudgets.length === 0 ? (
+              <div className="card flex flex-wrap items-center justify-between gap-3 text-sm text-ink-secondary">
+                <p>Không có ngân sách ở trạng thái này trong tháng {month}.</p>
+                <button
+                  type="button"
+                  className="btn-secondary btn-sm"
+                  onClick={() => setStatusFilter('all')}
+                >
+                  Xoá bộ lọc
+                </button>
+              </div>
+            ) : isDesktop ? (
+              <div className="card overflow-x-auto p-0">
+                <table className="w-full min-w-[760px] text-sm">
+                  <caption className="sr-only">
+                    Ngân sách tháng {month}: hạn mức, đã chi, còn lại, tiến độ và trạng thái
+                  </caption>
+                  <thead>
+                    <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-ink-muted">
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        Ngân sách
+                      </th>
+                      <th scope="col" className="px-4 py-3 text-right font-medium">
+                        Hạn mức
+                      </th>
+                      <th scope="col" className="px-4 py-3 text-right font-medium">
+                        Đã chi
+                      </th>
+                      <th scope="col" className="px-4 py-3 text-right font-medium">
+                        Còn lại
+                      </th>
+                      <th scope="col" className="w-48 px-4 py-3 font-medium">
+                        Tiến độ
+                      </th>
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        Trạng thái
+                      </th>
+                      <th scope="col" className="px-4 py-3 text-right font-medium">
+                        Thao tác
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line">
+                    {visibleBudgets.map((budget) => {
+                      const tone = statusTone(budget.status);
+                      return (
+                        <tr key={budget.id} className="align-top hover:bg-surface-muted/60">
+                          <th scope="row" className="px-4 py-3 text-left font-medium text-ink">
+                            <span className="block">{budget.name}</span>
+                            <span className="block text-xs font-normal text-ink-muted">
+                              {budget.categoryName ?? 'Toàn bộ chi tiêu'}
+                            </span>
+                          </th>
+                          <td className="px-4 py-3 text-right text-ink-secondary">
+                            {formatMoney(budget.limitAmount, currency)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-ink">
+                            {formatMoney(budget.spent, currency)}
+                          </td>
+                          <td
+                            className={`px-4 py-3 text-right ${
+                              Number(budget.remaining) < 0 ? 'text-danger' : 'text-ink-secondary'
+                            }`}
+                          >
+                            {formatMoney(budget.remaining, currency)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <ProgressBar
+                                value={budget.percentage}
+                                tone={tone}
+                                label={`Tiến độ ${budget.name}`}
+                              />
+                              <span className="w-10 shrink-0 text-right text-xs text-ink-muted">
+                                {Math.round(budget.percentage)}%
+                              </span>
+                            </div>
+                            <BudgetAlerts budget={budget} />
+                          </td>
+                          <td className="px-4 py-3">
+                            <Badge tone={tone}>{STATUS_LABELS[budget.status]}</Badge>
+                          </td>
+                          <td className="px-4 py-3">
+                            <BudgetActions
+                              budget={budget}
+                              onEdit={() => openEdit(budget)}
+                              onDelete={() => setDeleteTarget(budget)}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {visibleBudgets.map((budget) => {
+                  const tone = statusTone(budget.status);
+                  return (
+                    <li key={budget.id} className="card">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold text-ink">{budget.name}</p>
+                          <p className="text-xs text-ink-muted">
+                            {budget.categoryName ?? 'Toàn bộ chi tiêu'} · {month}
+                          </p>
+                        </div>
+                        <Badge tone={tone}>{STATUS_LABELS[budget.status]}</Badge>
+                      </div>
+                      <div className="mt-4">
+                        <div className="mb-1 flex items-center justify-between text-sm">
+                          <span className="text-ink-secondary">
+                            Đã chi {formatMoney(budget.spent, currency)}
+                          </span>
+                          <span className="font-semibold text-ink">
+                            {Math.round(budget.percentage)}%
+                          </span>
+                        </div>
+                        <ProgressBar value={budget.percentage} tone={tone} />
+                        <p className="mt-1 text-xs text-ink-muted">
+                          Hạn mức {formatMoney(budget.limitAmount, currency)} · còn lại{' '}
+                          {formatMoney(budget.remaining, currency)}
+                        </p>
+                      </div>
+                      <BudgetAlerts budget={budget} />
+                      <div className="mt-3 flex justify-end border-t border-line pt-2">
+                        <BudgetActions
+                          budget={budget}
+                          onEdit={() => openEdit(budget)}
+                          onDelete={() => setDeleteTarget(budget)}
+                        />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        </>
       )}
 
       <Modal
@@ -333,6 +555,22 @@ export function BudgetsPage() {
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Xoá ngân sách"
+        description={
+          deleteTarget
+            ? `Ngân sách "${deleteTarget.name}" sẽ bị xoá khỏi tháng ${month}. Các giao dịch đã ghi không bị ảnh hưởng.`
+            : ''
+        }
+        confirmLabel="Xoá ngân sách"
+        pending={deleteMutation.isPending}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
+        }}
+      />
     </div>
   );
 }

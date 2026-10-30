@@ -19,6 +19,7 @@ import {
 import { Badge, ErrorAlert, ProgressBar } from './ui';
 import { GoalPlanSimulator } from './GoalPlanSimulator';
 import { api, errorMessage } from '../lib/api';
+import { chartTheme } from '../lib/chartTheme';
 import { formatDate, formatMoney } from '../lib/format';
 
 const HISTORY_MONTHS = 6;
@@ -35,10 +36,10 @@ const STATUS_TONES: Record<SavingsProgressStatus, 'emerald' | 'amber' | 'rose' |
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-900">{value}</p>
-      {hint ? <p className="mt-1 text-xs text-slate-500">{hint}</p> : null}
+    <div className="rounded-xl bg-surface-muted p-3">
+      <p className="text-xs text-ink-muted">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-ink">{value}</p>
+      {hint ? <p className="mt-1 text-xs text-ink-muted">{hint}</p> : null}
     </div>
   );
 }
@@ -75,7 +76,7 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
   const timezone = history?.timezone;
 
   if (progressQuery.isLoading) {
-    return <p className="text-sm text-slate-500">Đang tải tiến độ mục tiêu...</p>;
+    return <p className="text-sm text-ink-muted">Đang tải tiến độ mục tiêu...</p>;
   }
   if (progressQuery.error) {
     return (
@@ -102,9 +103,9 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
           <Badge tone={STATUS_TONES[progress.progressStatus]}>
             {SAVINGS_PROGRESS_STATUS_LABELS[progress.progressStatus]}
           </Badge>
-          <span className="text-xs text-slate-500">{progress.statusReason}</span>
+          <span className="text-xs text-ink-muted">{progress.statusReason}</span>
         </div>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-ink-muted">
           Hoàn thành {progress.completionPercentage}% kế hoạch
         </span>
       </div>
@@ -182,26 +183,26 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
         />
       </div>
 
-      <section className="rounded-xl border border-slate-200 p-4">
-        <h3 className="text-sm font-semibold text-slate-900">Thực tế so với kế hoạch</h3>
-        <p className="mt-1 text-xs text-slate-500">
+      <section className="rounded-xl border border-line p-4">
+        <h3 className="text-sm font-semibold text-ink">Thực tế so với kế hoạch</h3>
+        <p className="mt-1 text-xs text-ink-muted">
           Luỹ kế đã tiết kiệm so với mức kế hoạch tuyến tính, theo tháng lịch.
         </p>
         {chartData.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">Chưa có dữ liệu để vẽ biểu đồ.</p>
+          <p className="mt-3 text-sm text-ink-muted">Chưa có dữ liệu để vẽ biểu đồ.</p>
         ) : (
           <div className="mt-4 h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fontSize: 12, fill: '#64748b' }}
+                  tick={{ fontSize: 12, fill: chartTheme.axis.label }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  tick={{ fontSize: 11, fill: chartTheme.axis.tick }}
                   axisLine={false}
                   tickLine={false}
                   width={64}
@@ -218,7 +219,7 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
                   type="monotone"
                   dataKey="actual"
                   name="Thực tế"
-                  stroke="#059669"
+                  stroke={chartTheme.series.income}
                   strokeWidth={2}
                   dot={{ r: 3 }}
                 />
@@ -226,7 +227,7 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
                   type="monotone"
                   dataKey="expected"
                   name="Kỳ vọng"
-                  stroke="#64748b"
+                  stroke={chartTheme.axis.label}
                   strokeWidth={2}
                   strokeDasharray="5 4"
                   dot={false}
@@ -237,10 +238,10 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
         )}
       </section>
 
-      <section className="rounded-xl border border-slate-200 p-4">
-        <h3 className="text-sm font-semibold text-slate-900">Lịch sử góp</h3>
+      <section className="rounded-xl border border-line p-4">
+        <h3 className="text-sm font-semibold text-ink">Lịch sử góp</h3>
         {historyQuery.isLoading ? (
-          <p className="mt-2 text-sm text-slate-500">Đang tải lịch sử góp...</p>
+          <p className="mt-2 text-sm text-ink-muted">Đang tải lịch sử góp...</p>
         ) : historyQuery.error ? (
           <div className="mt-2">
             <ErrorAlert
@@ -256,7 +257,7 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
                   Số tiền đã góp theo từng tháng trong {HISTORY_MONTHS} tháng gần nhất
                 </caption>
                 <thead>
-                  <tr className="text-xs uppercase tracking-wide text-slate-500">
+                  <tr className="text-xs uppercase tracking-wide text-ink-muted">
                     <th scope="col" className="py-2 pr-3 text-left font-medium">
                       Tháng
                     </th>
@@ -273,15 +274,18 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
                 </thead>
                 <tbody>
                   {history.months.map((month) => (
-                    <tr key={month.month} className="border-t border-slate-100">
-                      <th scope="row" className="py-2 pr-3 text-left font-normal text-slate-600">
+                    <tr key={month.month} className="border-t border-line">
+                      <th
+                        scope="row"
+                        className="py-2 pr-3 text-left font-normal text-ink-secondary"
+                      >
                         {month.month}
                       </th>
-                      <td className="py-2 pr-3 text-right text-slate-600">{month.count}</td>
-                      <td className="py-2 pr-3 text-right text-slate-700">
+                      <td className="py-2 pr-3 text-right text-ink-secondary">{month.count}</td>
+                      <td className="py-2 pr-3 text-right text-ink-secondary">
                         {formatMoney(month.amount, history.currency)}
                       </td>
-                      <td className="py-2 text-right font-medium text-slate-900">
+                      <td className="py-2 text-right font-medium text-ink">
                         {formatMoney(month.cumulativeAmount, history.currency)}
                       </td>
                     </tr>
@@ -290,18 +294,18 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
               </table>
             </div>
             {history.totalCount === 0 ? (
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-ink-muted">
                 Chưa có khoản góp nào trong {HISTORY_MONTHS} tháng gần nhất.
               </p>
             ) : (
-              <ul className="divide-y divide-slate-100 text-sm">
+              <ul className="divide-y divide-line text-sm">
                 {history.items.slice(0, 8).map((item) => (
                   <li key={item.id} className="flex items-center justify-between gap-2 py-2">
-                    <span className="text-slate-600">
+                    <span className="text-ink-secondary">
                       {formatDate(item.contributedAt, timezone)}
-                      {item.note ? <span className="text-slate-400"> · {item.note}</span> : null}
+                      {item.note ? <span className="text-ink-muted"> · {item.note}</span> : null}
                     </span>
-                    <span className="font-medium text-slate-900">
+                    <span className="font-medium text-ink">
                       {formatMoney(item.amount, history.currency)}
                     </span>
                   </li>
@@ -309,7 +313,7 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
               </ul>
             )}
             {history.truncated ? (
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-ink-muted">
                 Chỉ hiển thị các khoản góp mới nhất; tổng số vẫn tính đủ.
               </p>
             ) : null}
@@ -318,7 +322,7 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
       </section>
 
       {isArchived ? (
-        <p className="rounded-xl bg-slate-50 p-3 text-xs text-slate-500">
+        <p className="rounded-xl bg-surface-muted p-3 text-xs text-ink-muted">
           Mục tiêu đã lưu trữ nên không thể mô phỏng hay điều chỉnh kế hoạch.
         </p>
       ) : timezone ? (

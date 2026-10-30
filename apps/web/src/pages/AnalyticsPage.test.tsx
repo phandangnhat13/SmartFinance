@@ -802,15 +802,24 @@ function installDataFetch(
   });
 }
 
-function renderPage() {
+function renderPage(initialEntry = '/analytics') {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[initialEntry]}>
         <AnalyticsPage />
       </MemoryRouter>
     </QueryClientProvider>,
   );
+}
+
+/**
+ * Only the active analytics tab is mounted. Switching tabs through the tab bar
+ * is how these tests reach the other panels; deep links are exercised by the
+ * tests that pass an explicit `?tab=` entry to {@link renderPage}.
+ */
+function openTab(name: string) {
+  fireEvent.click(screen.getByRole('tab', { name }));
 }
 
 function getCalls(mock: ReturnType<typeof installFetch>): string[] {
@@ -830,22 +839,31 @@ afterEach(() => {
 describe('AnalyticsPage — loading and errors', () => {
   // Twelve parallel queries plus the charts and the health panel: give the
   // first render more room than the default 5s when the whole suite is running.
-  it('shows a loading state, then the five analysis areas', async () => {
+  it('shows a loading state, then every analysis area in its tab', async () => {
     installDataFetch();
     renderPage();
 
     expect(screen.getByText('Đang tính toán xu hướng...')).toBeInTheDocument();
     expect(await screen.findByText('So sánh với kỳ trước')).toBeInTheDocument();
-    expect(screen.getByText('Thu nhập và chi tiêu theo tháng')).toBeInTheDocument();
-    expect(screen.getByText('Dòng tiền ròng theo tháng')).toBeInTheDocument();
-    expect(screen.getByText('Phân tích thu nhập')).toBeInTheDocument();
-    expect(screen.getByText('Phân tích chi tiêu')).toBeInTheDocument();
-    expect(screen.getByText('Phân tích theo danh mục')).toBeInTheDocument();
-    expect(screen.getByText('Ngân sách tháng 01/2025')).toBeInTheDocument();
-    expect(screen.getByText('Giá trị dự báo, không phải số liệu thực tế')).toBeInTheDocument();
     expect(screen.getByText('Sức khỏe tài chính')).toBeInTheDocument();
     expect(screen.getByText('Cách tính điểm')).toBeInTheDocument();
     expect(screen.getByText('Lịch sử điểm (tính lại)')).toBeInTheDocument();
+    // Panels from unopened tabs are not mounted.
+    expect(screen.queryByText('Thu nhập và chi tiêu theo tháng')).not.toBeInTheDocument();
+
+    openTab('Danh mục');
+    expect(await screen.findByText('Phân tích thu nhập')).toBeInTheDocument();
+    expect(screen.getByText('Phân tích chi tiêu')).toBeInTheDocument();
+    expect(screen.getByText('Phân tích theo danh mục')).toBeInTheDocument();
+    expect(screen.getByText('Ngân sách tháng 01/2025')).toBeInTheDocument();
+
+    openTab('Xu hướng');
+    expect(await screen.findByText('Thu nhập và chi tiêu theo tháng')).toBeInTheDocument();
+    expect(screen.getByText('Dòng tiền ròng theo tháng')).toBeInTheDocument();
+    expect(screen.getByText('Giá trị dự báo, không phải số liệu thực tế')).toBeInTheDocument();
+
+    openTab('Phân tích AI');
+    expect(await screen.findByLabelText('Trợ lý phân tích AI')).toBeInTheDocument();
   }, 15_000);
 
   it('shows the API error and recovers after retrying', async () => {
@@ -877,7 +895,10 @@ describe('AnalyticsPage — loading and errors', () => {
     await user.click(screen.getByRole('button', { name: 'Thử lại' }));
 
     expect(await screen.findByText('So sánh với kỳ trước')).toBeInTheDocument();
-    await waitFor(() => expect(getCalls(fetchMock).length).toBeGreaterThanOrEqual(10));
+    // Only the overview tab was opened: overview, comparison and the two health
+    // requests are retried, not the queries of tabs that were never visited.
+    await waitFor(() => expect(getCalls(fetchMock).length).toBeGreaterThanOrEqual(8));
+    expect(getCalls(fetchMock).some((url) => url.includes('/analytics/trends?'))).toBe(false);
   });
 });
 
@@ -915,9 +936,16 @@ describe('AnalyticsPage — overview', () => {
 
     await screen.findByText('So sánh với kỳ trước');
 
-    // 11/2024 has no transactions; the trend and both breakdown tables say so.
-    expect(screen.getAllByText('Không có dữ liệu').length).toBeGreaterThanOrEqual(3);
+    // 11/2024 has no transactions; the trend table says so, and so do both
+    // breakdown tables on the categories tab.
+    openTab('Xu hướng');
+    await screen.findByText('Thu nhập và chi tiêu theo tháng');
+    expect(screen.getAllByText('Không có dữ liệu').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('11/2024').length).toBeGreaterThanOrEqual(1);
+
+    openTab('Danh mục');
+    await screen.findByText('Phân tích thu nhập');
+    expect(screen.getAllByText('Không có dữ liệu').length).toBeGreaterThanOrEqual(2);
   });
 
   it('shows income sources, expense volatility and descriptive wording', async () => {
@@ -925,6 +953,8 @@ describe('AnalyticsPage — overview', () => {
     renderPage();
 
     await screen.findByText('So sánh với kỳ trước');
+    openTab('Danh mục');
+    await screen.findByText('Phân tích thu nhập');
 
     expect(screen.getByText('Cơ cấu nguồn thu theo danh mục')).toBeInTheDocument();
     expect(screen.getByText('Lương')).toBeInTheDocument();
@@ -1012,7 +1042,7 @@ describe('AnalyticsPage — overview', () => {
 describe('AnalyticsPage — categories and budgets', () => {
   it('shows category change badges and budget utilization with pace', async () => {
     installDataFetch();
-    renderPage();
+    renderPage('/analytics?tab=categories');
 
     await screen.findByText('Phân tích theo danh mục');
 
@@ -1031,7 +1061,7 @@ describe('AnalyticsPage — categories and budgets', () => {
   it('switches between expense and income categories', async () => {
     const user = userEvent.setup();
     const fetchMock = installDataFetch();
-    renderPage();
+    renderPage('/analytics?tab=categories');
     await screen.findByText('Phân tích theo danh mục');
 
     await user.selectOptions(screen.getByLabelText('Danh mục thu / chi'), 'INCOME');
@@ -1047,7 +1077,7 @@ describe('AnalyticsPage — categories and budgets', () => {
   it('requests the monthly trend only for the selected category', async () => {
     const user = userEvent.setup();
     const fetchMock = installDataFetch();
-    renderPage();
+    renderPage('/analytics?tab=categories');
     await screen.findByText('Phân tích theo danh mục');
 
     await user.selectOptions(screen.getByLabelText('Danh mục xem xu hướng'), 'food');
@@ -1066,7 +1096,7 @@ describe('AnalyticsPage — categories and budgets', () => {
   it('scopes budget analysis to the last month of the selected period', async () => {
     const user = userEvent.setup();
     const fetchMock = installDataFetch();
-    renderPage();
+    renderPage('/analytics?tab=categories');
     await screen.findByText('Ngân sách tháng 01/2025');
 
     await user.selectOptions(screen.getByLabelText('Kỳ phân tích'), 'quarter');
@@ -1106,14 +1136,20 @@ describe('AnalyticsPage — filters', () => {
         ),
       ).toBe(true),
     );
-    expect(
-      getCalls(fetchMock).some(
-        (url) =>
-          url.includes('/analytics/trends?') &&
-          url.includes('months=6') &&
-          url.includes(`month=${CURRENT_MONTH}`),
-      ),
-    ).toBe(true);
+    // The trends query only exists once its tab has been opened.
+    expect(getCalls(fetchMock).some((url) => url.includes('/analytics/trends?'))).toBe(false);
+    openTab('Xu hướng');
+    await screen.findByText('Thu nhập và chi tiêu theo tháng');
+    await waitFor(() =>
+      expect(
+        getCalls(fetchMock).some(
+          (url) =>
+            url.includes('/analytics/trends?') &&
+            url.includes('months=6') &&
+            url.includes(`month=${CURRENT_MONTH}`),
+        ),
+      ).toBe(true),
+    );
 
     await user.selectOptions(screen.getByLabelText('Tiền tệ'), 'USD');
     await waitFor(() =>
@@ -1128,8 +1164,8 @@ describe('AnalyticsPage — filters', () => {
   it('switches the chart window to 12 months', async () => {
     const user = userEvent.setup();
     const fetchMock = installDataFetch();
-    renderPage();
-    await screen.findByText('So sánh với kỳ trước');
+    renderPage('/analytics?tab=trends');
+    await screen.findByText('Thu nhập và chi tiêu theo tháng');
 
     await user.selectOptions(screen.getByLabelText('Khoảng biểu đồ & phân tích tháng'), '12');
     await waitFor(() =>
@@ -1167,7 +1203,7 @@ describe('AnalyticsPage — filters', () => {
   it('requests the forecast for the selected horizon', async () => {
     const user = userEvent.setup();
     const fetchMock = installDataFetch();
-    renderPage();
+    renderPage('/analytics?tab=trends');
     await screen.findByText('Dự báo tài chính');
 
     await user.selectOptions(screen.getByLabelText('Khoảng dự báo'), '3m');

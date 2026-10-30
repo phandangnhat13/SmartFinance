@@ -1,6 +1,6 @@
-import { AlertCircle, Inbox, Loader2, X } from 'lucide-react';
-import { useEffect, useId, useRef } from 'react';
-import type { ReactNode } from 'react';
+import { AlertCircle, Eye, EyeOff, Inbox, Loader2, X } from 'lucide-react';
+import { forwardRef, useEffect, useId, useRef, useState } from 'react';
+import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 
 export function cn(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(' ');
@@ -18,14 +18,14 @@ export function Spinner({ label = 'Đang tải...' }: { label?: string }) {
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-lg bg-slate-200/70', className)} />;
+  return <div className={cn('animate-pulse rounded-lg bg-line/70', className)} />;
 }
 
 export function ErrorAlert({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <div
       role="alert"
-      className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"
+      className="flex items-start gap-3 rounded-xl border border-danger-border bg-danger-soft p-4 text-sm text-danger-strong"
     >
       <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
       <p className="flex-1">{message}</p>
@@ -122,15 +122,17 @@ export function StatCard({
 
 /* ------------------------------- controls ------------------------------- */
 
+/* Status tones are the design system's palette definition, like chartTheme:
+   components name a state, not a colour. */
 type BadgeTone = 'emerald' | 'rose' | 'amber' | 'slate' | 'sky' | 'violet';
 
 const badgeTones: Record<BadgeTone, string> = {
-  emerald: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-  rose: 'bg-rose-50 text-rose-700 ring-rose-200',
-  amber: 'bg-amber-50 text-amber-800 ring-amber-200',
-  slate: 'bg-slate-100 text-slate-700 ring-slate-200',
-  sky: 'bg-sky-50 text-sky-700 ring-sky-200',
-  violet: 'bg-violet-50 text-violet-700 ring-violet-200',
+  emerald: 'bg-brand-soft text-brand-hover ring-brand/20',
+  rose: 'bg-danger-soft text-danger-strong ring-danger-border',
+  amber: 'bg-warning-soft text-warning-strong ring-warning-border',
+  slate: 'bg-surface-muted text-ink-secondary ring-line',
+  sky: 'bg-info-soft text-info-strong ring-info-border',
+  violet: 'bg-accent-soft text-accent-strong ring-accent-border',
 };
 
 export function Badge({ children, tone = 'slate' }: { children: ReactNode; tone?: BadgeTone }) {
@@ -155,11 +157,10 @@ export function ProgressBar({
   tone?: 'emerald' | 'amber' | 'rose';
   label?: string;
 }) {
-  const color =
-    tone === 'rose' ? 'bg-rose-500' : tone === 'amber' ? 'bg-amber-500' : 'bg-emerald-500';
+  const color = tone === 'rose' ? 'bg-expense' : tone === 'amber' ? 'bg-warning' : 'bg-brand';
   return (
     <div
-      className="h-2 w-full overflow-hidden rounded-full bg-slate-100"
+      className="h-2 w-full overflow-hidden rounded-full bg-line"
       role="progressbar"
       aria-valuenow={Math.round(value)}
       aria-valuemin={0}
@@ -179,16 +180,51 @@ export function TabBar<T extends string>({
   value,
   onChange,
   label,
+  idBase,
+  panelId,
 }: {
   tabs: Array<{ value: T; label: string }>;
   value: T;
   onChange: (value: T) => void;
   label: string;
+  /** Stable id prefix for tab/panel aria wiring. Defaults to a generated id. */
+  idBase?: string;
+  /** When set, tabs point `aria-controls` at this tabpanel id. */
+  panelId?: string;
 }) {
+  const generatedId = useId();
+  const base = idBase ?? `tabs${generatedId}`;
+  const buttonRefs = useRef(new Map<T, HTMLButtonElement>());
+
+  function selectAt(index: number) {
+    const next = tabs[(index + tabs.length) % tabs.length];
+    if (!next) return;
+    onChange(next.value);
+    buttonRefs.current.get(next.value)?.focus();
+  }
+
+  function onKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    const currentIndex = tabs.findIndex((tab) => tab.value === value);
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      selectAt(currentIndex + 1);
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      selectAt(currentIndex - 1);
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      selectAt(0);
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      selectAt(tabs.length - 1);
+    }
+  }
+
   return (
     <div
       role="tablist"
       aria-label={label}
+      onKeyDown={onKeyDown}
       className="flex gap-1 overflow-x-auto rounded-xl border border-line bg-surface p-1"
     >
       {tabs.map((tab) => {
@@ -196,12 +232,19 @@ export function TabBar<T extends string>({
         return (
           <button
             key={tab.value}
+            ref={(node) => {
+              if (node) buttonRefs.current.set(tab.value, node);
+              else buttonRefs.current.delete(tab.value);
+            }}
+            id={`${base}-tab-${tab.value}`}
             type="button"
             role="tab"
             aria-selected={selected}
+            aria-controls={panelId}
+            tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.value)}
             className={cn(
-              'whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-medium transition',
+              'whitespace-nowrap rounded-lg px-4 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50',
               selected
                 ? 'bg-brand text-white shadow-sm'
                 : 'text-ink-secondary hover:bg-surface-muted hover:text-ink',
@@ -299,11 +342,15 @@ export function Modal({
       );
     };
 
-    // Prefer the first form control; otherwise the close button.
+    // Prefer the first form control; otherwise the dialog's first action
+    // (Cancel in a confirmation dialog); otherwise the close button.
     const controls = dialogRef.current?.querySelectorAll<HTMLElement>(
       'input:not([disabled]), select:not([disabled]), textarea:not([disabled])',
     );
-    (controls?.[0] ?? focusable()[0])?.focus();
+    const firstAction = dialogRef.current?.querySelector<HTMLElement>(
+      '[data-modal-footer] button:not([disabled])',
+    );
+    (controls?.[0] ?? firstAction ?? focusable()[0])?.focus();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -338,7 +385,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 sm:items-center"
       role="presentation"
       onMouseDown={() => onCloseRef.current()}
     >
@@ -367,7 +414,11 @@ export function Modal({
           </button>
         </div>
         {children}
-        {footer ? <div className="mt-5 flex justify-end gap-2">{footer}</div> : null}
+        {footer ? (
+          <div data-modal-footer className="mt-5 flex justify-end gap-2">
+            {footer}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -420,11 +471,44 @@ export function ConfirmDialog({
   );
 }
 
-export function FieldError({ message }: { message?: string }) {
+export function FieldError({ message, id }: { message?: string; id?: string }) {
   if (!message) return null;
   return (
-    <p className="mt-1 text-xs text-rose-600" role="alert">
+    <p id={id} className="mt-1 text-xs text-danger" role="alert">
       {message}
     </p>
   );
 }
+
+/**
+ * Password field with an explicit show/hide control. It forwards the ref that
+ * react-hook-form's `register` returns, so it drops into existing forms.
+ */
+export const PasswordInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  function PasswordInput({ className, ...props }, ref) {
+    const [visible, setVisible] = useState(false);
+    return (
+      <div className="relative">
+        <input
+          ref={ref}
+          type={visible ? 'text' : 'password'}
+          className={cn('input pr-11', className)}
+          {...props}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((value) => !value)}
+          aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+          aria-pressed={visible}
+          className="icon-btn absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2"
+        >
+          {visible ? (
+            <EyeOff className="h-4 w-4" aria-hidden />
+          ) : (
+            <Eye className="h-4 w-4" aria-hidden />
+          )}
+        </button>
+      </div>
+    );
+  },
+);

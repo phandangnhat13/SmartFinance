@@ -227,7 +227,7 @@ test.afterAll(async () => {
 });
 
 test('labels calculated figures and AI prose separately and never writes data', async () => {
-  await page.goto('/analytics');
+  await page.goto('/analytics?tab=ai');
   await expect(page.getByRole('heading', { name: 'Xu hướng thu nhập & chi tiêu' })).toBeVisible();
 
   const panel = page.getByLabel('Trợ lý phân tích AI');

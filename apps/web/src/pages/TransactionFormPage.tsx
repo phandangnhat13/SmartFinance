@@ -290,8 +290,8 @@ export function TransactionFormPage() {
                 }}
                 className={`rounded-xl border px-4 py-2.5 text-sm font-semibold ${
                   type === 'EXPENSE'
-                    ? 'border-rose-300 bg-rose-50 text-rose-700'
-                    : 'border-slate-300 bg-white text-slate-600'
+                    ? 'border-danger-border bg-danger-soft text-danger-strong'
+                    : 'border-line-strong bg-surface text-ink-secondary'
                 }`}
               >
                 Chi tiêu
@@ -305,8 +305,8 @@ export function TransactionFormPage() {
                 }}
                 className={`rounded-xl border px-4 py-2.5 text-sm font-semibold ${
                   type === 'INCOME'
-                    ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
-                    : 'border-slate-300 bg-white text-slate-600'
+                    ? 'border-brand/30 bg-brand-soft text-brand-hover'
+                    : 'border-line-strong bg-surface text-ink-secondary'
                 }`}
               >
                 Thu nhập
@@ -362,26 +362,26 @@ export function TransactionFormPage() {
         </div>
 
         {aiQuery.isFetching ? (
-          <p className="flex items-center gap-2 text-xs text-slate-500">
+          <p className="flex items-center gap-2 text-xs text-ink-muted">
             <Sparkles className="h-3.5 w-3.5" aria-hidden /> AI đang gợi ý danh mục...
           </p>
         ) : null}
         {usableSuggestion && suggestion?.status === 'ok' ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
-            <p className="flex items-center gap-2 font-medium text-emerald-900">
+          <div className="rounded-xl border border-brand/30 bg-brand-soft p-4 text-sm">
+            <p className="flex items-center gap-2 font-medium text-brand-hover">
               <Sparkles className="h-4 w-4" aria-hidden />
               AI gợi ý: {usableSuggestion.categoryName}
               {usableSuggestion.confidence !== null
                 ? ` (${Math.round(usableSuggestion.confidence * 100)}%)`
                 : ''}
             </p>
-            <p className="mt-1 text-xs text-emerald-800">
+            <p className="mt-1 text-xs text-brand-hover">
               Đây chỉ là đề xuất — bạn có thể chọn danh mục khác.
             </p>
             <button
               type="button"
               onClick={applySuggestion}
-              className="mt-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+              className="mt-2 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-hover"
             >
               Dùng gợi ý
             </button>
@@ -389,13 +389,13 @@ export function TransactionFormPage() {
         ) : null}
         {suggestion?.status === 'low_confidence' ? (
           <div
-            className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800"
+            className="rounded-xl border border-warning-border bg-warning-soft p-3 text-xs text-warning-strong"
             data-testid="ai-low-confidence"
           >
             <p>AI chưa chắc chắn về danh mục cho mô tả này. Vui lòng tự chọn danh mục.</p>
             {lowConfidenceCandidates.length > 0 ? (
               <>
-                <p className="mt-2 text-amber-700">
+                <p className="mt-2 text-warning-strong">
                   Gợi ý tham khảo — chưa đủ tin cậy để tự điền, bạn vẫn có thể chọn danh mục khác:
                 </p>
                 <div className="mt-1.5 flex flex-wrap gap-2">
@@ -404,7 +404,7 @@ export function TransactionFormPage() {
                       key={candidate.slug}
                       type="button"
                       onClick={() => chooseAlternative(candidate)}
-                      className="rounded-lg border border-amber-300 bg-white px-2.5 py-1 font-medium text-amber-900 hover:bg-amber-100"
+                      className="rounded-lg border border-warning-border bg-surface px-2.5 py-1 font-medium text-warning-strong hover:bg-warning-soft"
                     >
                       {candidate.categoryName}
                       {candidate.confidence > 0
@@ -418,7 +418,7 @@ export function TransactionFormPage() {
           </div>
         ) : null}
         {suggestion?.status === 'model_not_ready' ? (
-          <p className="rounded-xl bg-slate-100 p-3 text-xs text-slate-600">
+          <p className="rounded-xl bg-surface-muted p-3 text-xs text-ink-secondary">
             AI tạm thời không khả dụng. Bạn vẫn có thể lưu giao dịch bình thường.
           </p>
         ) : null}

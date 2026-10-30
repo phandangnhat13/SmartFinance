@@ -22,7 +22,7 @@ test.describe('authentication', () => {
     const account = loadAccount();
     await page.goto('/login');
     await page.getByLabel('Email').fill(account.email);
-    await page.getByLabel('Mật khẩu').fill('WrongPassword123!');
+    await page.getByLabel('Mật khẩu', { exact: true }).fill('WrongPassword123!');
     await page.getByRole('button', { name: 'Đăng nhập' }).click();
 
     await expect(page.getByText('Email hoặc mật khẩu không đúng')).toBeVisible();
@@ -33,7 +33,7 @@ test.describe('authentication', () => {
     const account = loadAccount();
     await page.goto('/login');
     await page.getByLabel('Email').fill(account.email);
-    await page.getByLabel('Mật khẩu').fill(account.password);
+    await page.getByLabel('Mật khẩu', { exact: true }).fill(account.password);
     await page.getByRole('button', { name: 'Đăng nhập' }).click();
 
     await expect(page).toHaveURL(/\/dashboard$/);
