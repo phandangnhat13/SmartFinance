@@ -36,3 +36,19 @@ export function formatPercent(value: number | null | undefined): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return '—';
   return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
 }
+
+/** `YYYY-MM` → `MM/YYYY` for chart axes and tables. */
+export function formatMonthLabel(month: string): string {
+  const [year, monthNumber] = month.split('-');
+  return `${monthNumber}/${year}`;
+}
+
+/**
+ * `YYYY-MM-DD` → `DD/MM/YYYY` without going through a Date, so a date-only
+ * value never shifts a day in a negative-offset browser timezone.
+ */
+export function formatDateOnly(value: string): string {
+  const [year, month, day] = value.split('-');
+  if (!year || !month || !day) return '—';
+  return `${day}/${month}/${year}`;
+}

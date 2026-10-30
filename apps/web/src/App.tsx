@@ -9,6 +9,9 @@ import { Spinner } from './components/ui';
 const AccountsPage = lazy(() =>
   import('./pages/AccountsPage').then((m) => ({ default: m.AccountsPage })),
 );
+const AnalyticsPage = lazy(() =>
+  import('./pages/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
+);
 const AlertsPage = lazy(() =>
   import('./pages/AlertsPage').then((m) => ({ default: m.AlertsPage })),
 );
@@ -68,6 +71,7 @@ export function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/insights" element={<InsightsPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/transactions/new" element={<TransactionFormPage />} />
             <Route path="/transactions/transfer" element={<TransferFormPage />} />

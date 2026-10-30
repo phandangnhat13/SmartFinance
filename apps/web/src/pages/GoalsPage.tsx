@@ -1,11 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  GoalContributionDto,
-  GoalDisplayStatus,
-  GoalDto,
-  InsightsMonthlyDto,
-} from '@smart-finance/shared-types';
+import type { GoalContributionDto, GoalDisplayStatus, GoalDto } from '@smart-finance/shared-types';
 import { GOAL_DISPLAY_STATUS_LABELS } from '@smart-finance/shared-types';
 import {
   Archive,
@@ -17,11 +12,9 @@ import {
   Plus,
   Target,
   Trash2,
-  TrendingUp,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import {
   Badge,
@@ -33,6 +26,10 @@ import {
   ProgressBar,
   Spinner,
 } from '../components/ui';
+import { SavingsProgressDashboard } from '../components/SavingsProgressDashboard';
+import { SavingsAssistantPanel } from '../components/SavingsAssistantPanel';
+import { SavingsRecommendations } from '../components/SavingsRecommendations';
+import { GoalProgressPanel } from '../components/GoalProgressPanel';
 import { useAuth } from '../context/AuthContext';
 import { api, errorMessage } from '../lib/api';
 import { inputToIso, isoToInput, todayInTimeZone } from '../lib/date';
@@ -101,14 +98,6 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-interface ReferenceFigures {
-  months: number;
-  income: number;
-  expense: number;
-  net: number;
-  savingsRate: number | null;
-}
-
 export function GoalsPage() {
   const { user } = useAuth();
   const timezone = user?.timezone ?? 'Asia/Ho_Chi_Minh';
@@ -151,49 +140,6 @@ export function GoalsPage() {
     [goals, currency],
   );
 
-  const summary = useMemo(() => {
-    const totals = visibleGoals.reduce(
-      (acc, goal) => ({
-        target: acc.target + Number(goal.targetAmount),
-        saved: acc.saved + Number(goal.savedAmount),
-        remaining: acc.remaining + Number(goal.remainingAmount),
-        overdue: acc.overdue + (goal.displayStatus === 'OVERDUE' ? 1 : 0),
-        active: acc.active + (goal.displayStatus === 'ACTIVE' ? 1 : 0),
-        paused: acc.paused + (goal.displayStatus === 'PAUSED' ? 1 : 0),
-        completed: acc.completed + (goal.status === 'COMPLETED' ? 1 : 0),
-      }),
-      { target: 0, saved: 0, remaining: 0, overdue: 0, active: 0, paused: 0, completed: 0 },
-    );
-    return {
-      ...totals,
-      percentage: totals.target > 0 ? (totals.saved / totals.target) * 100 : 0,
-    };
-  }, [visibleGoals]);
-
-  // Reference figures come from the existing Financial Insights endpoint; they
-  // are never written into a goal's saved amount.
-  const monthlyQuery = useQuery({
-    queryKey: ['goals-insights', currency],
-    queryFn: () => api.get<InsightsMonthlyDto>(`/insights/monthly?months=6&currency=${currency}`),
-    enabled: Boolean(currency) && goals.length > 0,
-    retry: false,
-  });
-
-  const reference = useMemo<ReferenceFigures | null>(() => {
-    const months = (monthlyQuery.data?.months ?? []).filter((month) => month.hasTransactions);
-    if (months.length === 0) return null;
-    const income = months.reduce((sum, month) => sum + Number(month.income), 0) / months.length;
-    const expense = months.reduce((sum, month) => sum + Number(month.expense), 0) / months.length;
-    const net = income - expense;
-    return {
-      months: months.length,
-      income,
-      expense,
-      net,
-      savingsRate: income > 0 ? (net / income) * 100 : null,
-    };
-  }, [monthlyQuery.data]);
-
   const goalForm = useForm<GoalFormValues>({
     resolver: zodResolver(goalSchema),
     defaultValues: {
@@ -213,6 +159,12 @@ export function GoalsPage() {
 
   const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey: ['goals'] });
+    // Contributions and statuses change the allocation, so refresh the advice too.
+    await queryClient.invalidateQueries({ queryKey: ['savings-recommendations'] });
+    // Server-computed progress and history depend on the same goal rows.
+    await queryClient.invalidateQueries({ queryKey: ['savings-progress'] });
+    await queryClient.invalidateQueries({ queryKey: ['savings-goal-progress'] });
+    await queryClient.invalidateQueries({ queryKey: ['savings-history'] });
   };
 
   const saveGoal = useMutation({
@@ -487,101 +439,17 @@ export function GoalsPage() {
         />
       ) : (
         <>
-          <section className="mb-6" aria-label="Tổng quan tiến độ">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="card">
-                <p className="text-xs text-slate-500">Tổng mục tiêu</p>
-                <p className="mt-1 text-xl font-semibold text-slate-900">
-                  {formatMoney(summary.target, currency)}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">{visibleGoals.length} mục tiêu</p>
-              </div>
-              <div className="card">
-                <p className="text-xs text-slate-500">Đã tiết kiệm</p>
-                <p className="mt-1 text-xl font-semibold text-emerald-700">
-                  {formatMoney(summary.saved, currency)}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {summary.active} đang thực hiện · {summary.overdue} quá hạn
-                </p>
-              </div>
-              <div className="card">
-                <p className="text-xs text-slate-500">Còn thiếu</p>
-                <p className="mt-1 text-xl font-semibold text-slate-900">
-                  {formatMoney(summary.remaining, currency)}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {summary.paused} tạm dừng · {summary.completed} hoàn thành
-                </p>
-              </div>
-              <div className="card">
-                <p className="text-xs text-slate-500">Tiến độ chung</p>
-                <p className="mt-1 text-xl font-semibold text-slate-900">
-                  {Math.round(summary.percentage)}%
-                </p>
-                <div className="mt-2">
-                  <ProgressBar value={summary.percentage} tone="emerald" />
-                </div>
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-slate-500">
-              Số liệu chỉ tính cho mục tiêu bằng {currency}; không quy đổi giữa các tiền tệ.
-            </p>
-          </section>
+          <SavingsProgressDashboard currency={currency} />
 
-          <section className="card mb-6" aria-label="Số liệu tham khảo">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-sky-600" aria-hidden />
-                <h2 className="text-sm font-semibold text-slate-900">
-                  Tham khảo từ Phân tích tài chính
-                </h2>
-              </div>
-              <Link to="/insights" className="text-xs font-medium text-sky-700 hover:underline">
-                Xem chi tiết phân tích
-              </Link>
-            </div>
-            {monthlyQuery.isLoading ? (
-              <p className="mt-3 text-sm text-slate-500">Đang tải số liệu tham khảo...</p>
-            ) : monthlyQuery.error ? (
-              <p className="mt-3 text-sm text-slate-500">
-                Chưa thể tải số liệu tham khảo từ Phân tích.
-              </p>
-            ) : reference ? (
-              <>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <Stat label="Thu nhập TB/tháng" value={formatMoney(reference.income, currency)} />
-                  <Stat
-                    label="Chi tiêu TB/tháng"
-                    value={formatMoney(reference.expense, currency)}
-                  />
-                  <Stat
-                    label="Dòng tiền ròng TB/tháng"
-                    value={formatMoney(reference.net, currency)}
-                  />
-                  <Stat
-                    label="Tỷ lệ tiết kiệm TB"
-                    value={
-                      reference.savingsRate === null ? '—' : `${reference.savingsRate.toFixed(1)}%`
-                    }
-                  />
-                </div>
-                <p className="mt-3 text-sm text-slate-700">
-                  {reference.net > 0
-                    ? `Khả năng tiết kiệm tham khảo: ${formatMoney(reference.net, currency)}/tháng, dựa trên ${reference.months} tháng có giao dịch gần nhất.`
-                    : `Dòng tiền ròng trung bình không dương trong ${reference.months} tháng có giao dịch gần nhất, nên chưa có khả năng tiết kiệm tham khảo.`}
-                </p>
-              </>
-            ) : (
-              <p className="mt-3 text-sm text-slate-500">
-                Chưa có giao dịch {currency} để tính số liệu tham khảo.
-              </p>
-            )}
-            <p className="mt-2 text-xs text-slate-500">
-              Đây là số liệu tham khảo từ các giao dịch đã ghi nhận, không được cộng tự động vào số
-              tiền đã tiết kiệm và không phải cam kết bạn chắc chắn tiết kiệm được số tiền này.
-            </p>
-          </section>
+          <SavingsRecommendations currency={currency} timezone={timezone} />
+
+          <SavingsAssistantPanel
+            currency={currency}
+            onReviewGoal={(goalId) => {
+              const goal = goals.find((item) => item.id === goalId);
+              if (goal) openDetail(goal);
+            }}
+          />
 
           <div className="grid gap-4 lg:grid-cols-2">
             {visibleGoals.map((goal) => (
@@ -1089,6 +957,8 @@ export function GoalsPage() {
                 </ul>
               )}
             </div>
+
+            <GoalProgressPanel goal={detailGoal} onChanged={() => void invalidate()} />
           </div>
         ) : null}
       </Modal>

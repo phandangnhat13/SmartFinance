@@ -7,7 +7,7 @@ import {
   type BrowserContext,
   type Page,
 } from '@playwright/test';
-import type { InsightsMonthlyDto } from '@smart-finance/shared-types';
+import type { SavingsRecommendationsDto } from '@smart-finance/shared-types';
 import { E2E_API_ORIGIN, E2E_WEB_ORIGIN } from '../env.mjs';
 
 /**
@@ -16,7 +16,7 @@ import { E2E_API_ORIGIN, E2E_WEB_ORIGIN } from '../env.mjs';
  * The spec registers its own throwaway user so its goals never mix with the
  * shared global-setup user. Goals, contributions and status changes all go
  * through the real UI and the real API; only the seed transactions behind the
- * reference panel are created directly through `POST /transactions`.
+ * savings recommendations are created directly through `POST /transactions`.
  */
 
 const RUN = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
@@ -35,6 +35,27 @@ function hcmDate(offsetDays: number): string {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
+  }).format(new Date(Date.now() + offsetDays * 86_400_000));
+}
+
+/**
+ * Local noon (Asia/Ho_Chi_Minh) on a day of a past month, as a UTC instant.
+ * 05:00Z is 12:00 in HCM, so the calendar month always matches.
+ */
+function hcmNoonInMonth(monthOffset: number, day: number): string {
+  const now = new Date();
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + monthOffset, day, 5, 0, 0),
+  ).toISOString();
+}
+
+/** dd/mm/yyyy in Asia/Ho_Chi_Minh, offset by whole days (matches the UI). */
+function hcmDisplay(offsetDays: number): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
   }).format(new Date(Date.now() + offsetDays * 86_400_000));
 }
 
@@ -72,34 +93,36 @@ test.beforeAll(async ({ browser }) => {
   const expense = items.find((item) => item.slug === 'food' && item.type === 'EXPENSE');
   if (!income || !expense) throw new Error('Seeded categories are required for this spec');
 
-  const occurredAt = new Date(Date.now() - 3 * 60_000).toISOString();
-  // One month of real transactions so the reference panel has figures to show.
-  await expectOk(
-    await api.post('/api/v1/transactions', {
-      data: {
-        accountId,
-        categoryId: income.id,
-        type: 'INCOME',
-        amount: '10000000',
-        occurredAt,
-        description: 'Thu nhập E2E goals',
-      },
-    }),
-    'Income',
-  );
-  await expectOk(
-    await api.post('/api/v1/transactions', {
-      data: {
-        accountId,
-        categoryId: expense.id,
-        type: 'EXPENSE',
-        amount: '4000000',
-        occurredAt,
-        description: 'Chi tiêu E2E goals',
-      },
-    }),
-    'Expense',
-  );
+  // Three completed months of real transactions so the savings advice has
+  // figures to work with. The in-progress month is intentionally left empty.
+  for (const monthOffset of [-1, -2, -3]) {
+    await expectOk(
+      await api.post('/api/v1/transactions', {
+        data: {
+          accountId,
+          categoryId: income.id,
+          type: 'INCOME',
+          amount: '10000000',
+          occurredAt: hcmNoonInMonth(monthOffset, 5),
+          description: 'Thu nhập E2E goals',
+        },
+      }),
+      'Income',
+    );
+    await expectOk(
+      await api.post('/api/v1/transactions', {
+        data: {
+          accountId,
+          categoryId: expense.id,
+          type: 'EXPENSE',
+          amount: '4000000',
+          occurredAt: hcmNoonInMonth(monthOffset, 20),
+          description: 'Chi tiêu E2E goals',
+        },
+      }),
+      'Expense',
+    );
+  }
 
   browserContext = await browser.newContext({
     storageState: await api.storageState(),
@@ -134,12 +157,21 @@ test('creates goals in two currencies, records savings and keeps currencies sepa
   await expect(vndCard).toContainText(/còn thiếu 30\.000\.000/);
   await expect(vndCard).toContainText(/Cần tiết kiệm/);
 
-  // The reference panel reads real insights and is explicitly non-committal.
-  const panel = page.getByLabel('Số liệu tham khảo');
-  await expect(panel.getByText(/10\.000\.000/)).toBeVisible();
-  await expect(panel.getByText(/4\.000\.000/)).toBeVisible();
-  await expect(panel.getByText('60.0%')).toBeVisible();
-  await expect(panel.getByText(/không được cộng tự động vào số tiền đã tiết kiệm/)).toBeVisible();
+  // The recommendations panel reads real insights and is explicitly non-committal.
+  const panel = page.getByLabel('Đề xuất tiết kiệm');
+  await expect(panel.getByText(/4\.800\.000/).first()).toBeVisible();
+  await expect(panel.getByText(/10\.000\.000/).first()).toBeVisible();
+  await expect(panel.getByText(/4\.000\.000/).first()).toBeVisible();
+  await expect(panel.getByText('Mua laptop E2E')).toBeVisible();
+  await expect(panel.getByText(/không tự tạo khoản góp hay sửa mục tiêu/)).toBeVisible();
+
+  // A simulation only previews another allocation; nothing is written.
+  await panel.getByLabel('Mức tiết kiệm giả định mỗi tháng').fill('3000000');
+  await panel.getByRole('button', { name: 'Mô phỏng' }).click();
+  await expect(panel.getByText(/Đang mô phỏng với/)).toBeVisible();
+  await expect(vndCard).toContainText(/còn thiếu 30\.000\.000/);
+  await panel.getByRole('button', { name: 'Bỏ mô phỏng' }).click();
+  await expect(panel.getByText(/Đang mô phỏng với/)).toBeHidden();
 
   await vndCard.getByRole('button', { name: 'Góp thêm' }).click();
   await page.getByLabel('Số tiền', { exact: true }).fill('6000000');
@@ -181,14 +213,17 @@ test('creates goals in two currencies, records savings and keeps currencies sepa
   await expect(summary.getByText(/Số liệu chỉ tính cho mục tiêu bằng USD/)).toBeVisible();
   await expect(page.locator('article').filter({ hasText: 'Mua laptop E2E' })).toHaveCount(0);
 
-  // The reference panel follows the selected currency through the real API.
-  const usdInsights = await page.request.get('/api/v1/insights/monthly?currency=USD&months=6');
-  expect(usdInsights.ok()).toBeTruthy();
-  const usdBody = (await usdInsights.json()) as InsightsMonthlyDto;
+  // The recommendations follow the selected currency through the real API.
+  const usdRecommendations = await page.request.get(
+    '/api/v1/insights/savings-recommendations?currency=USD',
+  );
+  expect(usdRecommendations.ok()).toBeTruthy();
+  const usdBody = (await usdRecommendations.json()) as SavingsRecommendationsDto;
   expect(usdBody.currency).toBe('USD');
-  expect(usdBody.months.every((month) => month.hasTransactions === false)).toBe(true);
-  await expect(page.getByLabel('Số liệu tham khảo')).toContainText(
-    'Chưa có giao dịch USD để tính số liệu tham khảo.',
+  expect(usdBody.status).toBe('insufficient_data');
+  expect(usdBody.capacity.monthsAnalyzed).toBe(0);
+  await expect(page.getByLabel('Đề xuất tiết kiệm')).toContainText(
+    'Chưa có tháng nào đã kết thúc với giao dịch USD.',
   );
 });
 
@@ -245,4 +280,111 @@ test('pauses, completes and archives a goal from the UI', async () => {
   const archived = page.locator('article').filter({ hasText: 'Quỹ khẩn cấp 6 tháng' });
   await expect(archived).toBeVisible();
   await expect(archived.getByText('Đã lưu trữ', { exact: true })).toBeVisible();
+});
+
+test('tracks progress, simulates a plan and applies a confirmed adjustment', async () => {
+  await page.goto('/goals');
+  await page.getByLabel('Lọc theo tiền tệ').selectOption('VND');
+  await expect(page.getByRole('heading', { name: 'Mục tiêu tiết kiệm' })).toBeVisible();
+
+  // 1–2. A goal with a deadline, then real contributions through the UI.
+  await page.getByRole('button', { name: 'Thêm mục tiêu' }).first().click();
+  await page.getByLabel('Tên mục tiêu', { exact: true }).fill('Du lịch E2E');
+  await page.getByLabel('Số tiền mục tiêu', { exact: true }).fill('24000000');
+  await page.getByLabel('Ngày đích (tuỳ chọn)').fill(hcmDate(120));
+  await page.getByRole('button', { name: 'Lưu', exact: true }).click();
+
+  const card = page.locator('article').filter({ hasText: 'Du lịch E2E' });
+  await expect(card).toBeVisible();
+  for (const amount of ['2000000', '3000000']) {
+    await card.getByRole('button', { name: 'Góp thêm' }).click();
+    await page.getByLabel('Số tiền', { exact: true }).fill(amount);
+    await page.getByRole('button', { name: 'Ghi nhận' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  }
+  await expect(card).toContainText(/5\.000\.000/);
+
+  // 3–4. The dashboard totals come from GET /savings/progress.
+  const summary = page.getByLabel('Tổng quan tiến độ');
+  await expect(summary.getByText(/Số liệu chỉ tính cho mục tiêu bằng VND/)).toBeVisible();
+  const progressResponse = await page.request.get('/api/v1/savings/progress?currency=VND');
+  expect(progressResponse.ok()).toBeTruthy();
+  const progress = (await progressResponse.json()) as {
+    currency: string;
+    summary: { totalTargetAmount: string; totalSavedAmount: string };
+    goals: { goalId: string; name: string; savedAmount: string }[];
+  };
+  expect(progress.currency).toBe('VND');
+  const progressGoal = progress.goals.find((goal) => goal.name === 'Du lịch E2E');
+  if (!progressGoal) throw new Error('The new goal is missing from the progress payload');
+  expect(Number(progressGoal.savedAmount)).toBe(5_000_000);
+
+  // 5–6. Per-goal actual versus expected, plus the monthly history.
+  await card.getByRole('button', { name: 'Chi tiết' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('Thực tế so với kế hoạch')).toBeVisible();
+  await expect(dialog.getByText('Kỳ vọng theo kế hoạch')).toBeVisible();
+  await expect(dialog.getByText('Chênh lệch thực tế − kỳ vọng')).toBeVisible();
+  await expect(dialog.getByText('Lịch sử góp')).toBeVisible();
+  await expect(dialog.getByText('Tốc độ góp thực tế')).toBeVisible();
+
+  const simulator = dialog.getByLabel('Mô phỏng kế hoạch');
+  await expect(simulator.getByText(/không có khoản góp nào được tạo/)).toBeVisible();
+
+  const goalsBefore = await page.request.get('/api/v1/goals?includeArchived=false');
+  const goalId = (
+    (await goalsBefore.json()) as { items: { id: string; name: string }[] }
+  ).items.find((goal) => goal.name === 'Du lịch E2E')?.id;
+  if (!goalId) throw new Error('Goal id not found');
+  const before = (await (await page.request.get(`/api/v1/goals/${goalId}`)).json()) as {
+    goal: { targetAmount: string; targetDate: string; contributions: unknown[] };
+  };
+
+  // 7. A read-only monthly simulation; no write, no contribution.
+  await simulator.getByLabel('Số tiền góp mỗi tháng').fill('5000000');
+  await simulator.getByRole('button', { name: 'Mô phỏng' }).click();
+  await expect(simulator.getByText('Hiện tại so với giả định')).toBeVisible();
+  expect(
+    (await (await page.request.get(`/api/v1/goals/${goalId}`)).json()) as {
+      goal: { targetAmount: string; targetDate: string };
+    },
+  ).toMatchObject({ goal: { targetAmount: before.goal.targetAmount } });
+
+  // 8–9. Simulate a new deadline, preview it and confirm it explicitly.
+  await simulator.getByRole('tab', { name: 'Ngày đích' }).click();
+  await simulator.getByLabel('Ngày đích mới').fill(hcmDate(240));
+  await simulator.getByRole('button', { name: 'Mô phỏng' }).click();
+  await expect(simulator.getByText('Hiện tại so với giả định')).toBeVisible();
+  await simulator.getByRole('button', { name: 'Xem trước thay đổi' }).click();
+
+  const confirm = page.getByRole('dialog', { name: 'Xác nhận điều chỉnh mục tiêu' });
+  await expect(confirm).toBeVisible();
+  await expect(confirm.getByText(new RegExp(hcmDisplay(120)))).toBeVisible();
+  await expect(confirm.getByText(new RegExp(hcmDisplay(240)))).toBeVisible();
+  await expect(confirm.getByText(/Các khoản góp đã ghi nhận không thay đổi/)).toBeVisible();
+  await confirm.getByRole('button', { name: 'Xác nhận áp dụng' }).click();
+
+  await expect(
+    dialog.getByText('Đã cập nhật mục tiêu. Các khoản góp đã ghi nhận được giữ nguyên.'),
+  ).toBeVisible();
+
+  // 10. Only the deadline changed; the contributions were preserved.
+  await expect
+    .poll(async () => {
+      const body = (await (await page.request.get(`/api/v1/goals/${goalId}`)).json()) as {
+        goal: { targetDate: string; targetAmount: string; contributions: unknown[] };
+      };
+      return {
+        targetDate: body.goal.targetDate,
+        targetAmount: body.goal.targetAmount,
+        contributions: body.goal.contributions.length,
+      };
+    })
+    .toEqual({
+      targetDate: hcmDate(240),
+      targetAmount: before.goal.targetAmount,
+      contributions: before.goal.contributions.length,
+    });
+
+  await expect(card).toContainText(new RegExp(`Hạn ${hcmDisplay(240)}`));
 });

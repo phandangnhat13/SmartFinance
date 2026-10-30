@@ -22,7 +22,14 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { EmptyState, ErrorAlert, PageHeader, ProgressBar, Spinner } from '../components/ui';
+import {
+  EmptyState,
+  ErrorAlert,
+  PageHeader,
+  ProgressBar,
+  Spinner,
+  StatCard,
+} from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { api, errorMessage } from '../lib/api';
 import { currentMonthRange, lastMonthsRange } from '../lib/date';
@@ -390,33 +397,6 @@ export function DashboardPage() {
           )}
         </section>
       </div>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  icon,
-  hint,
-  valueClass,
-}: {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-  hint?: React.ReactNode;
-  valueClass?: string;
-}) {
-  return (
-    <div className="card">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-500">{label}</p>
-        {icon}
-      </div>
-      <p className={`mt-2 text-xl font-bold tracking-tight ${valueClass ?? 'text-slate-900'}`}>
-        {value}
-      </p>
-      {hint ? <div className="mt-1 text-xs">{hint}</div> : null}
     </div>
   );
 }

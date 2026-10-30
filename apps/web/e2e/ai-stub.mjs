@@ -10,6 +10,14 @@
  *   [offline] -> HTTP 503
  *   [network] -> connection reset
  *
+ * It also answers `POST /v1/messages`, the Anthropic-shaped endpoint the
+ * optional savings assistant and the M3e financial analyst call when
+ * `LLM_BASE_URL` points here. That lets the browser suite exercise the real
+ * provider adapter and the assistant UI without a key. Replies are fixed prose
+ * containing no digits: any number the model writes must exist in the backend
+ * context, and the strict validator discards a response that invents one. The
+ * analyst tasks only cite evidence keys the backend listed.
+ *
  * Only the request path is logged. Descriptions are never logged.
  */
 import { createServer } from 'node:http';
@@ -84,6 +92,133 @@ function toResponse(description, type) {
     alternatives,
     modelName: MODEL_NAME,
     modelVersion: MODEL_VERSION,
+  };
+}
+
+/**
+ * Deterministic assistant reply for one prompt. The API sends a single user
+ * message holding JSON (`task`, `availableEvidenceKeys`, `schema`, …), so the
+ * stub can serve the right shape without understanding Vietnamese.
+ */
+function assistantReply(prompt) {
+  const keys = Array.isArray(prompt.availableEvidenceKeys)
+    ? prompt.availableEvidenceKeys.filter((key) => typeof key === 'string')
+    : [];
+  const goalKey = keys.find((item) => item.startsWith('goal:')) ?? keys[0] ?? null;
+  // A question about progress is best answered with the progress entry, which
+  // carries the backend's status and reason.
+  const progressKey = keys.find((item) => item.startsWith('progress:')) ?? goalKey;
+  if (prompt.task === 'EXPLAIN_SAVINGS_PLAN') {
+    return {
+      summary: 'Kế hoạch tháng này dựa trên dòng tiền đã ghi nhận của bạn.',
+      sections: [
+        { title: 'Khả năng tiết kiệm', body: 'Hệ thống tính từ các tháng đã kết thúc gần nhất.' },
+        {
+          title: 'Khoản dự phòng',
+          body: 'Một phần dòng tiền ròng luôn được giữ lại theo quy tắc cố định.',
+        },
+        { title: 'Ưu tiên', body: 'Mục tiêu gần hạn được xếp trước trong kế hoạch.' },
+      ],
+    };
+  }
+  if (prompt.task === 'SUGGEST_SAVINGS_ACTIONS') {
+    return {
+      suggestions: [
+        {
+          title: 'Duy trì nhịp góp hiện tại',
+          explanation: 'Tiến độ và dòng tiền cho thấy kế hoạch đang khả thi.',
+          expectedImpact: 'Có thể giữ đúng hạn nếu nhịp góp không đổi; đây là ước tính.',
+          evidenceKeys: goalKey ? [goalKey] : [],
+          confidence: 'medium',
+          limitations: ['Chưa tính lạm phát.'],
+        },
+      ],
+    };
+  }
+
+  /**
+   * Picks evidence keys the backend actually offered, preferring the one that
+   * matches the point being made. Never invents a key and never repeats digits.
+   */
+  const analystKeys = (preferred, count = 1) => {
+    const available = preferred.filter((key) => keys.includes(key));
+    const pool = available.length > 0 ? available : keys;
+    return Array.from(
+      { length: count },
+      (_, index) => pool[index % Math.max(pool.length, 1)],
+    ).filter((key) => typeof key === 'string');
+  };
+
+  if (prompt.task === 'ANALYTICS_SUMMARY') {
+    return {
+      summary: 'Tình hình tài chính trong kỳ dựa trên các chỉ số hệ thống đã tính.',
+      highlights: [
+        {
+          title: 'Dòng tiền trong kỳ',
+          body: 'Thu nhập và chi tiêu do hệ thống tính từ giao dịch đã ghi nhận.',
+          evidenceKeys: analystKeys(['overview_income', 'overview_expense']),
+        },
+        {
+          title: 'Ngân sách',
+          body: 'Hạn mức được so với chi tiêu cùng loại tiền trong tháng.',
+          evidenceKeys: analystKeys(['budgets_summary', 'overview_net']),
+        },
+        {
+          title: 'Sức khỏe tài chính',
+          body: 'Điểm tổng chỉ dựa trên các nhóm có đủ dữ liệu.',
+          evidenceKeys: analystKeys(['health_overall', 'overview_net']),
+        },
+      ],
+    };
+  }
+  if (prompt.task === 'ANALYTICS_EXPLAIN') {
+    return {
+      summary: 'Các chỉ số trong kỳ được giải thích từ dữ liệu đã ghi nhận.',
+      sections: [
+        {
+          title: 'Dòng tiền',
+          body: 'Dòng tiền ròng là số hệ thống tính từ thu nhập trừ chi tiêu trong kỳ.',
+        },
+        {
+          title: 'Danh mục chi tiêu',
+          body: 'Tỷ trọng từng danh mục do hệ thống tính trên tổng chi đã ghi nhận.',
+        },
+        {
+          title: 'Dự báo và sức khỏe tài chính',
+          body: 'Dự báo là ước tính từ các tháng đã kết thúc; điểm sức khỏe theo bộ quy tắc công khai.',
+        },
+      ],
+      evidenceKeys: analystKeys(
+        ['overview_net', 'budgets_summary', 'health_overall', 'forecast_net'],
+        2,
+      ),
+    };
+  }
+  if (prompt.task === 'ANALYTICS_RECOMMENDATIONS') {
+    return {
+      recommendations: [
+        {
+          title: 'Xem lại ngân sách đang căng',
+          detail: 'Có ngân sách đã gần hoặc vượt hạn mức trong tháng.',
+          expectedImpact: 'Giữ chi tiêu trong hạn mức đã đặt; đây là ước tính, không tự áp dụng.',
+          evidenceKeys: analystKeys(['budgets_summary', 'health_overall', 'overview_net']),
+          confidence: 'medium',
+          limitations: ['Chỉ dựa trên dữ liệu đã ghi nhận.'],
+        },
+      ],
+    };
+  }
+  if (prompt.task === 'ANALYTICS_CHAT') {
+    return {
+      reply:
+        'Mình chỉ giải thích số liệu hệ thống đã tính và không thể thay đổi dữ liệu của bạn. Đây là ước tính dựa trên dữ liệu đã ghi nhận.',
+      referenceKeys: analystKeys(['budgets_summary', 'overview_net', 'health_overall']),
+    };
+  }
+  return {
+    reply:
+      'Mình chỉ giải thích và mô phỏng dựa trên số liệu hệ thống đã tính. Đây là ước tính, chưa có thay đổi nào được lưu.',
+    referenceKeys: progressKey ? [progressKey] : [],
   };
 }
 
@@ -168,6 +303,28 @@ const server = createServer(async (request, response) => {
       });
     } catch {
       sendJson(response, 400, { detail: 'invalid json' });
+    }
+    return;
+  }
+  if (request.method === 'POST' && pathname === '/v1/messages') {
+    try {
+      const body = await readJson(request);
+      let prompt = {};
+      try {
+        prompt = JSON.parse(String(body.messages?.[0]?.content ?? '{}'));
+      } catch {
+        prompt = {};
+      }
+      sendJson(response, 200, {
+        id: 'msg_e2e_stub',
+        type: 'message',
+        role: 'assistant',
+        model: body.model ?? MODEL_NAME,
+        content: [{ type: 'text', text: JSON.stringify(assistantReply(prompt)) }],
+        stop_reason: 'end_turn',
+      });
+    } catch {
+      sendJson(response, 400, { error: { message: 'invalid json' } });
     }
     return;
   }

@@ -1,11 +1,36 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { GoalContributionDto, GoalDto, InsightsMonthlyDto } from '@smart-finance/shared-types';
+import type {
+  ContributionHistoryDto,
+  GoalContributionDto,
+  GoalDto,
+  GoalProgressDto,
+  SavingsProgressDto,
+  SavingsRecommendationItemDto,
+  SavingsRecommendationsDto,
+} from '@smart-finance/shared-types';
+import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { todayInTimeZone } from '../lib/date';
 import { GoalsPage } from './GoalsPage';
+
+// Recharts cannot measure a container in jsdom; the real chart is exercised by
+// the browser E2E suite. Keep the DOM small and deterministic here.
+vi.mock('recharts', () => {
+  const Container = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
+  return {
+    ResponsiveContainer: Container,
+    LineChart: Container,
+    Line: () => null,
+    CartesianGrid: () => null,
+    Legend: () => null,
+    Tooltip: () => null,
+    XAxis: () => null,
+    YAxis: () => null,
+  };
+});
 
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({
@@ -50,33 +75,75 @@ function makeGoal(overrides: Partial<GoalDto> = {}): GoalDto {
   };
 }
 
-function makeMonthly(overrides: Partial<InsightsMonthlyDto> = {}): InsightsMonthlyDto {
+function makeRecommendationItem(
+  overrides: Partial<SavingsRecommendationItemDto> = {},
+): SavingsRecommendationItemDto {
+  return {
+    goalId: 'goal-1',
+    goalName: 'Laptop mới',
+    currency: 'VND',
+    displayStatus: 'ACTIVE',
+    targetDate: '2027-04-30',
+    monthsRemaining: 6,
+    remainingAmount: '12000000.00',
+    requiredMonthlySaving: '2000000.00',
+    recommendedMonthlySaving: '2000000.00',
+    estimatedCompletionDate: '2027-04-30',
+    feasibility: 'ON_TRACK',
+    priority: 1,
+    priorityReason: 'Hạn chót 2027-04-30; xếp theo thứ tự hạn gần nhất.',
+    explanation: 'Đề xuất 2.000.000 VND/tháng để hoàn thành trước 2027-04-30.',
+    ...overrides,
+  };
+}
+
+function makeRecommendations(
+  overrides: Partial<SavingsRecommendationsDto> = {},
+): SavingsRecommendationsDto {
   return {
     currency: 'VND',
     timezone: 'Asia/Ho_Chi_Minh',
-    estimated: false,
-    months: [
-      {
-        month: '2026-09',
-        monthStatus: 'complete',
-        income: '10000000.00',
-        expense: '4000000.00',
-        net: '6000000.00',
-        savingsRate: 60,
-        transactionCount: 2,
-        hasTransactions: true,
-      },
-      {
-        month: '2026-10',
-        monthStatus: 'in_progress',
-        income: '20000000.00',
-        expense: '5000000.00',
-        net: '15000000.00',
-        savingsRate: 75,
-        transactionCount: 3,
-        hasTransactions: true,
-      },
+    generatedAt: '2026-10-30T03:00:00.000Z',
+    status: 'available',
+    capacity: {
+      status: 'available',
+      reason: null,
+      currency: 'VND',
+      monthsAnalyzed: 3,
+      analyzedMonths: ['2026-07', '2026-08', '2026-09'],
+      averageMonthlyIncome: '10000000.00',
+      averageMonthlyExpense: '4000000.00',
+      averageNetCashFlow: '6000000.00',
+      historicalSavingsRate: 60,
+      safetyBufferPercent: 20,
+      safetyBufferAmount: '1200000.00',
+      suggestedMonthlySaving: '4800000.00',
+      isPositive: true,
+      confidence: 'high',
+    },
+    monthlyBudget: '4800000.00',
+    simulated: false,
+    simulatedMonthlySaving: null,
+    items: [
+      makeRecommendationItem(),
+      makeRecommendationItem({
+        goalId: 'goal-2',
+        goalName: 'Quỹ dự phòng',
+        targetDate: '2027-12-30',
+        monthsRemaining: 14,
+        remainingAmount: '30000000.00',
+        requiredMonthlySaving: '2500000.00',
+        recommendedMonthlySaving: '2500000.00',
+        estimatedCompletionDate: '2027-12-30',
+        priority: 2,
+        priorityReason: 'Hạn chót 2027-12-30; xếp theo thứ tự hạn gần nhất.',
+      }),
     ],
+    allocatedMonthly: '4500000.00',
+    unallocatedMonthly: '300000.00',
+    excluded: { paused: 0, completed: 0, archived: 0 },
+    assumptions: ['Chỉ dùng tối đa 6 tháng đã kết thúc có giao dịch.'],
+    limitations: ['Đây là gợi ý, không phải cam kết.'],
     ...overrides,
   };
 }
@@ -97,13 +164,104 @@ function json(body: unknown, status = 200): Response {
 function createServer(initialGoals: GoalDto[]) {
   const state = [...initialGoals];
   const calls: RecordedCall[] = [];
-  let monthly = makeMonthly();
+  let recommendations = makeRecommendations();
   let failGoals = false;
 
   function patchGoal(id: string, patch: Partial<GoalDto>): GoalDto {
     const index = state.findIndex((goal) => goal.id === id);
     if (index >= 0) state[index] = { ...state[index], ...patch };
     return state[index];
+  }
+
+  // Progress is computed by the API in production; these fixtures only echo the
+  // goal rows so the page tests exercise the wiring, not the financial rules.
+  function goalProgress(goal: GoalDto): GoalProgressDto {
+    return {
+      goalId: goal.id,
+      name: goal.name,
+      currency: goal.currency,
+      status: goal.status,
+      displayStatus: goal.displayStatus,
+      targetAmount: goal.targetAmount,
+      savedAmount: goal.savedAmount,
+      remainingAmount: goal.remainingAmount,
+      completionPercentage: goal.percentage,
+      startDate: goal.startDate,
+      targetDate: goal.targetDate,
+      monthsRemaining: goal.monthsRemaining,
+      requiredMonthlySaving: goal.requiredMonthlySaving,
+      expectedAmount: null,
+      expectedPercentage: null,
+      actualVsExpected: null,
+      atRisk: null,
+      aheadOfSchedule: null,
+      pace: {
+        monthsObserved: 1,
+        averageMonthlyContribution: null,
+        monthsToComplete: null,
+        estimatedCompletionDate: null,
+        projectedAmountAtDeadline: null,
+        projectedHitsDeadline: null,
+      },
+      progressStatus: 'INSUFFICIENT_DATA',
+      statusReason: 'Chưa đủ dữ liệu để so sánh với kế hoạch.',
+      lastContributionAt: null,
+      timeline: [],
+    };
+  }
+
+  function savingsProgress(currency: string): SavingsProgressDto {
+    const scoped = state.filter((goal) => goal.currency === currency && goal.status !== 'ARCHIVED');
+    const archived = state.filter(
+      (goal) => goal.currency === currency && goal.status === 'ARCHIVED',
+    ).length;
+    const totalTarget = scoped.reduce((total, goal) => total + Number(goal.targetAmount), 0);
+    const totalSaved = scoped.reduce((total, goal) => total + Number(goal.savedAmount), 0);
+    const totalRemaining = scoped.reduce((total, goal) => total + Number(goal.remainingAmount), 0);
+    return {
+      currency,
+      timezone: 'Asia/Ho_Chi_Minh',
+      today: '2026-10-30',
+      generatedAt: '2026-10-30T03:00:00.000Z',
+      asOf: '2026-10-30',
+      summary: {
+        currency,
+        activeGoals: scoped.filter((goal) => goal.status === 'ACTIVE').length,
+        onTrack: 0,
+        atRisk: 0,
+        overdue: scoped.filter((goal) => goal.displayStatus === 'OVERDUE').length,
+        completed: scoped.filter((goal) => goal.status === 'COMPLETED').length,
+        paused: scoped.filter((goal) => goal.status === 'PAUSED').length,
+        insufficientData: scoped.length,
+        totalTargetAmount: totalTarget.toFixed(2),
+        totalSavedAmount: totalSaved.toFixed(2),
+        totalRemainingAmount: totalRemaining.toFixed(2),
+        overallPercentage: totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0,
+      },
+      goals: scoped.map(goalProgress),
+      excluded: { archived },
+      rules: ['Quy tắc phân loại tiến độ do máy chủ tính.'],
+      limitations: ['Chỉ dùng dữ liệu thử trong bài kiểm thử này.'],
+    };
+  }
+
+  function contributionHistory(goalId: string | null): ContributionHistoryDto {
+    const goal = goalId ? state.find((item) => item.id === goalId) : undefined;
+    return {
+      currency: goal?.currency ?? 'VND',
+      timezone: 'Asia/Ho_Chi_Minh',
+      monthCount: 6,
+      fromMonth: '2026-05',
+      toMonth: '2026-10',
+      goalId,
+      openingAmount: '0.00',
+      totalAmount: '0.00',
+      totalCount: 0,
+      months: [],
+      items: [],
+      truncated: false,
+      limitations: [],
+    };
   }
 
   const fetchMock = vi.fn(
@@ -116,7 +274,23 @@ function createServer(initialGoals: GoalDto[]) {
         : undefined;
       calls.push({ method, url: `${parsed.pathname}${parsed.search}`, body });
 
-      if (parsed.pathname.endsWith('/insights/monthly')) return json(monthly);
+      if (parsed.pathname.endsWith('/insights/savings-recommendations'))
+        return json(recommendations);
+
+      const goalProgressMatch = parsed.pathname.match(/\/savings\/progress\/([^/]+)$/);
+      if (method === 'GET' && goalProgressMatch) {
+        const goal = state.find((item) => item.id === goalProgressMatch[1]);
+        if (!goal) return json({ statusCode: 404, code: 'NOT_FOUND', message: 'Không thấy' }, 404);
+        return json(goalProgress(goal));
+      }
+
+      if (method === 'GET' && parsed.pathname.endsWith('/savings/progress')) {
+        return json(savingsProgress(parsed.searchParams.get('currency') ?? 'VND'));
+      }
+
+      if (method === 'GET' && parsed.pathname.endsWith('/savings/contribution-history')) {
+        return json(contributionHistory(parsed.searchParams.get('goalId')));
+      }
 
       if (method === 'GET' && parsed.pathname.endsWith('/goals')) {
         if (failGoals) {
@@ -189,8 +363,8 @@ function createServer(initialGoals: GoalDto[]) {
     calls,
     state,
     fetchMock,
-    setMonthly(next: InsightsMonthlyDto) {
-      monthly = next;
+    setRecommendations(next: SavingsRecommendationsDto) {
+      recommendations = next;
     },
     setFailGoals(value: boolean) {
       failGoals = value;
@@ -260,7 +434,7 @@ describe('GoalsPage — loading, errors and empty state', () => {
   });
 });
 
-describe('GoalsPage — list, progress and reference figures', () => {
+describe('GoalsPage — list, progress and recommendations', () => {
   it('renders progress, remaining amount, monthly target and status', async () => {
     createServer([
       makeGoal({
@@ -330,64 +504,103 @@ describe('GoalsPage — list, progress and reference figures', () => {
     renderPage();
 
     await screen.findByText('Mua laptop');
-    const summary = screen.getByLabelText('Tổng quan tiến độ');
-    expect(within(summary).getByText(/30\.000\.000/)).toBeInTheDocument();
-    expect(within(summary).getByText(/Số liệu chỉ tính cho mục tiêu bằng VND/)).toBeInTheDocument();
+    const summary = await screen.findByLabelText('Tổng quan tiến độ');
+    expect(await within(summary).findByText(/30\.000\.000/)).toBeInTheDocument();
+    expect(
+      await within(summary).findByText(/Số liệu chỉ tính cho mục tiêu bằng VND/),
+    ).toBeInTheDocument();
 
     await user.selectOptions(screen.getByLabelText('Lọc theo tiền tệ'), 'USD');
 
     await waitFor(() => expect(screen.queryByText('Mua laptop')).not.toBeInTheDocument());
     expect(screen.getByText('MacBook USD')).toBeInTheDocument();
     const usdSummary = screen.getByLabelText('Tổng quan tiến độ');
-    expect(within(usdSummary).getByText(/1\.000,00/)).toBeInTheDocument();
+    expect(await within(usdSummary).findByText(/1\.000,00/)).toBeInTheDocument();
     expect(within(usdSummary).getByText(/250,00/)).toBeInTheDocument();
     expect(
-      within(usdSummary).getByText(/Số liệu chỉ tính cho mục tiêu bằng USD/),
+      await within(usdSummary).findByText(/Số liệu chỉ tính cho mục tiêu bằng USD/),
     ).toBeInTheDocument();
   });
 
-  it('shows reference income, expense, net cash flow and savings rate from insights', async () => {
-    createServer([makeGoal()]);
+  it('shows the savings recommendation in the selected goal currency', async () => {
+    const user = userEvent.setup();
+    const server = createServer([
+      makeGoal(),
+      makeGoal({
+        id: 'goal-usd',
+        name: 'MacBook USD',
+        currency: 'USD',
+        targetAmount: '1000.00',
+        savedAmount: '250.00',
+        remainingAmount: '750.00',
+        percentage: 25,
+        requiredMonthlySaving: null,
+      }),
+    ]);
     renderPage();
 
     await screen.findByText('Mua laptop');
-    const panel = await screen.findByLabelText('Số liệu tham khảo');
-    expect(within(panel).getByText(/15\.000\.000/)).toBeInTheDocument();
-    expect(within(panel).getByText(/4\.500\.000/)).toBeInTheDocument();
-    const netStat = within(panel).getByText('Dòng tiền ròng TB/tháng').parentElement;
-    if (!netStat) throw new Error('Net cash flow stat is missing');
-    expect(within(netStat).getByText(/10\.500\.000/)).toBeInTheDocument();
-    expect(within(panel).getByText('70.0%')).toBeInTheDocument();
-    expect(within(panel).getByText(/Khả năng tiết kiệm tham khảo/)).toBeInTheDocument();
-    expect(
-      within(panel).getByText(/không được cộng tự động vào số tiền đã tiết kiệm/),
-    ).toBeInTheDocument();
+    await screen.findByText('Laptop mới');
+    const panel = screen.getByLabelText('Đề xuất tiết kiệm');
+    expect(within(panel).getAllByText(/4\.800\.000/).length).toBeGreaterThan(0);
+    expect(within(panel).getByText(/10\.000\.000/)).toBeInTheDocument();
+    expect(within(panel).getAllByText(/3 tháng/).length).toBeGreaterThan(0);
+    expect(within(panel).getByText('Laptop mới')).toBeInTheDocument();
+    expect(within(panel).getAllByText('Đúng tiến độ')).toHaveLength(2);
+    expect(within(panel).getAllByText(/Hạn chót 2027-04-30/).length).toBeGreaterThan(0);
+    expect(within(panel).getByText(/không tự tạo khoản góp hay sửa mục tiêu/)).toBeInTheDocument();
+    expect(callsFor(server, 'GET', '/insights/savings-recommendations?currency=VND')).toHaveLength(
+      1,
+    );
+
+    await user.selectOptions(screen.getByLabelText('Lọc theo tiền tệ'), 'USD');
+
+    await waitFor(() =>
+      expect(
+        callsFor(server, 'GET', '/insights/savings-recommendations?currency=USD'),
+      ).toHaveLength(1),
+    );
   });
 
-  it('says when there is no insight data for the currency yet', async () => {
+  it('shows the insufficient-data message when the currency has no completed months', async () => {
     const server = createServer([makeGoal()]);
-    server.setMonthly(
-      makeMonthly({
-        months: [
-          {
-            month: '2026-10',
-            monthStatus: 'in_progress',
-            income: '0.00',
-            expense: '0.00',
-            net: '0.00',
-            savingsRate: null,
-            transactionCount: 0,
-            hasTransactions: false,
-          },
+    server.setRecommendations(
+      makeRecommendations({
+        status: 'insufficient_data',
+        monthlyBudget: null,
+        unallocatedMonthly: null,
+        allocatedMonthly: '0.00',
+        capacity: {
+          ...makeRecommendations().capacity,
+          status: 'insufficient_data',
+          reason: 'no_complete_months',
+          monthsAnalyzed: 0,
+          analyzedMonths: [],
+          averageMonthlyIncome: null,
+          averageMonthlyExpense: null,
+          averageNetCashFlow: null,
+          historicalSavingsRate: null,
+          safetyBufferAmount: null,
+          suggestedMonthlySaving: null,
+          isPositive: false,
+          confidence: 'low',
+        },
+        items: [
+          makeRecommendationItem({
+            recommendedMonthlySaving: null,
+            estimatedCompletionDate: null,
+            feasibility: 'INSUFFICIENT_DATA',
+          }),
         ],
       }),
     );
     renderPage();
 
     await screen.findByText('Mua laptop');
-    expect(
-      await screen.findByText('Chưa có giao dịch VND để tính số liệu tham khảo.'),
-    ).toBeInTheDocument();
+    await screen.findByText(/Chưa có tháng nào đã kết thúc với giao dịch VND/);
+    const panel = screen.getByLabelText('Đề xuất tiết kiệm');
+    expect(within(panel).getByText('Chưa đủ dữ liệu')).toBeInTheDocument();
+    expect(within(panel).getByText(/Chưa có ngân sách để phân bổ/)).toBeInTheDocument();
   });
 });
 
@@ -570,6 +783,12 @@ describe('GoalsPage — status changes and archiving', () => {
     expect(callsFor(server, 'PATCH', '/goals/goal-1')[0].body).toEqual({ status: 'PAUSED' });
     await waitFor(() =>
       expect(within(goalCard('Mua laptop')).getByText('Tạm dừng')).toBeInTheDocument(),
+    );
+    // A paused goal changes the allocation, so the advice is refetched.
+    await waitFor(() =>
+      expect(
+        callsFor(server, 'GET', '/insights/savings-recommendations').length,
+      ).toBeGreaterThanOrEqual(2),
     );
 
     dialog = screen.getByRole('dialog');

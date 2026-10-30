@@ -10,6 +10,11 @@ export default tseslint.config(
       '**/dist/**',
       '**/coverage/**',
       '**/node_modules/**',
+      // Playwright output is generated (and gitignored); it contains bundled
+      // report assets that are not source.
+      '**/playwright-report/**',
+      '**/test-results/**',
+      '**/blob-report/**',
       '**/*.d.ts',
       '**/vite.config.ts',
       '**/vitest.config.ts',

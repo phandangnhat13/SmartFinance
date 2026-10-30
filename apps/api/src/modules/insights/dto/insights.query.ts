@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { IsInt, IsOptional, Matches, Max, Min } from 'class-validator';
+import { MONEY_REGEX } from '../../../common/utils/money';
 import { MONTH_REGEX } from '../../../common/utils/period';
 
 export const MAX_INSIGHT_MONTHS = 24;
@@ -26,4 +27,20 @@ export class MonthlyInsightsQuery extends InsightsQuery {
   @Min(1)
   @Max(MAX_INSIGHT_MONTHS)
   months?: number;
+}
+
+export class SavingsRecommendationQuery {
+  @ApiPropertyOptional({ example: 'VND', description: 'Mã tiền tệ 3 ký tự' })
+  @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toUpperCase() : value))
+  @Matches(/^[A-Z]{3}$/, { message: 'currency phải là mã 3 ký tự, ví dụ VND' })
+  currency?: string;
+
+  @ApiPropertyOptional({
+    example: '3000000',
+    description: 'Mức tiết kiệm giả định mỗi tháng để mô phỏng (không ghi dữ liệu)',
+  })
+  @IsOptional()
+  @Matches(MONEY_REGEX, { message: 'assumedMonthlySaving phải là số tiền không âm' })
+  assumedMonthlySaving?: string;
 }

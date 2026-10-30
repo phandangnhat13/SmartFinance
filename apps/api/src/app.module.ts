@@ -8,6 +8,10 @@ import { AccountsModule } from './modules/accounts/accounts.module';
 import { AiModule } from './modules/ai/ai.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { AnalyticsCategoryBudgetModule } from './modules/analytics-category-budget/analytics-category-budget.module';
+import { AnalyticsFinancialHealthModule } from './modules/analytics-financial-health/financial-health.module';
+import { AnalyticsForecastModule } from './modules/analytics-forecast/analytics-forecast.module';
+import { AnalyticsTrendsModule } from './modules/analytics-trends/analytics-trends.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BudgetsModule } from './modules/budgets/budgets.module';
 import { CategoriesModule } from './modules/categories/categories.module';
@@ -15,6 +19,7 @@ import { GoalsModule } from './modules/goals/goals.module';
 import { HealthModule } from './modules/health/health.module';
 import { ImportsModule } from './modules/imports/imports.module';
 import { InsightsModule } from './modules/insights/insights.module';
+import { SavingsModule } from './modules/savings/savings.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -42,7 +47,12 @@ import { UsersModule } from './modules/users/users.module';
     GoalsModule,
     AlertsModule,
     AnalyticsModule,
+    AnalyticsTrendsModule,
+    AnalyticsCategoryBudgetModule,
+    AnalyticsForecastModule,
+    AnalyticsFinancialHealthModule,
     InsightsModule,
+    SavingsModule,
     ImportsModule,
     AiModule,
     HealthModule,

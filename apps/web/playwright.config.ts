@@ -69,6 +69,15 @@ export default defineConfig({
         COOKIE_SECURE: 'false',
         AI_SERVICE_URL: `http://127.0.0.1:${E2E_AI_PORT}`,
         AI_TIMEOUT_MS: '1000',
+        // The savings assistant talks to the same local stub, using its
+        // Anthropic-shaped `/v1/messages` endpoint. The key is a stub-only
+        // placeholder: nothing leaves 127.0.0.1.
+        LLM_PROVIDER: 'anthropic',
+        LLM_API_KEY: 'e2e-stub-key',
+        LLM_BASE_URL: `http://127.0.0.1:${E2E_AI_PORT}`,
+        LLM_MODEL: 'claude-opus-5-5',
+        LLM_TIMEOUT_MS: '2000',
+        LLM_MAX_RETRIES: '0',
         // The suite registers a throwaway user per spec (more than the
         // production limit of 5 registrations/minute per IP). This test-only
         // override keeps that protection untouched in every real environment.

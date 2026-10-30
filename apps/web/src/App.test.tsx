@@ -21,6 +21,10 @@ function renderApp(path: string) {
 }
 
 describe('App routing', () => {
+  // The auth bootstrap is asynchronous; under a loaded CI worker the default
+  // one-second findBy timeout can elapse while the app still shows "Đang tải".
+  const SLOW_BOOTSTRAP = { timeout: 5_000 };
+
   beforeEach(() => {
     vi.stubGlobal(
       'fetch',
@@ -43,17 +47,23 @@ describe('App routing', () => {
 
   it('redirects unauthenticated visitors from the dashboard to the login page', async () => {
     renderApp('/dashboard');
-    expect(await screen.findByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Đăng nhập' }, SLOW_BOOTSTRAP),
+    ).toBeInTheDocument();
   });
 
   it('renders the registration page without a session', async () => {
     renderApp('/register');
-    expect(await screen.findByRole('heading', { name: 'Tạo tài khoản' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Tạo tài khoản' }, SLOW_BOOTSTRAP),
+    ).toBeInTheDocument();
   });
 
   it('shows the not-found page for unknown protected routes', async () => {
     renderApp('/does-not-exist');
     // The protected route redirects unauthenticated users to login first.
-    expect(await screen.findByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Đăng nhập' }, SLOW_BOOTSTRAP),
+    ).toBeInTheDocument();
   });
 });

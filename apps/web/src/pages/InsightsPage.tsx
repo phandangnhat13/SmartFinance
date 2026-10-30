@@ -6,7 +6,6 @@ import type {
 } from '@smart-finance/shared-types';
 import { ArrowDownLeft, ArrowUpRight, PiggyBank, Plus, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Bar,
@@ -18,7 +17,15 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Badge, EmptyState, ErrorAlert, PageHeader, ProgressBar, Spinner } from '../components/ui';
+import {
+  Badge,
+  EmptyState,
+  ErrorAlert,
+  PageHeader,
+  ProgressBar,
+  Spinner,
+  StatCard,
+} from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { api, errorMessage } from '../lib/api';
 import { currentMonthRange } from '../lib/date';
@@ -34,33 +41,6 @@ function monthLabel(month: string): string {
 
 function savingsRateLabel(value: number | null): string {
   return value === null ? '—' : `${value.toFixed(1)}%`;
-}
-
-function StatCard({
-  label,
-  value,
-  icon,
-  hint,
-  valueClass,
-}: {
-  label: string;
-  value: string;
-  icon: ReactNode;
-  hint?: ReactNode;
-  valueClass?: string;
-}) {
-  return (
-    <div className="card">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-500">{label}</p>
-        {icon}
-      </div>
-      <p className={`mt-2 text-xl font-bold tracking-tight ${valueClass ?? 'text-slate-900'}`}>
-        {value}
-      </p>
-      {hint ? <div className="mt-1 text-xs text-slate-500">{hint}</div> : null}
-    </div>
-  );
 }
 
 export function InsightsPage() {
