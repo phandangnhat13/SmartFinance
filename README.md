@@ -3,10 +3,6 @@
 Ứng dụng web quản lý tài chính cá nhân: ghi chép thu/chi, ngân sách, mục tiêu tiết kiệm,
 báo cáo trực quan, nhập/xuất CSV và **phân loại giao dịch bằng AI** (đề xuất, người dùng xác nhận).
 
-Monorepo gồm: React SPA, NestJS REST API, PostgreSQL (Prisma), và Python FastAPI cho mô hình phân loại.
-
-> Tài liệu thiết kế và trạng thái triển khai: [docs/](docs/).
-
 ---
 
 ## 1. Tính năng
@@ -344,8 +340,3 @@ hết hạn cũng fail. Lý do và đường ảnh hưởng ghi tại
 | [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | Trạng thái thực tế, lệnh đã chạy, lỗi đã biết |
 
 ---
-
-## 11. Phạm vi
-
-Đây là đồ án học thuật. Ứng dụng **không** thực hiện thanh toán, chuyển tiền thật hay kết nối
-ngân hàng. Dữ liệu người dùng chỉ nằm trong PostgreSQL của bạn.
