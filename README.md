@@ -314,29 +314,3 @@ account,type,amount,occurredAt,description,category,note,currency
 nâng major. CI chạy `npm run audit:policy`: high/critical production chưa allowlist sẽ fail, entry
 hết hạn cũng fail. Lý do và đường ảnh hưởng ghi tại
 [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) và [docs/DECISIONS.md](docs/DECISIONS.md).
-
----
-
-## 10. Tài liệu
-
-| Tài liệu                                                       | Nội dung                                      |
-| -------------------------------------------------------------- | --------------------------------------------- |
-| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)               | Kế hoạch và tiến độ theo phase                |
-| [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)     | Kế hoạch vòng 2–3 (fullstack + AI + E2E)      |
-| [docs/IMPLEMENTATION_AUDIT.md](docs/IMPLEMENTATION_AUDIT.md)   | Kết quả audit, lỗi đã sửa, khoảng trống       |
-| [docs/PROJECT_CHARTER.md](docs/PROJECT_CHARTER.md)             | Mục tiêu, phạm vi, tiêu chí thành công        |
-| [docs/SRS.md](docs/SRS.md)                                     | Yêu cầu chức năng/phi chức năng               |
-| [docs/USE_CASES.md](docs/USE_CASES.md)                         | Use case và luồng chính                       |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                   | Kiến trúc, quyết định kỹ thuật                |
-| [docs/DATABASE_DESIGN.md](docs/DATABASE_DESIGN.md)             | Mô hình dữ liệu, ràng buộc                    |
-| [docs/API_SPECIFICATION.md](docs/API_SPECIFICATION.md)         | Đặc tả endpoint                               |
-| [docs/AI_RESEARCH_PLAN.md](docs/AI_RESEARCH_PLAN.md)           | Taxonomy, dữ liệu, mô hình, đánh giá          |
-| [docs/AI_DATASET_GUIDELINES.md](docs/AI_DATASET_GUIDELINES.md) | Quy tắc dataset, chia split, tái tạo          |
-| [docs/AI_EVALUATION_REPORT.md](docs/AI_EVALUATION_REPORT.md)   | Kết quả đánh giá 3 phương pháp (số thật)      |
-| [docs/AI_MODEL_CARD.md](docs/AI_MODEL_CARD.md)                 | Model card, hạn chế, cân nhắc đạo đức         |
-| [docs/AI_FEEDBACK_PIPELINE.md](docs/AI_FEEDBACK_PIPELINE.md)   | Consent, khử định danh, quy trình export      |
-| [docs/TEST_PLAN.md](docs/TEST_PLAN.md)                         | Chiến lược và kết quả kiểm thử                |
-| [docs/DECISIONS.md](docs/DECISIONS.md)                         | Nhật ký quyết định                            |
-| [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | Trạng thái thực tế, lệnh đã chạy, lỗi đã biết |
-
----
