@@ -183,7 +183,9 @@ test('shows the month overview, category comparison and previous-month state', a
   await expect(page.getByRole('link', { name: 'Phân tích' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Phân tích tài chính' })).toBeVisible();
 
-  const monthInput = page.getByLabel('Tháng');
+  // The explain button "Cách tính thay đổi: Thay đổi theo tháng trước" also
+  // contains "tháng", so the month input is matched by its exact label.
+  const monthInput = page.getByLabel('Tháng', { exact: true });
   await expect(monthInput).toHaveValue(currentMonth);
   await expect(page.getByText('Tháng đang diễn ra')).toBeVisible();
 
@@ -217,7 +219,7 @@ test('shows the month overview, category comparison and previous-month state', a
     previousMonth.getUTCMonth() + 1,
   ).padStart(2, '0')}`;
   await monthInput.fill(previous);
-  await expect(page.getByLabel('Tháng')).toHaveValue(previous);
+  await expect(page.getByLabel('Tháng', { exact: true })).toHaveValue(previous);
   await expect(statCard('Tỷ lệ tiết kiệm')).toContainText('—');
   await expect(page.getByText('Tháng đã kết thúc')).toBeVisible();
   await expect(statCard('Chi tiêu')).toContainText(/1\.000\.000/);

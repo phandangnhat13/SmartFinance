@@ -342,14 +342,19 @@ test('Stage 4 AI savings regions and alert filters fit every viewport', async ()
   const aiPanel = page.getByLabel('Trợ lý tiết kiệm AI');
   await expect(aiPanel.getByTestId('ai-explanation')).toBeVisible();
   await expect(aiPanel.getByTestId('ai-scenario')).toBeVisible();
-  await expect(aiPanel.getByTestId('ai-chat')).toBeVisible();
   await expect(aiPanel.getByText('Số liệu hệ thống')).toBeVisible();
+
+  // Chat now lives in the floating widget shared by every page. It must fit any
+  // viewport without widening the page.
+  await page.getByTestId('ai-chat-launcher').click();
+  const chatWidget = page.getByTestId('ai-chat-widget');
+  await expect(chatWidget).toBeVisible();
 
   for (const viewport of VIEWPORTS) {
     await page.setViewportSize(viewport);
     await waitForLayoutToSettle();
     await expectNoPageOverflow();
-    for (const testId of ['ai-explanation', 'ai-scenario', 'ai-chat']) {
+    for (const testId of ['ai-explanation', 'ai-scenario']) {
       const box = await aiPanel.getByTestId(testId).boundingBox();
       expect(box, `${testId} box at ${viewport.width}px`).not.toBeNull();
       expect(box!.x, `${testId} left at ${viewport.width}px`).toBeGreaterThanOrEqual(0);
@@ -357,7 +362,11 @@ test('Stage 4 AI savings regions and alert filters fit every viewport', async ()
         viewport.width + 1,
       );
     }
+    expectBoxInsideViewport(await chatWidget.boundingBox(), viewport, 'chat widget');
   }
+
+  await chatWidget.getByRole('button', { name: 'Đóng trợ lý AI' }).click();
+  await expect(chatWidget).toBeHidden();
 
   await page.goto('/alerts');
   await expect(page.getByRole('heading', { name: 'Cảnh báo chi tiêu' })).toBeVisible();

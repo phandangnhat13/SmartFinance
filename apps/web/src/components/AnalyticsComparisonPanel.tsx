@@ -2,7 +2,10 @@ import type {
   AnalyticsCategoryChangeDirection,
   AnalyticsPeriodComparisonDto,
 } from '@smart-finance/shared-types';
+import { analyticsPeriodComparison } from '../lib/explanations';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import { formatMoney, formatPercent } from '../lib/format';
+import { AskAIAction, ExplainButton } from './Explain';
 import { Badge } from './ui';
 
 const directionLabels: Record<
@@ -39,16 +42,32 @@ function PeriodStatus({ status }: { status: 'in_progress' | 'complete' }) {
 export function AnalyticsComparisonPanel({
   data,
   currency,
+  context,
 }: {
   data: AnalyticsPeriodComparisonDto;
   currency: string;
+  context?: AiChatContext;
 }) {
   const { current, previous, changes } = data;
   const noBaseline = !previous.hasTransactions;
 
   return (
     <section className="card" aria-label="So sánh với kỳ trước">
-      <h2 className="font-semibold text-ink">So sánh với kỳ trước</h2>
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="font-semibold text-ink">So sánh với kỳ trước</h2>
+        <ExplainButton
+          explanation={analyticsPeriodComparison}
+          label="Cách tính"
+          variant="link"
+          context={context}
+        />
+        <AskAIAction
+          prompt="Giải thích so sánh thu chi giữa kỳ này và kỳ trước của tôi."
+          assistantType="ANALYTICS"
+          context={context}
+          label="Hỏi AI về so sánh"
+        />
+      </div>
       <p className="mt-1 text-xs text-ink-muted">
         Đơn vị {currency} · múi giờ {data.timezone} · chỉ tính giao dịch thu và chi.
       </p>

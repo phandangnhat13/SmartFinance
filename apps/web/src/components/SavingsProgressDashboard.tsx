@@ -1,9 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import type { SavingsProgressDto, SavingsProgressStatus } from '@smart-finance/shared-types';
 import { SAVINGS_PROGRESS_STATUS_LABELS } from '@smart-finance/shared-types';
-import { Badge, ErrorAlert, ProgressBar, StatCard } from './ui';
+import { goalsProgress } from '../lib/explanations';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import { api, errorMessage } from '../lib/api';
 import { formatMoney } from '../lib/format';
+import { AskAIAction, ExplainButton } from './Explain';
+import { Badge, ErrorAlert, ProgressBar, StatCard } from './ui';
 
 const STATUS_ORDER: SavingsProgressStatus[] = [
   'ON_TRACK',
@@ -45,7 +48,13 @@ function countFor(data: SavingsProgressDto, status: SavingsProgressStatus): numb
  * The dashboard for one currency. Every figure comes from GET /savings/progress;
  * the page never adds or converts money itself.
  */
-export function SavingsProgressDashboard({ currency }: { currency: string }) {
+export function SavingsProgressDashboard({
+  currency,
+  context,
+}: {
+  currency: string;
+  context?: AiChatContext;
+}) {
   const query = useQuery({
     queryKey: ['savings-progress', currency],
     queryFn: () => api.get<SavingsProgressDto>(`/savings/progress?currency=${currency}`),
@@ -57,7 +66,21 @@ export function SavingsProgressDashboard({ currency }: { currency: string }) {
   return (
     <section className="mb-6" aria-label="Tổng quan tiến độ">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold text-ink">Tổng quan tiến độ</h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-sm font-semibold text-ink">Tổng quan tiến độ</h2>
+          <ExplainButton
+            explanation={goalsProgress}
+            label="Cách tính"
+            variant="link"
+            context={context}
+          />
+          <AskAIAction
+            prompt="Giải thích tiến độ các mục tiêu tiết kiệm của tôi và mục tiêu nào cần chú ý."
+            assistantType="SAVINGS"
+            context={context}
+            label="Hỏi AI về tiến độ"
+          />
+        </div>
         {data ? (
           <span className="text-xs text-ink-muted">
             {data.summary.activeGoals} mục tiêu đang thực hiện · cập nhật {data.today}

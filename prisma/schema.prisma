@@ -86,6 +86,18 @@ enum SpendingAlertStatus {
   MARKED_NORMAL
 }
 
+/// Which AI assistant a conversation belongs to. The existing M2e savings
+/// assistant and M3e analytics analyst share one conversation infrastructure.
+enum AiAssistantType {
+  SAVINGS
+  ANALYTICS
+}
+
+enum AiMessageRole {
+  USER
+  ASSISTANT
+}
+
 model User {
   id              String   @id @default(uuid()) @db.Uuid
   email           String   @unique
@@ -107,6 +119,7 @@ model User {
   aiPredictions  AiPrediction[]
   goalContributions GoalContribution[]
   spendingAlerts SpendingAlert[]
+  aiConversations AiConversation[]
 
   @@map("users")
 }
@@ -369,4 +382,42 @@ model SpendingAlert {
   @@index([userId, status, createdAt(sort: Desc)])
   @@index([userId, type, createdAt(sort: Desc)])
   @@map("spending_alerts")
+}
+
+/// One chat thread between a user and one assistant type.
+///
+/// `title` is derived from the first user message and can be renamed. The
+/// conversation is scoped to its owner: every read and write filters by both
+/// `id` and `userId`, so an id alone never grants access.
+model AiConversation {
+  id            String          @id @default(uuid()) @db.Uuid
+  userId        String          @db.Uuid
+  title         String          @db.VarChar(120)
+  assistantType AiAssistantType
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+
+  @@index([userId, updatedAt(sort: Desc)])
+  @@index([userId, assistantType, updatedAt(sort: Desc)])
+  @@map("ai_conversations")
+}
+
+/// A persisted chat turn. `metadata` holds only the structured reply pieces
+/// needed to re-render a stored answer (source, evidence, disclosure, intent,
+/// clarification, optional simulation) — never the full context payload.
+model AiMessage {
+  id             String        @id @default(uuid()) @db.Uuid
+  conversationId String        @db.Uuid
+  role           AiMessageRole
+  content        String        @db.Text
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
 }

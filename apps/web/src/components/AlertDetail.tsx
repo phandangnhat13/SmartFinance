@@ -3,6 +3,7 @@ import type { SpendingAlertDto, SpendingAlertStatus } from '@smart-finance/share
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { api, errorMessage } from '../lib/api';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import {
   ALERT_SEVERITY_LABELS,
   ALERT_SEVERITY_TONES,
@@ -24,7 +25,9 @@ import {
   resolveCurrency,
   toFiniteNumber,
 } from '../lib/alerts';
+import { alertsDetection, alertsSeverity } from '../lib/explanations';
 import { formatDateTime } from '../lib/format';
+import { AskAIAction, ExplainButton } from './Explain';
 import { Badge, ErrorAlert } from './ui';
 
 interface AlertDetailProps {
@@ -32,6 +35,8 @@ interface AlertDetailProps {
   timezone: string;
   fallbackCurrency: string;
   onUpdated: (alert: SpendingAlertDto) => void;
+  /** Called before opening the AI widget so the host modal can close first. */
+  onClose?: () => void;
 }
 
 interface FactRow {
@@ -298,11 +303,29 @@ function DuplicateFacts({
   );
 }
 
-export function AlertDetail({ alert, timezone, fallbackCurrency, onUpdated }: AlertDetailProps) {
+export function AlertDetail({
+  alert,
+  timezone,
+  fallbackCurrency,
+  onUpdated,
+  onClose,
+}: AlertDetailProps) {
   const queryClient = useQueryClient();
   const facts = isRecord(alert.facts) ? alert.facts : {};
   const currency = resolveCurrency(facts, fallbackCurrency);
   const actions = ALERT_STATUS_ACTIONS[alert.status] ?? [];
+  // Only the alert's own labels and normalized evidence keys travel with the
+  // AI request; transaction and account identifiers stay on this page.
+  const context: AiChatContext = {
+    page: 'alerts',
+    feature: `alert-${alert.type.toLowerCase()}`,
+    label: ALERT_TYPE_LABELS[alert.type],
+    currency,
+    ...(alert.periodStart && alert.periodEnd
+      ? { dateRange: { from: alert.periodStart, to: alert.periodEnd } }
+      : {}),
+    evidenceKeys: Object.keys(facts).sort().slice(0, 6),
+  };
 
   const updateStatus = useMutation({
     mutationFn: (status: SpendingAlertStatus) =>
@@ -323,10 +346,31 @@ export function AlertDetail({ alert, timezone, fallbackCurrency, onUpdated }: Al
         <Badge tone={ALERT_STATUS_TONES[alert.status]}>
           {`Trạng thái: ${ALERT_STATUS_LABELS[alert.status]}`}
         </Badge>
+        <ExplainButton
+          explanation={alertsSeverity}
+          label="Mức độ"
+          variant="link"
+          context={{ ...context, feature: 'alert-severity', label: 'Mức độ cảnh báo' }}
+        />
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-ink">Vì sao có cảnh báo này</h3>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-sm font-semibold text-ink">Vì sao có cảnh báo này</h3>
+          <ExplainButton
+            explanation={alertsDetection}
+            label="Cách phát hiện"
+            variant="link"
+            context={{ ...context, feature: 'alert-detection', label: 'Cách phát hiện' }}
+          />
+          <AskAIAction
+            prompt="Giải thích cảnh báo chi tiêu này: vì sao hệ thống phát hiện và tôi nên kiểm tra gì."
+            assistantType="ANALYTICS"
+            context={context}
+            label="Hỏi AI về cảnh báo này"
+            onBeforeOpen={() => onClose?.()}
+          />
+        </div>
         <p className="mt-1 break-words text-sm leading-relaxed text-ink-secondary">
           {alert.explanation}
         </p>

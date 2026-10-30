@@ -44,6 +44,21 @@ export function lastMonthsRange(timeZone: string, count: number): { from: string
   return { from, to: today };
 }
 
+/**
+ * First and last calendar day of a `YYYY-MM` month. Used for context labels
+ * only, so it does not apply a timezone: the month is already a calendar bucket.
+ */
+export function calendarMonthRange(month: string): { from: string; to: string } {
+  const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(month);
+  if (!match) {
+    const fallback = currentMonthRange('UTC');
+    return { from: fallback.from, to: fallback.to };
+  }
+  const [, year, monthNumber] = match;
+  const lastDay = new Date(Date.UTC(Number(year), Number(monthNumber), 0)).getUTCDate();
+  return { from: `${month}-01`, to: `${month}-${String(lastDay).padStart(2, '0')}` };
+}
+
 /** Converts a datetime-local value wall-clock time in `timeZone` to ISO UTC. */
 export function inputToIso(value: string, timeZone: string): string {
   const [datePart, timePart = '00:00'] = value.split('T');

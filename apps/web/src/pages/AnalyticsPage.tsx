@@ -23,19 +23,30 @@ import { AnalyticsCategoryPanel } from '../components/AnalyticsCategoryPanel';
 import { AnalyticsComparisonPanel } from '../components/AnalyticsComparisonPanel';
 import { AnalyticsForecastPanel } from '../components/AnalyticsForecastPanel';
 import { AnalyticsHealthPanel } from '../components/AnalyticsHealthPanel';
+import { AnalyticsHighlights } from '../components/AnalyticsHighlights';
+import { AnalyticsOverviewChart } from '../components/AnalyticsOverviewChart';
 import { AnalyticsTrendCharts } from '../components/AnalyticsTrendCharts';
 import {
   Badge,
   EmptyState,
   ErrorAlert,
+  HelpTip,
   PageHeader,
   Skeleton,
   StatCard,
   TabBar,
 } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import { api, errorMessage } from '../lib/api';
-import { currentMonthRange, todayInTimeZone } from '../lib/date';
+import { calendarMonthRange, currentMonthRange, todayInTimeZone } from '../lib/date';
+import {
+  analyticsExpense,
+  analyticsIncome,
+  analyticsNetCashFlow,
+  analyticsSavingsRate,
+  analyticsTransactionCount,
+} from '../lib/explanations';
 import { formatMoney, formatPercent } from '../lib/format';
 
 type PeriodKind = 'month' | 'quarter' | 'year' | 'custom';
@@ -279,6 +290,41 @@ export function AnalyticsPage() {
   const healthHistory = healthHistoryQuery.data;
   const period = overview?.period;
 
+  // Context describes what the page is showing. Only `currency` is forwarded to
+  // the API; the date range is display-only because the chat API has no field
+  // for it. Panels that ignore the period selector (health, forecast, trends)
+  // intentionally get no `dateRange`.
+  const baseContext: AiChatContext = {
+    page: 'analytics',
+    currency,
+    ...(period ? { dateRange: { from: period.from, to: period.to } } : {}),
+  };
+  const budgetContext: AiChatContext = {
+    page: 'analytics',
+    feature: 'budget-analysis',
+    label: 'Ngân sách tháng',
+    currency,
+    dateRange: calendarMonthRange(anchor),
+  };
+  const healthContext: AiChatContext = {
+    page: 'analytics',
+    feature: 'financial-health',
+    label: 'Sức khỏe tài chính',
+    currency,
+  };
+  const forecastContext: AiChatContext = {
+    page: 'analytics',
+    feature: 'forecast',
+    label: 'Dự báo tài chính',
+    currency,
+  };
+  const trendsContext: AiChatContext = {
+    page: 'analytics',
+    feature: 'trends',
+    label: 'Xu hướng theo tháng',
+    currency,
+  };
+
   // Keep the selector populated while a new period loads.
   useEffect(() => {
     if (overview?.availableCurrencies.length) {
@@ -300,10 +346,18 @@ export function AnalyticsPage() {
     <div>
       <PageHeader
         title="Xu hướng thu nhập & chi tiêu"
-        description="Phân tích dữ liệu giao dịch đã ghi nhận, tách riêng từng loại tiền tệ và theo múi giờ tài khoản."
+        description="Đọc nhanh điều đáng chú ý, mở từng tab để xem phân tích chi tiết."
       />
 
       <section className="filter-bar" aria-label="Bộ lọc phân tích">
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          <p className="text-sm font-semibold text-ink">Bộ lọc</p>
+          <HelpTip label="cách tính số liệu">
+            Chỉ giao dịch thu nhập và chi tiêu được tính; giao dịch chuyển tiền nội bộ bị loại trừ
+            và không có quy đổi tỷ giá giữa các loại tiền. Tháng không có giao dịch được để trống,
+            khác với tháng có giao dịch nhưng bằng 0.
+          </HelpTip>
+        </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label className="label" htmlFor="analyticsPeriod">
@@ -478,12 +532,6 @@ export function AnalyticsPage() {
             {anchor} · <span className="font-medium text-ink-secondary">{currency}</span>
           </span>
         </div>
-
-        <p className="mt-2 text-xs text-ink-muted">
-          Chỉ giao dịch thu nhập và chi tiêu được tính; giao dịch chuyển tiền nội bộ bị loại trừ và
-          không có quy đổi tỷ giá giữa các loại tiền. Tháng không có giao dịch được hiển thị là
-          &ldquo;không có dữ liệu&rdquo;, khác với tháng có giao dịch nhưng bằng 0.
-        </p>
       </section>
 
       <TabBar
@@ -531,6 +579,15 @@ export function AnalyticsPage() {
                 label="Thu nhập"
                 value={formatMoney(overview.income, currency)}
                 icon={<ArrowDownLeft className="h-5 w-5 text-income" />}
+                explain={analyticsIncome}
+                explainContext={{
+                  ...baseContext,
+                  feature: 'income',
+                  selectedMetric: 'Thu nhập',
+                  label: 'Thu nhập kỳ này',
+                  displayedValue: formatMoney(overview.income, currency),
+                  comparisonValue: formatPercent(overview.changes.income.percent),
+                }}
                 hint={
                   <>
                     Kỳ trước: {formatMoney(overview.previous.income, currency)} (
@@ -542,6 +599,15 @@ export function AnalyticsPage() {
                 label="Chi tiêu"
                 value={formatMoney(overview.expense, currency)}
                 icon={<ArrowUpRight className="h-5 w-5 text-expense" />}
+                explain={analyticsExpense}
+                explainContext={{
+                  ...baseContext,
+                  feature: 'expense',
+                  selectedMetric: 'Chi tiêu',
+                  label: 'Chi tiêu kỳ này',
+                  displayedValue: formatMoney(overview.expense, currency),
+                  comparisonValue: formatPercent(overview.changes.expense.percent),
+                }}
                 hint={
                   <>
                     Kỳ trước: {formatMoney(overview.previous.expense, currency)} (
@@ -554,6 +620,15 @@ export function AnalyticsPage() {
                 value={formatMoney(overview.net, currency)}
                 icon={<Wallet className="h-5 w-5 text-info" />}
                 valueClass={Number(overview.net) < 0 ? 'text-danger' : 'text-brand-hover'}
+                explain={analyticsNetCashFlow}
+                explainContext={{
+                  ...baseContext,
+                  feature: 'net-cash-flow',
+                  selectedMetric: 'Dòng tiền ròng',
+                  label: 'Dòng tiền ròng kỳ này',
+                  displayedValue: formatMoney(overview.net, currency),
+                  comparisonValue: formatMoney(overview.changes.net.amount, currency),
+                }}
                 hint={
                   <>
                     Chênh lệch: {Number(overview.changes.net.amount) > 0 ? '+' : ''}
@@ -565,6 +640,15 @@ export function AnalyticsPage() {
                 label="Tỷ lệ tiết kiệm"
                 value={savingsRateLabel(overview.savingsRate)}
                 icon={<PiggyBank className="h-5 w-5 text-accent" />}
+                explain={analyticsSavingsRate}
+                explainContext={{
+                  ...baseContext,
+                  feature: 'savings-rate',
+                  selectedMetric: 'Tỷ lệ tiết kiệm',
+                  label: 'Tỷ lệ tiết kiệm kỳ này',
+                  displayedValue: savingsRateLabel(overview.savingsRate),
+                  comparisonValue: savingsRateLabel(overview.previous.savingsRate),
+                }}
                 hint={
                   overview.savingsRate === null
                     ? 'Kỳ này chưa có thu nhập để tính tỷ lệ.'
@@ -579,6 +663,15 @@ export function AnalyticsPage() {
                 label="Số giao dịch"
                 value={overview.transactionCount.toLocaleString('vi-VN')}
                 icon={<Receipt className="h-5 w-5 text-ink-muted" />}
+                explain={analyticsTransactionCount}
+                explainContext={{
+                  ...baseContext,
+                  feature: 'transaction-count',
+                  selectedMetric: 'Số giao dịch',
+                  label: 'Số giao dịch kỳ này',
+                  displayedValue: overview.transactionCount.toLocaleString('vi-VN'),
+                  comparisonValue: overview.previous.transactionCount.toLocaleString('vi-VN'),
+                }}
                 hint={`Kỳ trước: ${overview.previous.transactionCount.toLocaleString('vi-VN')}`}
               />
             </div>
@@ -598,11 +691,39 @@ export function AnalyticsPage() {
             ) : null}
 
             <div className="mt-4">
-              <AnalyticsComparisonPanel data={comparison} currency={currency} />
+              <AnalyticsOverviewChart
+                history={healthHistory}
+                currency={currency}
+                context={{
+                  ...baseContext,
+                  feature: 'overview-chart',
+                  label: 'Diễn biến 6 tháng gần nhất',
+                }}
+              />
             </div>
 
             <div className="mt-4">
-              <AnalyticsHealthPanel data={health} history={healthHistory} />
+              <AnalyticsHighlights
+                data={comparison}
+                currency={currency}
+                context={{ ...baseContext, feature: 'highlights', label: 'Điểm đáng chú ý' }}
+              />
+            </div>
+
+            <div className="mt-4">
+              <AnalyticsComparisonPanel
+                data={comparison}
+                currency={currency}
+                context={{
+                  ...baseContext,
+                  feature: 'period-comparison',
+                  label: 'So sánh với kỳ trước',
+                }}
+              />
+            </div>
+
+            <div className="mt-4">
+              <AnalyticsHealthPanel data={health} history={healthHistory} context={healthContext} />
             </div>
           </>
         ) : onCategories && categories && income && expense && budgets && budgetPace ? (
@@ -618,11 +739,22 @@ export function AnalyticsPage() {
                 currency={currency}
                 selectedCategoryId={categoryId}
                 onSelectCategory={setCategoryId}
+                context={{
+                  ...baseContext,
+                  feature: 'category-analysis',
+                  label: 'Phân tích theo danh mục',
+                  selectedMetric: categoryType === 'INCOME' ? 'Thu nhập' : 'Chi tiêu',
+                }}
               />
             </div>
 
             <div className="mt-4">
-              <AnalyticsBudgetPanel data={budgets} pace={budgetPace} currency={currency} />
+              <AnalyticsBudgetPanel
+                data={budgets}
+                pace={budgetPace}
+                currency={currency}
+                context={budgetContext}
+              />
             </div>
           </>
         ) : onTrends && trends && forecast ? (
@@ -631,6 +763,7 @@ export function AnalyticsPage() {
               data={trends}
               currency={currency}
               timezone={overview?.timezone ?? timezone}
+              context={trendsContext}
             />
             <div className="mt-4">
               <AnalyticsForecastPanel
@@ -638,6 +771,7 @@ export function AnalyticsPage() {
                 currency={currency}
                 horizon={forecastHorizon}
                 onHorizonChange={setForecastHorizon}
+                context={forecastContext}
               />
             </div>
           </>

@@ -14,6 +14,7 @@ import {
   ConfirmDialog,
   EmptyState,
   ErrorAlert,
+  HelpTip,
   PageHeader,
   Pagination,
   Spinner,
@@ -21,6 +22,7 @@ import {
 } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { api, downloadFile, errorMessage } from '../lib/api';
+import { transactionsCategory, transactionsTypes } from '../lib/explanations';
 import { formatDateOnly, formatDateTime, formatMoney } from '../lib/format';
 import { useMediaQuery } from '../lib/useMediaQuery';
 
@@ -259,9 +261,12 @@ export function TransactionsPage() {
               />
             </div>
             <div>
-              <label className="label" htmlFor="filterType">
-                Loại
-              </label>
+              <span className="flex items-center gap-1.5">
+                <label className="label" htmlFor="filterType">
+                  Loại
+                </label>
+                <HelpTip label="Loại giao dịch" explanation={transactionsTypes} />
+              </span>
               <select
                 id="filterType"
                 className="input"
@@ -331,9 +336,12 @@ export function TransactionsPage() {
               </select>
             </div>
             <div>
-              <label className="label" htmlFor="filterCategory">
-                Danh mục
-              </label>
+              <span className="flex items-center gap-1.5">
+                <label className="label" htmlFor="filterCategory">
+                  Danh mục
+                </label>
+                <HelpTip label="Danh mục giao dịch" explanation={transactionsCategory} />
+              </span>
               <select
                 id="filterCategory"
                 className="input"

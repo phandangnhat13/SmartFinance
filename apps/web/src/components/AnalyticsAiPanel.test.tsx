@@ -3,7 +3,6 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {
   AiDisclosureDto,
-  AnalyticsAiChatReplyDto,
   AnalyticsAiExplanationDto,
   AnalyticsAiFactsDto,
   AnalyticsAiRecommendationsDto,
@@ -136,24 +135,6 @@ function makeRecommendations(
         requiresConfirmation: true,
       },
     ],
-    ...overrides,
-  };
-}
-
-function makeChatReply(overrides: Partial<AnalyticsAiChatReplyDto> = {}): AnalyticsAiChatReplyDto {
-  return {
-    currency: 'VND',
-    timezone: 'Asia/Ho_Chi_Minh',
-    generatedAt: '2026-10-30T03:00:00.000Z',
-    source: 'FALLBACK',
-    facts: makeFacts(),
-    evidence: [{ label: 'Tổng quan ngân sách tháng', value: '3 ngân sách: 1 vượt hạn mức' }],
-    limitations: ['Chỉ dựa trên dữ liệu đã ghi nhận.'],
-    canModifyData: false,
-    disclosure: DISCLOSURE_OFF,
-    intent: 'BUDGET',
-    reply: 'Có một ngân sách đang vượt hạn mức trong tháng này.',
-    clarification: null,
     ...overrides,
   };
 }
@@ -356,87 +337,5 @@ describe('AnalyticsAiPanel — recommendations', () => {
     expect(
       server.calls.filter((call) => /\/transactions|\/budgets|\/goals|\/accounts/.test(call.path)),
     ).toHaveLength(0);
-  });
-});
-
-describe('AnalyticsAiPanel — chat', () => {
-  it('sends one question at a time with no chat history', async () => {
-    let chatCount = 0;
-    const server = setupServer((_method, path) => {
-      if (path === '/ai/analytics/summary') return json(makeSummary());
-      chatCount += 1;
-      return json(
-        chatCount === 1
-          ? makeChatReply()
-          : makeChatReply({
-              intent: 'HEALTH',
-              reply: 'Điểm sức khỏe tài chính dựa trên các nhóm.',
-            }),
-      );
-    });
-    const user = userEvent.setup();
-    renderPanel();
-
-    await screen.findByTestId('ai-analytics-summary-text');
-    await user.click(screen.getByRole('button', { name: 'Ngân sách nào đang vượt hạn mức?' }));
-    await user.click(screen.getByRole('button', { name: 'Gửi' }));
-
-    expect(
-      await screen.findByText('Có một ngân sách đang vượt hạn mức trong tháng này.'),
-    ).toBeInTheDocument();
-    expect(screen.getByText('Ngân sách')).toBeInTheDocument();
-
-    await user.type(
-      screen.getByLabelText('Câu hỏi cho trợ lý phân tích'),
-      'Điểm sức khỏe thế nào?',
-    );
-    await user.click(screen.getByRole('button', { name: 'Gửi' }));
-
-    expect(
-      await screen.findByText('Điểm sức khỏe tài chính dựa trên các nhóm.'),
-    ).toBeInTheDocument();
-    await screen.findByText('Sức khỏe tài chính');
-
-    const chatCalls = server.calls.filter((call) => call.path === '/ai/analytics/chat');
-    expect(chatCalls).toHaveLength(2);
-    // Each question stands alone: there is no history field at all.
-    expect(chatCalls[0].body).toEqual({
-      currency: 'VND',
-      message: 'Ngân sách nào đang vượt hạn mức?',
-    });
-    expect(chatCalls[1].body).toEqual({
-      currency: 'VND',
-      message: 'Điểm sức khỏe thế nào?',
-    });
-  });
-
-  it('shows the refusal when the question asks to change data', async () => {
-    setupServer((_method, path) =>
-      path === '/ai/analytics/summary'
-        ? json(makeSummary())
-        : json(
-            makeChatReply({
-              intent: 'UNSUPPORTED',
-              reply: 'Mình chỉ phân tích dữ liệu đã ghi nhận.',
-              evidence: [],
-              clarification:
-                'Mình không thể tạo, sửa hay xóa giao dịch, ngân sách, mục tiêu hay số dư.',
-            }),
-          ),
-    );
-    const user = userEvent.setup();
-    renderPanel();
-
-    await screen.findByTestId('ai-analytics-summary-text');
-    await user.type(screen.getByLabelText('Câu hỏi cho trợ lý phân tích'), 'Xóa giao dịch đi');
-    await user.click(screen.getByRole('button', { name: 'Gửi' }));
-
-    expect(
-      await screen.findByText(
-        'Mình không thể tạo, sửa hay xóa giao dịch, ngân sách, mục tiêu hay số dư.',
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByText('Không hỗ trợ thay đổi dữ liệu')).toBeInTheDocument();
-    expect(screen.getByTestId('ai-chat-log')).toBeInTheDocument();
   });
 });

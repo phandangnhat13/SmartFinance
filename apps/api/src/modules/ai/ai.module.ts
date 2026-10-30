@@ -12,6 +12,8 @@ import { AI_PROVIDER, HttpAiProvider } from './ai.provider';
 import { AiService } from './ai.service';
 import { AnalyticsAnalystController } from './analytics-analyst/analytics-analyst.controller';
 import { AnalyticsAnalystService } from './analytics-analyst/analytics-analyst.service';
+import { AiConversationsController } from './conversations/ai-conversations.controller';
+import { AiConversationsService } from './conversations/ai-conversations.service';
 import { createLlmProvider } from './llm/llm.factory';
 import { LLM_PROVIDER } from './llm/llm.types';
 import { SavingsAssistantController } from './savings-assistant/savings-assistant.controller';
@@ -27,13 +29,19 @@ import { SavingsAssistantService } from './savings-assistant/savings-assistant.s
     AnalyticsForecastModule,
     AnalyticsFinancialHealthModule,
   ],
-  controllers: [AiController, SavingsAssistantController, AnalyticsAnalystController],
+  controllers: [
+    AiController,
+    SavingsAssistantController,
+    AnalyticsAnalystController,
+    AiConversationsController,
+  ],
   providers: [
     AiService,
     HttpAiProvider,
     { provide: AI_PROVIDER, useExisting: HttpAiProvider },
     SavingsAssistantService,
     AnalyticsAnalystService,
+    AiConversationsService,
     {
       // Disabled unless explicitly configured; never enabled by a typo.
       provide: LLM_PROVIDER,

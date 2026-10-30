@@ -1,4 +1,5 @@
 import type { AnalyticsTrendsDto } from '@smart-finance/shared-types';
+import { MessageSquare } from 'lucide-react';
 import {
   Bar,
   BarChart,
@@ -12,13 +13,18 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { openAiChat } from '../lib/ai-chat-events';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import { chartTheme } from '../lib/chartTheme';
+import { analyticsTrends } from '../lib/explanations';
 import { formatMoney, formatMonthLabel } from '../lib/format';
+import { ExplainButton } from './Explain';
 
 interface Props {
   data: AnalyticsTrendsDto;
   currency: string;
   timezone: string;
+  context?: AiChatContext;
 }
 
 function compactMoney(value: number): string {
@@ -36,7 +42,7 @@ function compactMoney(value: number): string {
  * "Không có dữ liệu" for that month. A month with transactions but zero income
  * or expense remains a measured 0 and is plotted as such.
  */
-export function AnalyticsTrendCharts({ data, currency, timezone }: Props) {
+export function AnalyticsTrendCharts({ data, currency, timezone, context }: Props) {
   const points = data.points.map((point) => ({
     month: point.month,
     label: formatMonthLabel(point.month),
@@ -49,12 +55,37 @@ export function AnalyticsTrendCharts({ data, currency, timezone }: Props) {
 
   return (
     <div className="mt-4 grid gap-4 xl:grid-cols-2">
-      <section className="card min-w-0" aria-label="Biểu đồ thu nhập và chi tiêu">
-        <h2 className="font-semibold text-ink">Thu nhập và chi tiêu theo tháng</h2>
-        <p className="mt-1 text-xs text-ink-muted">
-          {data.rangeMonths} tháng gần nhất, đơn vị {currency}, múi giờ {timezone}. Tháng không có
-          giao dịch để trống, không nội suy.
-        </p>
+      <section className="card min-w-0 xl:col-span-2" aria-label="Biểu đồ thu nhập và chi tiêu">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-semibold text-ink">Thu nhập và chi tiêu theo tháng</h2>
+              <ExplainButton
+                explanation={analyticsTrends}
+                label="Cách đọc"
+                variant="link"
+                context={context}
+              />
+            </div>
+            <p className="mt-1 text-xs text-ink-muted">
+              {data.rangeMonths} tháng gần nhất, đơn vị {currency}, múi giờ {timezone}. Tháng không
+              có giao dịch để trống, không nội suy.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn-secondary btn-sm"
+            onClick={() =>
+              openAiChat({
+                prompt: 'Giải thích biểu đồ thu nhập và chi tiêu theo tháng của tôi.',
+                assistantType: 'ANALYTICS',
+                context,
+              })
+            }
+          >
+            <MessageSquare className="h-3.5 w-3.5" aria-hidden /> Hỏi AI về biểu đồ
+          </button>
+        </div>
         {hasAnyData ? null : (
           <p
             className="mt-3 rounded-lg bg-surface-muted px-3 py-2 text-sm text-ink-secondary"
@@ -63,7 +94,7 @@ export function AnalyticsTrendCharts({ data, currency, timezone }: Props) {
             Không có giao dịch thu hoặc chi trong khoảng này.
           </p>
         )}
-        <div className="mt-4 h-64 w-full">
+        <div className="mt-4 h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={points} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} vertical={false} />
@@ -153,7 +184,7 @@ export function AnalyticsTrendCharts({ data, currency, timezone }: Props) {
         </div>
       </section>
 
-      <section className="card min-w-0 xl:col-span-2" aria-label="Số liệu từng tháng">
+      <section className="card min-w-0" aria-label="Số liệu từng tháng">
         <h2 className="font-semibold text-ink">Số liệu từng tháng</h2>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-sm">

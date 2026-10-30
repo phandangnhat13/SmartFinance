@@ -17,19 +17,31 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { AskAIAction, ExplainButton } from '../components/Explain';
 import {
   Badge,
   EmptyState,
   ErrorAlert,
+  HelpTip,
   PageHeader,
   ProgressBar,
   Skeleton,
   StatCard,
 } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import { api, errorMessage } from '../lib/api';
 import { chartTheme } from '../lib/chartTheme';
 import { currentMonthRange } from '../lib/date';
+import {
+  analyticsExpense,
+  analyticsIncome,
+  analyticsNetCashFlow,
+  analyticsSavingsRate,
+  insightsCategories,
+  insightsMetricChange,
+  insightsReferencePeriod,
+} from '../lib/explanations';
 import { formatMoney, formatPercent } from '../lib/format';
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -82,6 +94,11 @@ export function InsightsPage() {
   const monthly = monthlyQuery.data;
   const categories = categoriesQuery.data;
   const monthIsRunning = overview?.monthStatus === 'in_progress';
+  const baseContext: AiChatContext = {
+    page: 'insights',
+    currency,
+    ...(overview ? { dateRange: { from: overview.periodStart, to: overview.periodEnd } } : {}),
+  };
 
   // Keep the currency options stable while another month is loading, so the
   // selector does not collapse back to a single option on every month change.
@@ -140,9 +157,20 @@ export function InsightsPage() {
           </div>
           <div className="flex items-center pb-1.5">
             {overview ? (
-              <Badge tone={monthIsRunning ? 'amber' : 'slate'}>
-                {monthIsRunning ? 'Tháng đang diễn ra' : 'Tháng đã kết thúc'}
-              </Badge>
+              <span className="flex items-center gap-1.5">
+                <Badge tone={monthIsRunning ? 'amber' : 'slate'}>
+                  {monthIsRunning ? 'Tháng đang diễn ra' : 'Tháng đã kết thúc'}
+                </Badge>
+                <HelpTip
+                  label="kỳ tham chiếu"
+                  explanation={insightsReferencePeriod}
+                  explainContext={{
+                    ...baseContext,
+                    feature: 'reference-period',
+                    label: 'Kỳ tham chiếu',
+                  }}
+                />
+              </span>
             ) : null}
           </div>
         </div>
@@ -171,6 +199,18 @@ export function InsightsPage() {
       ) : overview && monthly && categories ? (
         <>
           <section aria-label="Chỉ số tổng quan">
+            <div className="mb-2 flex justify-end">
+              <ExplainButton
+                explanation={insightsMetricChange}
+                label="Cách tính thay đổi"
+                variant="link"
+                context={{
+                  ...baseContext,
+                  feature: 'metric-change',
+                  label: 'Thay đổi so với tháng trước',
+                }}
+              />
+            </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 label="Thu nhập"
@@ -182,6 +222,15 @@ export function InsightsPage() {
                     {formatPercent(overview.previous.incomeChangePercent)})
                   </>
                 }
+                explain={analyticsIncome}
+                explainContext={{
+                  ...baseContext,
+                  feature: 'income',
+                  selectedMetric: 'Thu nhập',
+                  label: 'Thu nhập tháng này',
+                  displayedValue: formatMoney(overview.income, currency),
+                  comparisonValue: formatMoney(overview.previous.income, currency),
+                }}
               />
               <StatCard
                 label="Chi tiêu"
@@ -193,6 +242,15 @@ export function InsightsPage() {
                     {formatPercent(overview.previous.expenseChangePercent)})
                   </>
                 }
+                explain={analyticsExpense}
+                explainContext={{
+                  ...baseContext,
+                  feature: 'expense',
+                  selectedMetric: 'Chi tiêu',
+                  label: 'Chi tiêu tháng này',
+                  displayedValue: formatMoney(overview.expense, currency),
+                  comparisonValue: formatMoney(overview.previous.expense, currency),
+                }}
               />
               <StatCard
                 label="Dòng tiền ròng"
@@ -200,6 +258,15 @@ export function InsightsPage() {
                 icon={<Wallet className="h-5 w-5 text-info" />}
                 valueClass={Number(overview.net) < 0 ? 'text-danger' : 'text-brand-hover'}
                 hint={`Thu nhập trừ chi tiêu · ${overview.transactionCount} giao dịch`}
+                explain={analyticsNetCashFlow}
+                explainContext={{
+                  ...baseContext,
+                  feature: 'net-cash-flow',
+                  selectedMetric: 'Dòng tiền ròng',
+                  label: 'Dòng tiền ròng tháng này',
+                  displayedValue: formatMoney(overview.net, currency),
+                  comparisonValue: formatMoney(overview.previous.net, currency),
+                }}
               />
               <StatCard
                 label="Tỷ lệ tiết kiệm"
@@ -210,6 +277,15 @@ export function InsightsPage() {
                     ? 'Tháng này chưa có thu nhập để tính tỷ lệ.'
                     : 'Tính trên thu nhập: (thu nhập − chi tiêu) / thu nhập.'
                 }
+                explain={analyticsSavingsRate}
+                explainContext={{
+                  ...baseContext,
+                  feature: 'savings-rate',
+                  selectedMetric: 'Tỷ lệ tiết kiệm',
+                  label: 'Tỷ lệ tiết kiệm tháng này',
+                  displayedValue: savingsRateLabel(overview.savingsRate),
+                  comparisonValue: savingsRateLabel(overview.previous.savingsRate),
+                }}
               />
             </div>
           </section>
@@ -230,7 +306,20 @@ export function InsightsPage() {
 
           <section className="mt-6" aria-label="Diễn biến theo thời gian">
             <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="card-title">Diễn biến {TREND_MONTHS} tháng gần nhất</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="card-title">Diễn biến {TREND_MONTHS} tháng gần nhất</h2>
+                <AskAIAction
+                  prompt={`Giải thích diễn biến thu nhập và chi tiêu ${TREND_MONTHS} tháng gần nhất của tôi.`}
+                  assistantType="ANALYTICS"
+                  context={{
+                    page: 'insights',
+                    currency,
+                    feature: 'monthly-trend',
+                    label: `Diễn biến ${TREND_MONTHS} tháng gần nhất`,
+                  }}
+                  label="Hỏi AI về biểu đồ"
+                />
+              </div>
               <p className="text-xs text-ink-muted">
                 {TREND_MONTHS} tháng gần nhất, tính theo múi giờ {timezone}
               </p>
@@ -355,7 +444,29 @@ export function InsightsPage() {
 
           <section className="mt-4 card" aria-label="Chi tiêu theo danh mục">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h2 className="card-title">Chi tiêu theo danh mục</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="card-title">Chi tiêu theo danh mục</h2>
+                <ExplainButton
+                  explanation={insightsCategories}
+                  label="Cách đọc"
+                  variant="link"
+                  context={{
+                    ...baseContext,
+                    feature: 'category-spending',
+                    label: 'Chi tiêu theo danh mục',
+                  }}
+                />
+                <AskAIAction
+                  prompt="Giải thích chi tiêu theo danh mục của tôi trong tháng này."
+                  assistantType="ANALYTICS"
+                  context={{
+                    ...baseContext,
+                    feature: 'category-spending',
+                    label: 'Chi tiêu theo danh mục',
+                  }}
+                  label="Hỏi AI về danh mục"
+                />
+              </div>
               <p className="text-xs text-ink-muted">
                 So với tháng {monthLabel(categories.previousMonth)} · danh mục tăng từ{' '}
                 {categories.thresholds.notableIncreasePercent}% được đánh dấu

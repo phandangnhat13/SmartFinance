@@ -149,6 +149,7 @@ export function buildChatPrompt(
   context: AnalyticsAiContext,
   question: string,
   evidenceKeys: string[],
+  history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
 ) {
   return {
     system: ANALYST_SYSTEM_PROMPT,
@@ -157,6 +158,9 @@ export function buildChatPrompt(
       instruction:
         'Trả lời câu hỏi của người dùng bằng tiếng Việt, chỉ dùng số liệu trong CONTEXT. Nếu câu hỏi hỏi thay đổi dữ liệu, hãy nói bạn không thể thực hiện và hướng dẫn màn hình phù hợp. Nếu câu hỏi chưa rõ, đặt một câu hỏi làm rõ ngắn trong trường clarification. Trích tối đa 4 referenceKeys.',
       context,
+      // Only a conversation route supplies history; the stateless endpoint
+      // sends none, so its contract and prompt stay exactly as before.
+      ...(history.length > 0 ? { history: history.slice(-6) } : {}),
       question,
       availableEvidenceKeys: evidenceKeys,
       schema: CHAT_SCHEMA,

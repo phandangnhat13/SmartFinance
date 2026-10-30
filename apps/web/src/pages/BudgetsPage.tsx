@@ -11,6 +11,7 @@ import {
   EmptyState,
   ErrorAlert,
   FieldError,
+  HelpTip,
   Modal,
   PageHeader,
   ProgressBar,
@@ -18,8 +19,15 @@ import {
   StatCard,
 } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import { api, errorMessage } from '../lib/api';
-import { currentMonthRange } from '../lib/date';
+import { calendarMonthRange, currentMonthRange } from '../lib/date';
+import {
+  budgetsRemaining,
+  budgetsSpent,
+  budgetsUtilization,
+  budgetsWarningThresholds,
+} from '../lib/explanations';
 import { formatMoney } from '../lib/format';
 import { useMediaQuery } from '../lib/useMediaQuery';
 
@@ -206,6 +214,11 @@ export function BudgetsPage() {
 
   const budgets = budgetsQuery.data?.items ?? [];
   const currency = user?.defaultCurrency ?? 'VND';
+  const context: AiChatContext = {
+    page: 'budgets',
+    currency,
+    dateRange: calendarMonthRange(month),
+  };
 
   const counts = {
     OK: budgets.filter((budget) => budget.status === 'OK').length,
@@ -312,17 +325,44 @@ export function BudgetsPage() {
               icon={<Wallet className="h-5 w-5 text-brand" />}
               hint={`${budgets.length} ngân sách · tháng ${month}`}
             />
-            <StatCard label="Đã chi" value={formatMoney(totalSpent, currency)} />
+            <StatCard
+              label="Đã chi"
+              value={formatMoney(totalSpent, currency)}
+              explain={budgetsSpent}
+              explainContext={{
+                ...context,
+                feature: 'spent',
+                label: 'Đã chi trong tháng',
+                selectedMetric: 'Đã chi',
+                displayedValue: formatMoney(totalSpent, currency),
+              }}
+            />
             <StatCard
               label="Còn lại"
               value={formatMoney(totalRemaining, currency)}
               valueClass={totalRemaining < 0 ? 'text-danger' : 'text-brand-hover'}
+              explain={budgetsRemaining}
+              explainContext={{
+                ...context,
+                feature: 'remaining',
+                label: 'Còn lại trong tháng',
+                selectedMetric: 'Còn lại',
+                displayedValue: formatMoney(totalRemaining, currency),
+              }}
             />
             <StatCard
               label="Cần chú ý"
               value={String(needsAttention)}
               icon={<AlertTriangle className="h-5 w-5 text-warning" />}
               hint={`${counts.EXCEEDED} vượt hạn mức · ${counts.WARNING} sắp chạm`}
+              explain={budgetsUtilization}
+              explainContext={{
+                ...context,
+                feature: 'utilization',
+                label: 'Ngân sách cần chú ý',
+                selectedMetric: 'Số ngân sách cần chú ý',
+                displayedValue: String(needsAttention),
+              }}
             />
           </div>
 
@@ -366,7 +406,18 @@ export function BudgetsPage() {
                         Còn lại
                       </th>
                       <th scope="col" className="w-48 px-4 py-3 font-medium">
-                        Tiến độ
+                        <span className="inline-flex items-center gap-1.5">
+                          Tiến độ
+                          <HelpTip
+                            label="mức sử dụng ngân sách"
+                            explanation={budgetsUtilization}
+                            explainContext={{
+                              ...context,
+                              feature: 'utilization',
+                              label: 'Mức sử dụng ngân sách',
+                            }}
+                          />
+                        </span>
                       </th>
                       <th scope="col" className="px-4 py-3 font-medium">
                         Trạng thái
@@ -533,9 +584,20 @@ export function BudgetsPage() {
               <FieldError message={errors.limitAmount?.message} />
             </div>
             <div>
-              <label className="label" htmlFor="budgetThresholds">
-                Mốc cảnh báo (%)
-              </label>
+              <span className="flex items-center gap-1.5">
+                <label className="label" htmlFor="budgetThresholds">
+                  Mốc cảnh báo (%)
+                </label>
+                <HelpTip
+                  label="Mốc cảnh báo"
+                  explanation={budgetsWarningThresholds}
+                  explainContext={{
+                    ...context,
+                    feature: 'warning-thresholds',
+                    label: 'Mốc cảnh báo ngân sách',
+                  }}
+                />
+              </span>
               <input
                 id="budgetThresholds"
                 className="input"

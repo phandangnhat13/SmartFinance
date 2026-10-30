@@ -279,7 +279,7 @@ test.describe('spending alerts end-to-end', () => {
     }
 
     await openAlertsPage(page);
-    await page.getByLabel('Loại cảnh báo').selectOption('CATEGORY_SPIKE');
+    await page.getByLabel('Loại cảnh báo', { exact: true }).selectOption('CATEGORY_SPIKE');
     await scanFromUi(page);
     await expect(page.getByRole('heading', { name: 'Cảnh báo chi tiêu' })).toBeVisible();
 
@@ -330,7 +330,9 @@ test.describe('spending alerts end-to-end', () => {
     await openAlertsPage(page);
     // Two 777 001 expenses are also large for their category, so narrow the
     // list to duplicates before opening the detail.
-    await page.getByLabel('Loại cảnh báo').selectOption('POSSIBLE_DUPLICATE');
+    // The explain button is named "Các loại cảnh báo: Loại cảnh báo", so the
+    // filter is matched by its exact visible label.
+    await page.getByLabel('Loại cảnh báo', { exact: true }).selectOption('POSSIBLE_DUPLICATE');
     await scanFromUi(page);
 
     const alert = await findAlert(page, (item) => {

@@ -8,7 +8,10 @@ import type {
 } from '@smart-finance/shared-types';
 import { HEALTH_CLASSIFICATION_LABELS } from '@smart-finance/shared-types';
 import { Info } from 'lucide-react';
+import { analyticsHealthScore } from '../lib/explanations';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import { formatDateTime, formatMonthLabel } from '../lib/format';
+import { AskAIAction, ExplainButton } from './Explain';
 import { Badge, EmptyState } from './ui';
 
 type Tone = 'emerald' | 'amber' | 'rose' | 'slate' | 'sky';
@@ -180,15 +183,31 @@ function HistoryTable({ history }: { history: FinancialHealthHistoryDto }) {
 export function AnalyticsHealthPanel({
   data,
   history,
+  context,
 }: {
   data: FinancialHealthDto;
   history?: FinancialHealthHistoryDto;
+  context?: AiChatContext;
 }) {
   const overall = data.overall;
   return (
     <section className="card" aria-label="Sức khỏe tài chính">
       <div>
-        <h2 className="text-lg font-semibold text-ink">Sức khỏe tài chính</h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-lg font-semibold text-ink">Sức khỏe tài chính</h2>
+          <ExplainButton
+            explanation={analyticsHealthScore}
+            label="Giải thích điểm"
+            variant="link"
+            context={context}
+          />
+          <AskAIAction
+            prompt="Giải thích điểm sức khỏe tài chính của tôi và các gợi ý hành động."
+            assistantType="ANALYTICS"
+            context={context}
+            label="Hỏi AI về điểm sức khỏe"
+          />
+        </div>
         <p className="mt-1 text-sm text-ink-muted">
           Chỉ báo nội bộ tính từ dữ liệu bạn đã ghi, theo bộ quy tắc công khai bên dưới. Không dùng
           AI/LLM và không tự thay đổi dữ liệu.

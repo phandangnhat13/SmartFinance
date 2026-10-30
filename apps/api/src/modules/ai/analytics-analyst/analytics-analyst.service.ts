@@ -270,7 +270,15 @@ export class AnalyticsAnalystService {
     }
   }
 
-  async chat(userId: string, dto: AnalyticsAiChatRequestDto): Promise<AnalyticsAiChatReplyDto> {
+  /**
+   * `history` is only supplied by the persistent conversation path. The direct
+   * `/ai/analytics/chat` endpoint keeps its documented stateless contract.
+   */
+  async chat(
+    userId: string,
+    dto: AnalyticsAiChatRequestDto,
+    history: Array<{ role: 'user' | 'assistant'; content: string }> = [],
+  ): Promise<AnalyticsAiChatReplyDto> {
     const intent = classifyIntent(dto.message);
 
     // A write request never reaches the model, and never needs the full profile.
@@ -308,7 +316,7 @@ export class AnalyticsAnalystService {
       };
     }
 
-    const prompt = buildChatPrompt(context, dto.message, Object.keys(catalog));
+    const prompt = buildChatPrompt(context, dto.message, Object.keys(catalog), history);
     try {
       const result = await this.llm.complete({ ...prompt, maxTokens: 1_200 });
       const parsed = parseChatReply(result.text, allowed, new Set(Object.keys(catalog)));

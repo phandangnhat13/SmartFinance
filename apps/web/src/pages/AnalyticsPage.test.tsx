@@ -930,6 +930,28 @@ describe('AnalyticsPage — overview', () => {
     expect(screen.getAllByText(/Kỳ 2025-01/).length).toBeGreaterThan(0);
   });
 
+  it('summarises the notable changes and shows one quick-read chart on the overview', async () => {
+    installDataFetch();
+    renderPage();
+
+    await screen.findByText('So sánh với kỳ trước');
+
+    const highlights = screen.getByRole('region', { name: 'Điểm đáng chú ý' });
+    expect(
+      within(highlights).getByText(/Chi tiêu tăng 15\.0% so với kỳ trước/),
+    ).toBeInTheDocument();
+    expect(
+      within(highlights).getByText(/Thu nhập tăng 25\.0% so với kỳ trước/),
+    ).toBeInTheDocument();
+    expect(within(highlights).getByText(/Tỷ lệ tiết kiệm tăng 4\.0 điểm %/)).toBeInTheDocument();
+    expect(within(highlights).getByText(/Ăn uống: tăng/)).toBeInTheDocument();
+    expect(within(highlights).getAllByRole('button', { name: /Hỏi AI/ })).toHaveLength(4);
+
+    const chart = screen.getByRole('region', { name: 'Biểu đồ diễn biến 6 tháng' });
+    expect(within(chart).getByText('Diễn biến 6 tháng gần nhất')).toBeInTheDocument();
+    expect(within(chart).getByRole('button', { name: /Hỏi AI về biểu đồ/ })).toBeInTheDocument();
+  });
+
   it('distinguishes "no data" months from measured zero months', async () => {
     installDataFetch();
     renderPage();

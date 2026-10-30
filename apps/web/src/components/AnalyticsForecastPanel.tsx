@@ -20,7 +20,10 @@ import {
   YAxis,
 } from 'recharts';
 import { chartTheme } from '../lib/chartTheme';
+import type { AiChatContext } from '../lib/ai-chat-context';
+import { analyticsForecast } from '../lib/explanations';
 import { formatDateTime, formatMoney, formatMonthLabel } from '../lib/format';
+import { AskAIAction, ExplainButton } from './Explain';
 import { Badge, EmptyState } from './ui';
 
 type Tone = 'emerald' | 'amber' | 'rose' | 'slate' | 'sky';
@@ -328,11 +331,13 @@ export function AnalyticsForecastPanel({
   currency,
   horizon,
   onHorizonChange,
+  context,
 }: {
   data: AnalyticsForecastDto;
   currency: string;
   horizon: ForecastHorizon;
   onHorizonChange: (horizon: ForecastHorizon) => void;
+  context?: AiChatContext;
 }) {
   const horizonLabel =
     HORIZON_OPTIONS.find((option) => option.value === horizon)?.label ?? 'Dự báo';
@@ -342,7 +347,21 @@ export function AnalyticsForecastPanel({
     <section className="card" aria-label="Dự báo tài chính">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-ink">Dự báo tài chính</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-semibold text-ink">Dự báo tài chính</h2>
+            <ExplainButton
+              explanation={analyticsForecast}
+              label="Cách hiểu"
+              variant="link"
+              context={context}
+            />
+            <AskAIAction
+              prompt="Giải thích dự báo thu chi và số dư cuối tháng của tôi."
+              assistantType="ANALYTICS"
+              context={context}
+              label="Hỏi AI về dự báo"
+            />
+          </div>
           <p className="mt-1 text-sm text-ink-muted">
             Tính trên máy chủ từ các tháng đã kết thúc của chính bạn, không dùng AI/LLM và không tạo
             giao dịch.

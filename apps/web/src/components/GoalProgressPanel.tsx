@@ -16,11 +16,19 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Badge, ErrorAlert, ProgressBar } from './ui';
-import { GoalPlanSimulator } from './GoalPlanSimulator';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import { api, errorMessage } from '../lib/api';
 import { chartTheme } from '../lib/chartTheme';
+import {
+  goalsContributionPace,
+  goalsExpectedCompletion,
+  goalsProgress,
+  type Explanation,
+} from '../lib/explanations';
 import { formatDate, formatMoney } from '../lib/format';
+import { AskAIAction, ExplainButton } from './Explain';
+import { GoalPlanSimulator } from './GoalPlanSimulator';
+import { Badge, ErrorAlert, HelpTip, ProgressBar } from './ui';
 
 const HISTORY_MONTHS = 6;
 
@@ -34,10 +42,27 @@ const STATUS_TONES: Record<SavingsProgressStatus, 'emerald' | 'amber' | 'rose' |
     INSUFFICIENT_DATA: 'slate',
   };
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Stat({
+  label,
+  value,
+  hint,
+  explain,
+  explainContext,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  explain?: Explanation;
+  explainContext?: AiChatContext;
+}) {
   return (
     <div className="rounded-xl bg-surface-muted p-3">
-      <p className="text-xs text-ink-muted">{label}</p>
+      <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+        {label}
+        {explain ? (
+          <HelpTip label={label} explanation={explain} explainContext={explainContext} />
+        ) : null}
+      </div>
       <p className="mt-1 text-sm font-semibold text-ink">{value}</p>
       {hint ? <p className="mt-1 text-xs text-ink-muted">{hint}</p> : null}
     </div>
@@ -53,7 +78,15 @@ function signedMoney(value: string, currency: string): string {
  * Per-goal progress: what was saved versus what the plan expected, the
  * contribution history, and the read-only plan simulator.
  */
-export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChanged: () => void }) {
+export function GoalProgressPanel({
+  goal,
+  onChanged,
+  context,
+}: {
+  goal: GoalDto;
+  onChanged: () => void;
+  context?: AiChatContext;
+}) {
   const progressQuery = useQuery({
     queryKey: ['savings-goal-progress', goal.id],
     queryFn: () => api.get<GoalProgressDto>(`/savings/progress/${goal.id}`),
@@ -105,8 +138,20 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
           </Badge>
           <span className="text-xs text-ink-muted">{progress.statusReason}</span>
         </div>
-        <span className="text-xs text-ink-muted">
+        <span className="flex flex-wrap items-center gap-2 text-xs text-ink-muted">
           Hoàn thành {progress.completionPercentage}% kế hoạch
+          <ExplainButton
+            explanation={goalsProgress}
+            label="Cách tính"
+            variant="link"
+            context={context}
+          />
+          <AskAIAction
+            prompt="Giải thích tiến độ mục tiêu tiết kiệm này và tôi cần làm gì để hoàn thành đúng hạn."
+            assistantType="SAVINGS"
+            context={context}
+            label="Hỏi AI về mục tiêu"
+          />
         </span>
       </div>
 
@@ -167,6 +212,12 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
               : `${formatMoney(progress.pace.averageMonthlyContribution, progress.currency)}/tháng`
           }
           hint={`Trong ${progress.pace.monthsObserved} tháng đã quan sát`}
+          explain={goalsContributionPace}
+          explainContext={{
+            ...context,
+            feature: 'contribution-pace',
+            label: 'Tốc độ góp thực tế',
+          }}
         />
         <Stat
           label="Dự kiến hoàn thành"
@@ -180,6 +231,12 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
               ? 'Cần thêm dữ liệu khoản góp'
               : `Còn khoảng ${progress.pace.monthsToComplete} tháng theo tốc độ hiện tại`
           }
+          explain={goalsExpectedCompletion}
+          explainContext={{
+            ...context,
+            feature: 'expected-completion',
+            label: 'Dự kiến hoàn thành',
+          }}
         />
       </div>
 
@@ -326,7 +383,12 @@ export function GoalProgressPanel({ goal, onChanged }: { goal: GoalDto; onChange
           Mục tiêu đã lưu trữ nên không thể mô phỏng hay điều chỉnh kế hoạch.
         </p>
       ) : timezone ? (
-        <GoalPlanSimulator goal={goal} timezone={timezone} onApplied={onChanged} />
+        <GoalPlanSimulator
+          goal={goal}
+          timezone={timezone}
+          onApplied={onChanged}
+          context={{ ...context, feature: 'plan-simulation', label: 'Mô phỏng kế hoạch' }}
+        />
       ) : null}
     </div>
   );

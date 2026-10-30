@@ -17,7 +17,10 @@ import {
   YAxis,
 } from 'recharts';
 import { chartTheme } from '../lib/chartTheme';
+import type { AiChatContext } from '../lib/ai-chat-context';
+import { analyticsBudgetAnalysis } from '../lib/explanations';
 import { formatDateOnly, formatMoney, formatMonthLabel, formatPercent } from '../lib/format';
+import { AskAIAction, ExplainButton } from './Explain';
 import { Badge, ProgressBar } from './ui';
 
 type Tone = 'emerald' | 'amber' | 'rose' | 'slate';
@@ -64,10 +67,12 @@ export function AnalyticsBudgetPanel({
   data,
   pace,
   currency,
+  context,
 }: {
   data: AnalyticsBudgetsDto;
   pace: AnalyticsBudgetPaceDto;
   currency: string;
+  context?: AiChatContext;
 }) {
   const paceByBudget = new Map(pace.items.map((item) => [item.budgetId, item]));
   const chartData = data.items.map((item) => ({
@@ -80,7 +85,21 @@ export function AnalyticsBudgetPanel({
   return (
     <section className="card" aria-label="Ngân sách tháng">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold text-ink">Ngân sách tháng {formatMonthLabel(data.month)}</h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="font-semibold text-ink">Ngân sách tháng {formatMonthLabel(data.month)}</h2>
+          <ExplainButton
+            explanation={analyticsBudgetAnalysis}
+            label="Cách đọc"
+            variant="link"
+            context={context}
+          />
+          <AskAIAction
+            prompt="Giải thích mức sử dụng ngân sách tháng này và ngân sách nào cần chú ý."
+            assistantType="ANALYTICS"
+            context={context}
+            label="Hỏi AI về ngân sách"
+          />
+        </div>
         <p className="text-xs text-ink-muted">
           {data.items.length} ngân sách · đơn vị {currency} · tính đến {formatDateOnly(data.asOf)}
         </p>

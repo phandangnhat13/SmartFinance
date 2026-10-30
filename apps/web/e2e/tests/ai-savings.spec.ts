@@ -199,18 +199,23 @@ test('explains, simulates and only changes data after an explicit confirmation',
   await expect(panel.getByText('Chậm tiến độ').first()).toBeVisible();
 
   // 3. Ask why the goal is behind. The model is called, but it can only explain
-  //    the context the backend built.
-  const chat = panel.getByTestId('ai-chat');
-  await chat
-    .getByLabel('Câu hỏi cho trợ lý')
-    .fill(`Tại sao mục tiêu ${GOAL_NAME} lại chậm tiến độ?`);
-  await chat.getByRole('button', { name: 'Gửi' }).click();
+  //    the context the backend built. The conversation lives in the floating
+  //    widget, which persists each turn for this account.
+  await page.getByTestId('ai-chat-launcher').click();
+  const chat = page.getByTestId('ai-chat-widget');
+  await chat.getByTestId('ai-chat-input').fill(`Tại sao mục tiêu ${GOAL_NAME} lại chậm tiến độ?`);
+  await chat.getByTestId('ai-chat-send').click();
 
   // 4. The answer carries backend evidence: the real status and reason.
-  const log = panel.getByTestId('ai-chat-log');
+  const log = chat.getByTestId('ai-chat-log');
   await expect(log.getByText(/Mình chỉ giải thích và mô phỏng/)).toBeVisible();
   await expect(log.getByText(new RegExp(`Tiến độ ${GOAL_NAME}: AT_RISK`))).toBeVisible();
   await expect(log.getByText('AI viết')).toBeVisible();
+
+  // The widget floats above the page, so close it before using the scenario
+  // form underneath. The conversation stays in the history view.
+  await chat.getByRole('button', { name: 'Đóng trợ lý AI' }).click();
+  await expect(chat).toBeHidden();
 
   // 5. Ask about an alternative monthly amount.
   const scenario = panel.getByTestId('ai-scenario');

@@ -9,7 +9,10 @@ import {
   YAxis,
 } from 'recharts';
 import { chartTheme } from '../lib/chartTheme';
+import type { AiChatContext } from '../lib/ai-chat-context';
+import { analyticsCategories } from '../lib/explanations';
 import { formatMoney, formatMonthLabel, formatPercent } from '../lib/format';
+import { AskAIAction, ExplainButton } from './Explain';
 import { Badge, ProgressBar } from './ui';
 
 const MAX_TREND_OPTIONS = 60;
@@ -50,11 +53,13 @@ export function AnalyticsCategoryPanel({
   currency,
   selectedCategoryId,
   onSelectCategory,
+  context,
 }: {
   data: AnalyticsCategoriesDto;
   currency: string;
   selectedCategoryId: string;
   onSelectCategory: (categoryId: string) => void;
+  context?: AiChatContext;
 }) {
   const isIncome = data.type === 'INCOME';
   const noun = isIncome ? 'thu nhập' : 'chi tiêu';
@@ -71,7 +76,21 @@ export function AnalyticsCategoryPanel({
   return (
     <section className="card" aria-label="Phân tích theo danh mục">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold text-ink">Phân tích theo danh mục</h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="font-semibold text-ink">Phân tích theo danh mục</h2>
+          <ExplainButton
+            explanation={analyticsCategories}
+            label="Cách đọc"
+            variant="link"
+            context={context}
+          />
+          <AskAIAction
+            prompt="Giải thích chi tiêu theo danh mục trong kỳ này và danh mục nào thay đổi nhiều nhất."
+            assistantType="ANALYTICS"
+            context={context}
+            label="Hỏi AI về danh mục"
+          />
+        </div>
         <p className="text-xs text-ink-muted">
           Kỳ {data.period.label} · đơn vị {currency} · {isIncome ? 'thu nhập' : 'chi tiêu'}
         </p>

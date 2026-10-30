@@ -443,7 +443,15 @@ export function GoalsPage() {
         />
       ) : (
         <>
-          <SavingsProgressDashboard currency={currency} />
+          <SavingsProgressDashboard
+            currency={currency}
+            context={{
+              page: 'goals',
+              currency,
+              feature: 'progress-overview',
+              label: 'Tổng quan tiến độ tiết kiệm',
+            }}
+          />
 
           <SavingsRecommendations currency={currency} timezone={timezone} />
 
@@ -962,7 +970,16 @@ export function GoalsPage() {
               )}
             </div>
 
-            <GoalProgressPanel goal={detailGoal} onChanged={() => void invalidate()} />
+            <GoalProgressPanel
+              goal={detailGoal}
+              onChanged={() => void invalidate()}
+              context={{
+                page: 'goals',
+                currency: detailGoal.currency,
+                feature: 'goal-progress',
+                label: 'Tiến độ mục tiêu',
+              }}
+            />
           </div>
         ) : null}
       </Modal>

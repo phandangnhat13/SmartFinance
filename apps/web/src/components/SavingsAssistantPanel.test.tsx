@@ -1,8 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {
-  SavingsChatReplyDto,
   SavingsExplanationDto,
   SavingsScenarioExplanationDto,
   SavingsSuggestionsDto,
@@ -178,23 +177,6 @@ function makeScenario(
     },
     requiresConfirmation: true,
     limitations: ['Mô phỏng chỉ đọc: không có khoản góp nào được lưu.'],
-    disclosure: DISCLOSURE_OFF,
-    ...overrides,
-  };
-}
-
-function makeChatReply(overrides: Partial<SavingsChatReplyDto> = {}): SavingsChatReplyDto {
-  return {
-    currency: 'VND',
-    timezone: 'Asia/Ho_Chi_Minh',
-    generatedAt: '2026-10-30T03:00:00.000Z',
-    source: 'FALLBACK',
-    intent: 'PRIORITY',
-    reply: 'Thứ tự ưu tiên hiện tại: 1. Du lịch.',
-    references: [{ label: 'Mục tiêu Du lịch', value: 'Còn thiếu 19.000.000 ₫' }],
-    scenario: null,
-    clarification: null,
-    canModifyData: false,
     disclosure: DISCLOSURE_OFF,
     ...overrides,
   };
@@ -416,81 +398,5 @@ describe('SavingsAssistantPanel — scenario', () => {
 
     expect(await screen.findByText('Bạn muốn mô phỏng cho mục tiêu nào?')).toBeInTheDocument();
     expect(screen.queryByText('Giả định – chưa áp dụng')).not.toBeInTheDocument();
-  });
-});
-
-describe('SavingsAssistantPanel — chat', () => {
-  it('sends a suggested question, shows references and keeps a bounded history', async () => {
-    let chatCount = 0;
-    const server = setupServer((_method, path) => {
-      if (path === '/ai/savings/explain') return json(makeExplanation());
-      chatCount += 1;
-      return json(
-        chatCount === 1
-          ? makeChatReply()
-          : makeChatReply({ intent: 'STATUS', reply: 'Bạn có 1 mục tiêu đang chậm tiến độ.' }),
-      );
-    });
-    const user = userEvent.setup();
-    renderPanel();
-
-    await screen.findByText(/Kế hoạch tháng này phân bổ/);
-    await user.click(screen.getByRole('button', { name: 'Mục tiêu nào nên ưu tiên nhất?' }));
-    await user.click(screen.getByRole('button', { name: 'Gửi' }));
-
-    expect(await screen.findByText('Thứ tự ưu tiên hiện tại: 1. Du lịch.')).toBeInTheDocument();
-    expect(screen.getByText('Mục tiêu Du lịch: Còn thiếu 19.000.000 ₫')).toBeInTheDocument();
-
-    await user.type(screen.getByLabelText('Câu hỏi cho trợ lý'), 'Tiến độ thế nào?');
-    await user.click(screen.getByRole('button', { name: 'Gửi' }));
-
-    expect(await screen.findByText('Bạn có 1 mục tiêu đang chậm tiến độ.')).toBeInTheDocument();
-
-    const chatCalls = server.calls.filter((call) => call.path === '/ai/savings/chat');
-    expect(chatCalls).toHaveLength(2);
-    expect(chatCalls[0].body).toEqual({
-      currency: 'VND',
-      message: 'Mục tiêu nào nên ưu tiên nhất?',
-      history: [],
-    });
-    expect(chatCalls[1].body).toMatchObject({
-      currency: 'VND',
-      message: 'Tiến độ thế nào?',
-      history: [
-        { role: 'user', content: 'Mục tiêu nào nên ưu tiên nhất?' },
-        { role: 'assistant', content: 'Thứ tự ưu tiên hiện tại: 1. Du lịch.' },
-      ],
-    });
-  });
-
-  it('shows the refusal notice when the assistant cannot change data', async () => {
-    setupServer((_method, path) =>
-      path === '/ai/savings/explain'
-        ? json(makeExplanation())
-        : json(
-            makeChatReply({
-              intent: 'UNSUPPORTED',
-              reply: 'Mình chỉ giải thích và mô phỏng.',
-              references: [],
-              clarification:
-                'Mình không thể tạo, sửa hay xóa mục tiêu, khoản góp, giao dịch hoặc số dư.',
-            }),
-          ),
-    );
-    const user = userEvent.setup();
-    renderPanel();
-
-    await screen.findByText(/Kế hoạch tháng này phân bổ/);
-    await user.type(screen.getByLabelText('Câu hỏi cho trợ lý'), 'Xóa mục tiêu Du lịch đi');
-    await user.click(screen.getByRole('button', { name: 'Gửi' }));
-
-    expect(
-      await screen.findByText(
-        'Mình không thể tạo, sửa hay xóa mục tiêu, khoản góp, giao dịch hoặc số dư.',
-      ),
-    ).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getByTestId('ai-chat-log')).toBeInTheDocument();
-    });
   });
 });

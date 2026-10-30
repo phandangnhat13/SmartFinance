@@ -10,9 +10,12 @@ import type {
 import { SIMULATION_FEASIBILITY_LABELS } from '@smart-finance/shared-types';
 import { Sparkles, Wand2 } from 'lucide-react';
 import { useState } from 'react';
-import { Badge, ErrorAlert, FieldError, Modal } from './ui';
 import { api, errorMessage } from '../lib/api';
+import type { AiChatContext } from '../lib/ai-chat-context';
+import { goalsSimulation } from '../lib/explanations';
 import { formatDate, formatMoney } from '../lib/format';
+import { AskAIAction, ExplainButton } from './Explain';
+import { Badge, ErrorAlert, FieldError, Modal } from './ui';
 
 const MONEY_REGEX = /^(?:0|[1-9]\d{0,14})(?:\.\d{1,2})?$/;
 
@@ -64,10 +67,12 @@ export function GoalPlanSimulator({
   goal,
   timezone,
   onApplied,
+  context,
 }: {
   goal: GoalDto;
   timezone: string;
   onApplied: () => void;
+  context?: AiChatContext;
 }) {
   const [scenario, setScenario] = useState<SingleScenario>('MONTHLY_AMOUNT');
   const [monthlyAmount, setMonthlyAmount] = useState('');
@@ -221,9 +226,21 @@ export function GoalPlanSimulator({
 
   return (
     <section className="rounded-xl border border-line p-4" aria-label="Mô phỏng kế hoạch">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Wand2 className="h-4 w-4 text-info" aria-hidden />
         <h3 className="text-sm font-semibold text-ink">Mô phỏng kế hoạch</h3>
+        <ExplainButton
+          explanation={goalsSimulation}
+          label="Cách hoạt động"
+          variant="link"
+          context={context}
+        />
+        <AskAIAction
+          prompt="Giải thích cách mô phỏng kế hoạch tiết kiệm và ý nghĩa các con số dự kiến."
+          assistantType="SAVINGS"
+          context={context}
+          label="Hỏi AI về kế hoạch"
+        />
       </div>
       <p className="mt-1 text-xs text-ink-muted">
         Chỉ là phép tính xem trước: không có khoản góp nào được tạo và mục tiêu chưa bị thay đổi.

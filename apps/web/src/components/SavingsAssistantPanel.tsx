@@ -1,29 +1,18 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
-  AiDisclosureDto,
-  SavingsChatMessageDto,
-  SavingsChatReplyDto,
   SavingsExplanationDto,
   SavingsProgressStatus,
   SavingsScenarioExplanationDto,
-  SavingsSimulationDto,
   SavingsSuggestionDto,
   SavingsSuggestionsDto,
-  SimulationScenario,
 } from '@smart-finance/shared-types';
-import {
-  SAVINGS_CHAT_SUGGESTED_QUESTIONS,
-  SAVINGS_PROGRESS_STATUS_LABELS,
-  SIMULATION_FEASIBILITY_LABELS,
-} from '@smart-finance/shared-types';
-import { Bot, Calculator, MessageSquare, Send, Sparkles, Target, Wand2 } from 'lucide-react';
+import { SAVINGS_PROGRESS_STATUS_LABELS } from '@smart-finance/shared-types';
+import { Calculator, Sparkles, Target, Wand2 } from 'lucide-react';
 import { useState } from 'react';
-import { Badge, cn, ErrorAlert, Skeleton } from './ui';
+import { Badge, ErrorAlert, Skeleton } from './ui';
+import { DisclosureNote, SimulationSummary, SourceBadge } from './ai/ai-chat-shared';
 import { api, errorMessage } from '../lib/api';
 import { formatDate, formatMoney } from '../lib/format';
-
-const MAX_MESSAGE_LENGTH = 1_000;
-const MAX_HISTORY = 10;
 
 const STATUS_TONES: Record<SavingsProgressStatus, 'emerald' | 'amber' | 'rose' | 'sky' | 'slate'> =
   {
@@ -41,41 +30,6 @@ const CONFIDENCE_LABELS: Record<'high' | 'medium' | 'low', string> = {
   low: 'Độ tin cậy thấp',
 };
 
-const SCENARIO_LABELS: Record<SimulationScenario, string> = {
-  MONTHLY_AMOUNT: 'Mức góp mỗi tháng',
-  DEADLINE: 'Ngày đích',
-  TARGET_AMOUNT: 'Số tiền mục tiêu',
-  MULTI_GOAL_BUDGET: 'Ngân sách cho nhiều mục tiêu',
-};
-
-/**
- * Says who wrote a piece of text. A fallback is labelled "Không dùng AI" so
- * rule-based prose can never be mistaken for a model answer; calculated
- * figures use their own "Hệ thống tính" badge in the facts card.
- */
-function SourceBadge({ source }: { source: 'AI' | 'FALLBACK' }) {
-  return source === 'AI' ? (
-    <Badge tone="sky">AI viết</Badge>
-  ) : (
-    <Badge tone="slate">Không dùng AI</Badge>
-  );
-}
-
-function DisclosureNote({ disclosure }: { disclosure: AiDisclosureDto }) {
-  return (
-    <p
-      className={cn(
-        'mt-2 rounded-lg border p-2 text-xs',
-        disclosure.usedModel
-          ? 'border-brand/30 bg-brand-soft text-ink-secondary'
-          : 'border-line bg-surface-muted text-ink-secondary',
-      )}
-    >
-      {disclosure.notice}
-    </p>
-  );
-}
-
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-xl bg-surface-muted p-3">
@@ -88,154 +42,6 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
 
 function moneyOrDash(value: string | null, currency: string): string {
   return value === null ? '—' : formatMoney(value, currency);
-}
-
-function deadlineLabel(value: boolean | null): string {
-  if (value === null) return '—';
-  return value ? 'Có' : 'Không';
-}
-
-/** Compact, read-only view of a deterministic M2d simulation. */
-function SimulationSummary({ simulation }: { simulation: SavingsSimulationDto }) {
-  if (simulation.scenario === 'MULTI_GOAL_BUDGET') {
-    return (
-      <div className="mt-2 rounded-xl border border-line bg-surface p-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
-            {SCENARIO_LABELS[simulation.scenario]}
-          </p>
-          <Badge tone="amber">Giả định – chưa áp dụng</Badge>
-        </div>
-        <div className="mt-2 grid gap-2 sm:grid-cols-3">
-          <Stat label="Ngân sách" value={formatMoney(simulation.budget, simulation.currency)} />
-          <Stat
-            label="Đã phân bổ"
-            value={formatMoney(simulation.simulated.allocatedMonthly, simulation.currency)}
-          />
-          <Stat
-            label="Còn lại"
-            value={moneyOrDash(simulation.simulated.unallocatedMonthly, simulation.currency)}
-          />
-        </div>
-        {simulation.differences.length > 0 ? (
-          <ul className="mt-2 divide-y divide-line text-sm">
-            {simulation.differences.map((difference) => (
-              <li
-                key={difference.goalId}
-                className="flex flex-wrap items-center justify-between gap-2 py-1.5"
-              >
-                <span className="text-ink-secondary">{difference.goalName}</span>
-                <span className="text-ink-secondary">
-                  {moneyOrDash(difference.baselineMonthlySaving, simulation.currency)} →{' '}
-                  <span className="font-semibold text-ink">
-                    {moneyOrDash(difference.simulatedMonthlySaving, simulation.currency)}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {simulation.simulated.infeasibleGoalIds.length > 0 ? (
-          <p className="mt-2 text-xs text-warning-strong">
-            Ngân sách này không đủ cho {simulation.simulated.infeasibleGoalIds.length} mục tiêu.
-          </p>
-        ) : null}
-      </div>
-    );
-  }
-
-  return (
-    <div className="mt-2 rounded-xl border border-line bg-surface p-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
-          {SCENARIO_LABELS[simulation.scenario]} · {simulation.goalName}
-        </p>
-        <div className="flex flex-wrap items-center gap-1">
-          <Badge tone="amber">Giả định – chưa áp dụng</Badge>
-          <Badge
-            tone={
-              simulation.feasibility === 'FEASIBLE'
-                ? 'emerald'
-                : simulation.feasibility === 'NOT_FEASIBLE'
-                  ? 'rose'
-                  : 'slate'
-            }
-          >
-            {SIMULATION_FEASIBILITY_LABELS[simulation.feasibility]}
-          </Badge>
-        </div>
-      </div>
-      <div className="mt-2 overflow-x-auto">
-        <table className="w-full text-sm">
-          <caption className="sr-only">So sánh kế hoạch hiện tại và kế hoạch giả định</caption>
-          <thead>
-            <tr className="text-xs uppercase tracking-wide text-ink-muted">
-              <th scope="col" className="py-1 pr-3 text-left font-medium">
-                Chỉ số
-              </th>
-              <th scope="col" className="py-1 pr-3 text-right font-medium">
-                Hiện tại
-              </th>
-              <th scope="col" className="py-1 text-right font-medium">
-                Giả định
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-t border-line">
-              <th scope="row" className="py-1.5 pr-3 text-left font-medium text-ink-secondary">
-                Mức góp mỗi tháng
-              </th>
-              <td className="py-1.5 pr-3 text-right text-ink-secondary">
-                {moneyOrDash(simulation.current.monthlySaving, simulation.currency)}
-              </td>
-              <td className="py-1.5 text-right font-semibold text-ink">
-                {moneyOrDash(simulation.simulated.monthlySaving, simulation.currency)}
-              </td>
-            </tr>
-            <tr className="border-t border-line">
-              <th scope="row" className="py-1.5 pr-3 text-left font-medium text-ink-secondary">
-                Cần góp mỗi tháng
-              </th>
-              <td className="py-1.5 pr-3 text-right text-ink-secondary">
-                {moneyOrDash(simulation.current.requiredMonthlySaving, simulation.currency)}
-              </td>
-              <td className="py-1.5 text-right font-semibold text-ink">
-                {moneyOrDash(simulation.simulated.requiredMonthlySaving, simulation.currency)}
-              </td>
-            </tr>
-            <tr className="border-t border-line">
-              <th scope="row" className="py-1.5 pr-3 text-left font-medium text-ink-secondary">
-                Dự kiến hoàn thành
-              </th>
-              <td className="py-1.5 pr-3 text-right text-ink-secondary">
-                {simulation.current.estimatedCompletionDate
-                  ? formatDate(`${simulation.current.estimatedCompletionDate}T00:00`)
-                  : '—'}
-              </td>
-              <td className="py-1.5 text-right font-semibold text-ink">
-                {simulation.simulated.estimatedCompletionDate
-                  ? formatDate(`${simulation.simulated.estimatedCompletionDate}T00:00`)
-                  : '—'}
-              </td>
-            </tr>
-            <tr className="border-t border-line">
-              <th scope="row" className="py-1.5 pr-3 text-left font-medium text-ink-secondary">
-                Đúng hạn
-              </th>
-              <td className="py-1.5 pr-3 text-right text-ink-secondary">
-                {deadlineLabel(simulation.current.deadlineMet)}
-              </td>
-              <td className="py-1.5 text-right font-semibold text-ink">
-                {deadlineLabel(simulation.simulated.deadlineMet)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p className="mt-2 text-xs text-ink-secondary">{simulation.feasibilityReason}</p>
-    </div>
-  );
 }
 
 function SuggestionCard({
@@ -322,8 +128,6 @@ export function SavingsAssistantPanel({
   onReviewGoal?: (goalId: string) => void;
 }) {
   const [scenarioInput, setScenarioInput] = useState('');
-  const [chatInput, setChatInput] = useState('');
-  const [messages, setMessages] = useState<ChatEntry[]>([]);
 
   const explanation = useQuery({
     queryKey: ['ai-savings-explain', currency],
@@ -344,35 +148,12 @@ export function SavingsAssistantPanel({
       }),
   });
 
-  const chat = useMutation({
-    mutationFn: (payload: { message: string; history: SavingsChatMessageDto[] }) =>
-      api.post<SavingsChatReplyDto>('/ai/savings/chat', { currency, ...payload }),
-    onSuccess: (reply) => {
-      setMessages((current) => [...current, { role: 'assistant', reply }]);
-    },
-  });
-
   const explainData = explanation.data;
 
   function submitScenario() {
     const message = scenarioInput.trim();
     if (message.length < 3) return;
     scenario.mutate(message);
-  }
-
-  function submitChat() {
-    const message = chatInput.trim();
-    if (!message || chat.isPending) return;
-    const history: SavingsChatMessageDto[] = messages
-      .slice(-MAX_HISTORY)
-      .map((entry) =>
-        entry.role === 'user'
-          ? { role: 'user', content: entry.content }
-          : { role: 'assistant', content: entry.reply.reply },
-      );
-    chat.mutate({ message, history });
-    setMessages((current) => [...current, { role: 'user', content: message }]);
-    setChatInput('');
   }
 
   return (
@@ -618,259 +399,118 @@ export function SavingsAssistantPanel({
         ) : null}
       </div>
 
-      {/* Scenario and chat live side by side on wide screens -------------- */}
-      <div className="mt-5 grid gap-4 border-t border-line pt-4 xl:grid-cols-2 xl:items-start">
-        <div className="min-w-0 rounded-2xl border border-line p-4" data-testid="ai-scenario">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-ink">Thử một kịch bản</h3>
-            <Badge tone="slate">Mô phỏng chỉ đọc</Badge>
-          </div>
-          <p className="mt-1 text-xs text-ink-muted">
-            Ví dụ: “Nếu tôi góp 3.000.000 mỗi tháng cho mục tiêu Du lịch thì sao?”. Hệ thống mô
-            phỏng trước, sau đó AI giải thích kết quả.
-          </p>
-          <form
-            className="mt-2 flex flex-wrap items-end gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              submitScenario();
-            }}
+      {/* Scenario --------------------------------------------------------- */}
+      <div className="mt-5 min-w-0 rounded-2xl border border-line p-4" data-testid="ai-scenario">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-ink">Thử một kịch bản</h3>
+          <Badge tone="slate">Mô phỏng chỉ đọc</Badge>
+        </div>
+        <p className="mt-1 text-xs text-ink-muted">
+          Ví dụ: “Nếu tôi góp 3.000.000 mỗi tháng cho mục tiêu Du lịch thì sao?”. Hệ thống mô phỏng
+          trước, sau đó AI giải thích kết quả.
+        </p>
+        <form
+          className="mt-2 flex flex-wrap items-end gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            submitScenario();
+          }}
+        >
+          <label className="flex min-w-52 flex-1 flex-col gap-1 text-sm text-ink-secondary">
+            <span className="sr-only">Kịch bản muốn mô phỏng</span>
+            <input
+              className="input"
+              maxLength={500}
+              placeholder="Nếu tôi góp 3.000.000 mỗi tháng cho mục tiêu Du lịch thì sao?"
+              value={scenarioInput}
+              onChange={(event) => setScenarioInput(event.target.value)}
+            />
+          </label>
+          <button
+            type="submit"
+            className="btn-secondary"
+            disabled={scenario.isPending || scenarioInput.trim().length < 3}
           >
-            <label className="flex min-w-52 flex-1 flex-col gap-1 text-sm text-ink-secondary">
-              <span className="sr-only">Kịch bản muốn mô phỏng</span>
-              <input
-                className="input"
-                maxLength={500}
-                placeholder="Nếu tôi góp 3.000.000 mỗi tháng cho mục tiêu Du lịch thì sao?"
-                value={scenarioInput}
-                onChange={(event) => setScenarioInput(event.target.value)}
-              />
-            </label>
-            <button
-              type="submit"
-              className="btn-secondary"
-              disabled={scenario.isPending || scenarioInput.trim().length < 3}
-            >
-              <Sparkles className="h-4 w-4" aria-hidden />
-              {scenario.isPending ? 'Đang mô phỏng...' : 'Mô phỏng'}
-            </button>
-          </form>
+            <Sparkles className="h-4 w-4" aria-hidden />
+            {scenario.isPending ? 'Đang mô phỏng...' : 'Mô phỏng'}
+          </button>
+        </form>
 
-          {scenario.isPending ? (
-            <p className="mt-2 text-xs text-ink-muted" role="status" aria-live="polite">
-              Đang mô phỏng trên máy chủ...
+        {scenario.isPending ? (
+          <p className="mt-2 text-xs text-ink-muted" role="status" aria-live="polite">
+            Đang mô phỏng trên máy chủ...
+          </p>
+        ) : null}
+
+        {scenario.error ? (
+          <div className="mt-2">
+            <ErrorAlert message={errorMessage(scenario.error)} />
+          </div>
+        ) : null}
+
+        {scenario.data ? (
+          <div
+            className="mt-3 rounded-xl border border-line bg-surface-muted/40 p-3"
+            data-testid="ai-scenario-result"
+          >
+            <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
+              Kết quả mô phỏng · hệ thống tính
             </p>
-          ) : null}
-
-          {scenario.error ? (
-            <div className="mt-2">
-              <ErrorAlert message={errorMessage(scenario.error)} />
-            </div>
-          ) : null}
-
-          {scenario.data ? (
-            <div
-              className="mt-3 rounded-xl border border-line bg-surface-muted/40 p-3"
-              data-testid="ai-scenario-result"
-            >
-              <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
-                Kết quả mô phỏng · hệ thống tính
-              </p>
-              {scenario.data.status === 'simulated' && scenario.data.simulation ? (
-                <>
-                  <SimulationSummary simulation={scenario.data.simulation} />
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <SourceBadge source={scenario.data.source} />
-                    <span className="text-xs text-ink-muted">
-                      Số liệu ở trên do hệ thống tính; phần giải thích do nguồn ghi trên nhãn viết.
-                    </span>
-                  </div>
-                  <p className="mt-2 break-words whitespace-pre-line text-sm text-ink-secondary">
-                    {scenario.data.explanation}
-                  </p>
-                  <DisclosureNote disclosure={scenario.data.disclosure} />
-                  {scenario.data.requiresConfirmation ? (
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <p className="text-xs text-warning-strong">
-                        Đây là mô phỏng, chưa có thay đổi nào được lưu. Muốn áp dụng, bạn phải mở
-                        mục tiêu, xem trước thay đổi và xác nhận.
-                      </p>
-                      {onReviewGoal && scenario.data.interpretation.goalId ? (
-                        <button
-                          type="button"
-                          className="btn-secondary"
-                          onClick={() => {
-                            const goalId = scenario.data?.interpretation.goalId;
-                            if (goalId) onReviewGoal(goalId);
-                          }}
-                        >
-                          Xem và xác nhận điều chỉnh
-                        </button>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </>
-              ) : (
-                <div role="status">
-                  <p className="break-words whitespace-pre-line text-sm text-ink-secondary">
-                    {scenario.data.explanation}
-                  </p>
-                  <p className="mt-1 text-xs text-ink-muted">
-                    Mình chưa hiểu đủ kịch bản nên chưa mô phỏng gì. Bạn nói rõ mục tiêu và số tiền
-                    hoặc ngày mong muốn nhé.
-                  </p>
-                </div>
-              )}
-              {scenario.data.limitations.length > 0 ? (
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-ink-muted">
-                  {scenario.data.limitations.map((limitation) => (
-                    <li key={limitation}>{limitation}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-
-        <div className="min-w-0 rounded-2xl border border-line p-4" data-testid="ai-chat">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Bot className="h-4 w-4 text-ink-muted" aria-hidden />
-              <h3 className="text-sm font-semibold text-ink">Hỏi trợ lý</h3>
-            </div>
-            <span className="flex items-center gap-1 text-xs text-ink-muted">
-              <MessageSquare className="h-3.5 w-3.5" aria-hidden />
-              Chỉ trong phiên này
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-ink-muted">
-            Trợ lý không thể tạo, sửa hay xóa mục tiêu, khoản góp, giao dịch hay số dư. Lịch sử trò
-            chuyện chỉ nằm trong phiên này.
-          </p>
-
-          {messages.length === 0 ? (
-            <div className="mt-2 flex flex-wrap gap-1">
-              {SAVINGS_CHAT_SUGGESTED_QUESTIONS.map((question) => (
-                <button
-                  key={question}
-                  type="button"
-                  className="rounded-full border border-line px-3 py-1 text-xs text-ink-secondary hover:bg-surface-muted"
-                  onClick={() => setChatInput(question)}
-                >
-                  {question}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <ol
-              className="mt-3 space-y-3"
-              aria-label="Hội thoại với trợ lý"
-              data-testid="ai-chat-log"
-            >
-              {messages.map((entry, index) =>
-                entry.role === 'user' ? (
-                  <li key={index} className="flex min-w-0 flex-col items-end gap-1">
-                    <span className="text-[11px] font-medium uppercase tracking-wide text-ink-muted">
-                      Bạn hỏi
-                    </span>
-                    <p className="max-w-[85%] break-words whitespace-pre-line rounded-xl rounded-tr-sm bg-brand px-3 py-2 text-sm text-white">
-                      {entry.content}
-                    </p>
-                  </li>
-                ) : (
-                  <li key={index} className="flex min-w-0 flex-col gap-1">
-                    <span className="text-[11px] font-medium uppercase tracking-wide text-ink-muted">
-                      Trợ lý trả lời
-                    </span>
-                    <div className="min-w-0 rounded-xl rounded-tl-sm border border-line p-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <SourceBadge source={entry.reply.source} />
-                        {entry.reply.scenario ? (
-                          <Badge tone="amber">Câu trả lời kèm mô phỏng</Badge>
-                        ) : null}
-                      </div>
-                      <p className="mt-1 break-words whitespace-pre-line text-sm text-ink-secondary">
-                        {entry.reply.reply}
-                      </p>
-                      {entry.reply.scenario ? (
-                        <SimulationSummary simulation={entry.reply.scenario} />
-                      ) : null}
-                      {entry.reply.references.length > 0 ? (
-                        <ul className="mt-2 flex flex-wrap gap-1">
-                          {entry.reply.references.map((reference) => (
-                            <li
-                              key={`${reference.label}:${reference.value}`}
-                              className="break-words rounded-full bg-surface-muted px-2 py-0.5 text-xs text-ink-secondary"
-                            >
-                              {reference.label}: {reference.value}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                      {entry.reply.clarification ? (
-                        <p className="mt-2 break-words rounded-lg border border-warning-border bg-warning-soft p-2 text-xs text-warning-strong">
-                          {entry.reply.clarification}
-                        </p>
-                      ) : null}
-                      <DisclosureNote disclosure={entry.reply.disclosure} />
-                    </div>
-                  </li>
-                ),
-              )}
-              {chat.isPending ? (
-                <li className="flex min-w-0 flex-col gap-1">
-                  <span className="text-[11px] font-medium uppercase tracking-wide text-ink-muted">
-                    Trợ lý trả lời
+            {scenario.data.status === 'simulated' && scenario.data.simulation ? (
+              <>
+                <SimulationSummary simulation={scenario.data.simulation} />
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <SourceBadge source={scenario.data.source} />
+                  <span className="text-xs text-ink-muted">
+                    Số liệu ở trên do hệ thống tính; phần giải thích do nguồn ghi trên nhãn viết.
                   </span>
-                  <p
-                    className="rounded-xl border border-dashed border-line p-3 text-sm text-ink-muted"
-                    role="status"
-                    aria-live="polite"
-                  >
-                    Đang soạn câu trả lời...
-                  </p>
-                </li>
-              ) : null}
-            </ol>
-          )}
-
-          {chat.error ? (
-            <div className="mt-2">
-              <ErrorAlert message={errorMessage(chat.error)} />
-            </div>
-          ) : null}
-
-          <form
-            className="mt-3 flex flex-wrap items-end gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              submitChat();
-            }}
-          >
-            <label className="flex min-w-52 flex-1 flex-col gap-1 text-sm text-ink-secondary">
-              <span className="sr-only">Câu hỏi cho trợ lý</span>
-              <input
-                className="input"
-                maxLength={MAX_MESSAGE_LENGTH}
-                placeholder="Tại sao mục tiêu của tôi lại chậm tiến độ?"
-                value={chatInput}
-                onChange={(event) => setChatInput(event.target.value)}
-              />
-            </label>
-            <button
-              type="submit"
-              className="btn-secondary"
-              disabled={chat.isPending || chatInput.trim().length === 0}
-            >
-              <Send className="h-4 w-4" aria-hidden />
-              {chat.isPending ? 'Đang trả lời...' : 'Gửi'}
-            </button>
-          </form>
-        </div>
+                </div>
+                <p className="mt-2 break-words whitespace-pre-line text-sm text-ink-secondary">
+                  {scenario.data.explanation}
+                </p>
+                <DisclosureNote disclosure={scenario.data.disclosure} />
+                {scenario.data.requiresConfirmation ? (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <p className="text-xs text-warning-strong">
+                      Đây là mô phỏng, chưa có thay đổi nào được lưu. Muốn áp dụng, bạn phải mở mục
+                      tiêu, xem trước thay đổi và xác nhận.
+                    </p>
+                    {onReviewGoal && scenario.data.interpretation.goalId ? (
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => {
+                          const goalId = scenario.data?.interpretation.goalId;
+                          if (goalId) onReviewGoal(goalId);
+                        }}
+                      >
+                        Xem và xác nhận điều chỉnh
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <div role="status">
+                <p className="break-words whitespace-pre-line text-sm text-ink-secondary">
+                  {scenario.data.explanation}
+                </p>
+                <p className="mt-1 text-xs text-ink-muted">
+                  Mình chưa hiểu đủ kịch bản nên chưa mô phỏng gì. Bạn nói rõ mục tiêu và số tiền
+                  hoặc ngày mong muốn nhé.
+                </p>
+              </div>
+            )}
+            {scenario.data.limitations.length > 0 ? (
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-ink-muted">
+                {scenario.data.limitations.map((limitation) => (
+                  <li key={limitation}>{limitation}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </section>
   );
 }
-
-type ChatEntry =
-  { role: 'user'; content: string } | { role: 'assistant'; reply: SavingsChatReplyDto };

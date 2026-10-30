@@ -37,6 +37,11 @@ export function formatPercent(value: number | null | undefined): string {
   return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
 }
 
+/** Size of a change without a sign, for sentences phrased with "tăng"/"giảm". */
+export function formatPercentMagnitude(value: number): string {
+  return `${Math.abs(value).toFixed(1)}%`;
+}
+
 /** `YYYY-MM` → `MM/YYYY` for chart axes and tables. */
 export function formatMonthLabel(month: string): string {
   const [year, monthNumber] = month.split('-');

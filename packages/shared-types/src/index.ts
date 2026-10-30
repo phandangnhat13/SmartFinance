@@ -1703,6 +1703,103 @@ export const ANALYTICS_AI_SUGGESTED_QUESTIONS: readonly string[] = [
   'Điểm sức khỏe tài chính được tính ra sao?',
 ];
 
+/**
+ * Persistent AI conversations (floating widget).
+ *
+ * Both assistants share one conversation/message store. A stored assistant
+ * message keeps only the structured pieces needed to re-render the answer;
+ * the full deterministic context is never persisted.
+ */
+export type AiAssistantType = 'SAVINGS' | 'ANALYTICS';
+
+export type AiMessageRole = 'USER' | 'ASSISTANT';
+
+export const AI_ASSISTANT_LABELS: Record<AiAssistantType, string> = {
+  ANALYTICS: 'Trợ lý phân tích',
+  SAVINGS: 'Trợ lý tiết kiệm',
+};
+
+export const AI_CONVERSATION_DEFAULT_TITLE = 'Cuộc trò chuyện mới';
+
+export const AI_CONVERSATION_TITLE_MAX_LENGTH = 120;
+
+export const AI_MESSAGE_MAX_LENGTH = 1_000;
+
+/** Messages loaded per page when opening a conversation. */
+export const AI_MESSAGE_PAGE_SIZE = 30;
+
+export interface AiConversationDto {
+  id: string;
+  title: string;
+  assistantType: AiAssistantType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AiConversationListDto {
+  items: AiConversationDto[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+/** Analytics reply fields kept with a stored assistant message. */
+export type AiStoredAnalyticsReplyDto = Pick<
+  AnalyticsAiChatReplyDto,
+  | 'currency'
+  | 'timezone'
+  | 'generatedAt'
+  | 'source'
+  | 'intent'
+  | 'evidence'
+  | 'clarification'
+  | 'canModifyData'
+  | 'disclosure'
+>;
+
+/** Savings reply fields kept with a stored assistant message. */
+export type AiStoredSavingsReplyDto = Pick<
+  SavingsChatReplyDto,
+  | 'currency'
+  | 'timezone'
+  | 'generatedAt'
+  | 'source'
+  | 'intent'
+  | 'references'
+  | 'scenario'
+  | 'clarification'
+  | 'canModifyData'
+  | 'disclosure'
+>;
+
+export type AiChatMessageMetadataDto =
+  | { assistantType: 'ANALYTICS'; reply: AiStoredAnalyticsReplyDto }
+  | { assistantType: 'SAVINGS'; reply: AiStoredSavingsReplyDto };
+
+export interface AiMessageDto {
+  id: string;
+  conversationId: string;
+  role: AiMessageRole;
+  content: string;
+  /** Structured assistant reply; null for user messages. */
+  metadata: AiChatMessageMetadataDto | null;
+  createdAt: string;
+}
+
+export interface AiMessageListDto {
+  items: AiMessageDto[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface SendAiMessageResponseDto {
+  userMessage: AiMessageDto;
+  assistantMessage: AiMessageDto;
+}
+
 export interface ApiErrorBody {
   statusCode: number;
   code: string;

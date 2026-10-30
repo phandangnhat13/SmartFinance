@@ -1,10 +1,18 @@
 import { AlertCircle, Eye, EyeOff, Inbox, Loader2, X } from 'lucide-react';
 import { forwardRef, useEffect, useId, useRef, useState } from 'react';
 import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
+import { cn } from '../lib/cn';
+import type { AiChatContext } from '../lib/ai-chat-context';
+import type { Explanation } from '../lib/explanations';
+import { HelpTip } from './Explain';
 
-export function cn(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(' ');
-}
+export { cn };
+export { HelpTip };
+
+/* ---------------------------- contextual help ---------------------------- */
+
+/* Level A quick help lives in `Explain.tsx`; re-exported here so pages keep a
+   single import for the shared UI primitives. */
 
 /* ------------------------------- feedback ------------------------------- */
 
@@ -92,17 +100,35 @@ export function StatCard({
   icon,
   hint,
   valueClass,
+  help,
+  explain,
+  explainContext,
 }: {
   label: string;
   value: string;
   icon?: ReactNode;
   hint?: ReactNode;
   valueClass?: string;
+  /** Optional definition shown through contextual help, never by default. */
+  help?: ReactNode;
+  /** Quick definition plus the detailed panel, in one help button. */
+  explain?: Explanation;
+  /** Page context forwarded to the AI action inside the explanation panel. */
+  explainContext?: AiChatContext;
 }) {
   return (
     <div className="card min-w-0">
       <div className="flex items-start justify-between gap-3">
-        <p className="stat-label">{label}</p>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <p className="stat-label">{label}</p>
+          {explain ? (
+            <HelpTip label={label} explanation={explain} explainContext={explainContext} />
+          ) : help ? (
+            <HelpTip label={label} explainContext={explainContext}>
+              {help}
+            </HelpTip>
+          ) : null}
+        </div>
         {icon ? (
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-surface-muted">
             {icon}

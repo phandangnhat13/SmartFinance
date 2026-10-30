@@ -21,6 +21,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AiChatWidget } from './AiChatWidget';
 import { cn } from './ui';
 
 interface NavItem {
@@ -397,6 +398,8 @@ export function AppLayout() {
           <Outlet />
         </main>
       </div>
+
+      <AiChatWidget />
 
       {mobileOpen ? (
         <div className="fixed inset-0 z-40 lg:hidden">

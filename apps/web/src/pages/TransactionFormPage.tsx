@@ -12,10 +12,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { z } from 'zod';
+import { ExplainButton } from '../components/Explain';
 import { ErrorAlert, FieldError, PageHeader, Spinner } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { api, errorMessage } from '../lib/api';
 import { inputToIso, isoToInput, nowInput } from '../lib/date';
+import { transactionsTransfer } from '../lib/explanations';
 import { formatMoney } from '../lib/format';
 
 const MONEY_REGEX = /^(?:0|[1-9]\d{0,14})(?:\.\d{1,2})?$/;
@@ -531,9 +533,12 @@ export function TransferFormPage() {
         title="Chuyển tiền nội bộ"
         description="Chuyển giữa hai tài khoản của bạn. Giao dịch được ghi nhận nguyên tử."
         actions={
-          <Link to="/transactions" className="btn-secondary">
-            Danh sách
-          </Link>
+          <>
+            <ExplainButton explanation={transactionsTransfer} label="Cách hoạt động" />
+            <Link to="/transactions" className="btn-secondary">
+              Danh sách
+            </Link>
+          </>
         }
       />
       {submitError ? (

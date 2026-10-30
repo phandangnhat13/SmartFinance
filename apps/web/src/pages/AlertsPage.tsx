@@ -11,6 +11,7 @@ import { Filter, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertDetail } from '../components/AlertDetail';
+import { ExplainButton } from '../components/Explain';
 import {
   Badge,
   cn,
@@ -22,6 +23,7 @@ import {
   Spinner,
 } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import type { AiChatContext } from '../lib/ai-chat-context';
 import { api, ApiError, errorMessage } from '../lib/api';
 import {
   ALERT_SEVERITY_LABELS,
@@ -33,6 +35,7 @@ import {
   formatMonthLabel,
   normalizeCurrency,
 } from '../lib/alerts';
+import { alertsEvidence, alertsType } from '../lib/explanations';
 import { formatDateTime } from '../lib/format';
 
 const PAGE_SIZE = 20;
@@ -176,6 +179,8 @@ export function AlertsPage() {
   }, [result, page]);
 
   const filtersActive = status !== '' || type !== '';
+
+  const listContext: AiChatContext = { page: 'alerts', currency: fallbackCurrency };
 
   function resetFilters() {
     setStatus('');
@@ -324,6 +329,24 @@ export function AlertsPage() {
         />
       ) : (
         <>
+          <div className="mb-3 flex flex-wrap gap-3">
+            <ExplainButton
+              explanation={alertsType}
+              label="Các loại cảnh báo"
+              variant="link"
+              context={{ ...listContext, feature: 'alert-types', label: 'Các loại cảnh báo' }}
+            />
+            <ExplainButton
+              explanation={alertsEvidence}
+              label="Cách đọc bằng chứng"
+              variant="link"
+              context={{
+                ...listContext,
+                feature: 'alert-evidence',
+                label: 'Cách đọc bằng chứng',
+              }}
+            />
+          </div>
           <ul className="space-y-3" aria-label="Danh sách cảnh báo">
             {result?.items.map((alert) => (
               <li
@@ -409,6 +432,7 @@ export function AlertsPage() {
             timezone={timezone}
             fallbackCurrency={fallbackCurrency}
             onUpdated={setActiveAlert}
+            onClose={() => setActiveAlert(null)}
           />
         ) : null}
       </Modal>
