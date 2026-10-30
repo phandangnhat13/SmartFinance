@@ -16,8 +16,13 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import type { AuthenticatedUser } from '../../common/interfaces/auth-user.interface';
-import { CreateContributionDto, CreateGoalDto, UpdateGoalDto } from './dto/goal.dto';
-import { toGoalDto } from './goal.mapper';
+import {
+  CreateContributionDto,
+  CreateGoalDto,
+  ListGoalsQuery,
+  UpdateContributionDto,
+  UpdateGoalDto,
+} from './dto/goal.dto';
 import { GoalsService } from './goals.service';
 
 @ApiTags('goals')
@@ -28,19 +33,27 @@ export class GoalsController {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách mục tiêu tiết kiệm và tiến độ' })
-  async list(
+  async list(@CurrentUser() current: AuthenticatedUser, @Query() query: ListGoalsQuery) {
+    const items = await this.goalsService.list(current.id, {
+      includeArchived: query.includeArchived === 'true',
+      currency: query.currency,
+    });
+    return { items };
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Chi tiết một mục tiêu tiết kiệm' })
+  async get(
     @CurrentUser() current: AuthenticatedUser,
-    @Query('includeArchived') includeArchived?: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    const goals = await this.goalsService.list(current.id, includeArchived === 'true');
-    return { items: goals.map(toGoalDto) };
+    return { goal: await this.goalsService.get(current.id, id) };
   }
 
   @Post()
   @ApiOperation({ summary: 'Tạo mục tiêu tiết kiệm' })
   async create(@CurrentUser() current: AuthenticatedUser, @Body() dto: CreateGoalDto) {
-    const goal = await this.goalsService.create(current.id, dto);
-    return { goal: toGoalDto(goal) };
+    return { goal: await this.goalsService.create(current.id, dto) };
   }
 
   @Patch(':id')
@@ -50,8 +63,7 @@ export class GoalsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateGoalDto,
   ) {
-    const goal = await this.goalsService.update(current.id, id, dto);
-    return { goal: toGoalDto(goal) };
+    return { goal: await this.goalsService.update(current.id, id, dto) };
   }
 
   @Delete(':id')
@@ -61,8 +73,7 @@ export class GoalsController {
     @CurrentUser() current: AuthenticatedUser,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    const goal = await this.goalsService.archive(current.id, id);
-    return { goal: toGoalDto(goal) };
+    return { goal: await this.goalsService.archive(current.id, id) };
   }
 
   @Post(':id/contributions')
@@ -72,7 +83,29 @@ export class GoalsController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: CreateContributionDto,
   ) {
-    const goal = await this.goalsService.addContribution(current.id, id, dto);
-    return { goal: toGoalDto(goal) };
+    return { goal: await this.goalsService.addContribution(current.id, id, dto) };
+  }
+
+  @Patch(':id/contributions/:contributionId')
+  @ApiOperation({ summary: 'Sửa một khoản đóng góp đã ghi nhận' })
+  async updateContribution(
+    @CurrentUser() current: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('contributionId', new ParseUUIDPipe()) contributionId: string,
+    @Body() dto: UpdateContributionDto,
+  ) {
+    return {
+      goal: await this.goalsService.updateContribution(current.id, id, contributionId, dto),
+    };
+  }
+
+  @Delete(':id/contributions/:contributionId')
+  @ApiOperation({ summary: 'Xóa một khoản đóng góp đã ghi nhận' })
+  async deleteContribution(
+    @CurrentUser() current: AuthenticatedUser,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('contributionId', new ParseUUIDPipe()) contributionId: string,
+  ) {
+    return { goal: await this.goalsService.deleteContribution(current.id, id, contributionId) };
   }
 }

@@ -42,6 +42,7 @@ enum GoalStatus {
   ACTIVE
   COMPLETED
   ARCHIVED
+  PAUSED
 }
 
 enum ImportStatus {
@@ -66,6 +67,25 @@ enum AiPredictionStatus {
   REJECTED
 }
 
+enum SpendingAlertType {
+  LARGE_TRANSACTION
+  CATEGORY_SPIKE
+  POSSIBLE_DUPLICATE
+}
+
+enum SpendingAlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum SpendingAlertStatus {
+  OPEN
+  ACKNOWLEDGED
+  DISMISSED
+  MARKED_NORMAL
+}
+
 model User {
   id              String   @id @default(uuid()) @db.Uuid
   email           String   @unique
@@ -86,6 +106,7 @@ model User {
   importBatches  ImportBatch[]
   aiPredictions  AiPrediction[]
   goalContributions GoalContribution[]
+  spendingAlerts SpendingAlert[]
 
   @@map("users")
 }
@@ -125,6 +146,7 @@ model Category {
   budgets           Budget[]
   predictionsAsPredicted AiPrediction[] @relation("PredictedCategory")
   predictionsAsAccepted  AiPrediction[] @relation("AcceptedCategory")
+  spendingAlerts         SpendingAlert[]
 
   @@unique([userId, type, name])
   @@index([userId, type, isArchived])
@@ -157,6 +179,8 @@ model Transaction {
   category    Category?    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   importBatch ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
   aiPredictions AiPrediction[]
+  alertsAsTransaction SpendingAlert[] @relation("AlertTransaction")
+  alertsAsRelated     SpendingAlert[] @relation("AlertRelatedTransaction")
 
   @@unique([userId, importHash])
   @@index([userId, occurredAt(sort: Desc)])
@@ -208,7 +232,10 @@ model SavingsGoal {
   id           String     @id @default(uuid()) @db.Uuid
   userId       String     @db.Uuid
   name         String
+  description  String?
   targetAmount Decimal    @db.Decimal(18, 2)
+  currency     String     @default("VND") @db.VarChar(3)
+  startDate    DateTime?  @db.Date
   targetDate   DateTime?  @db.Date
   status       GoalStatus @default(ACTIVE)
   createdAt    DateTime   @default(now())
@@ -297,4 +324,49 @@ model AiPrediction {
   @@index([transactionId, createdAt(sort: Desc)])
   @@index([userId, status])
   @@map("ai_predictions")
+}
+
+/// A statistically detected spending anomaly shown to its owner.
+///
+/// The row is a *record of what was observed*, not an accusation: detectors only
+/// propose, and the user can acknowledge, dismiss or mark it normal. Alerts are
+/// deduplicated by (userId, dedupeKey) so a repeated scan never duplicates one —
+/// the unique index is the guarantee, `skipDuplicates` is only the fast path.
+///
+/// `score` is a robust z-score (standard deviations from the user's median), not
+/// a probability. A transaction alert is deleted with its transaction; a
+/// duplicate alert is deleted when either side disappears, because the pair no
+/// longer exists. `categoryId` uses SET NULL so archiving a category keeps the
+/// historical alert (the name snapshot lives in `facts`).
+model SpendingAlert {
+  id                   String                @id @default(uuid()) @db.Uuid
+  userId               String                @db.Uuid
+  type                 SpendingAlertType
+  severity             SpendingAlertSeverity
+  status               SpendingAlertStatus   @default(OPEN)
+  /// Stable identity of the detected event, e.g. "LARGE:<txId>",
+  /// "SPIKE:<categoryId>:<YYYY-MM>", "DUP:<lowerId>:<higherId>".
+  dedupeKey            String
+  transactionId        String?               @db.Uuid
+  relatedTransactionId String?               @db.Uuid
+  categoryId           String?               @db.Uuid
+  periodStart          DateTime?             @db.Date
+  periodEnd            DateTime?             @db.Date
+  /// Robust z-score, or null when the fallback ratio rule was used.
+  score                Decimal?              @db.Decimal(10, 4)
+  /// Snapshot of the numbers behind the explanation (median, MAD, windows…).
+  facts                Json
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  resolvedAt           DateTime?
+
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction        Transaction? @relation("AlertTransaction", fields: [transactionId], references: [id], onDelete: Cascade)
+  relatedTransaction Transaction? @relation("AlertRelatedTransaction", fields: [relatedTransactionId], references: [id], onDelete: Cascade)
+  category           Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, status, createdAt(sort: Desc)])
+  @@index([userId, type, createdAt(sort: Desc)])
+  @@map("spending_alerts")
 }

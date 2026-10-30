@@ -217,9 +217,9 @@ Script AI (chạy trong `apps/ai-service`):
 
 ```bash
 npm run typecheck && npm run lint
-npm test                       # API unit (38) + web unit (11)
+npm test                       # API unit (40) + web unit (11)
 npm run test:e2e               # API e2e (20), cần database test đã migrate
-npm run test:e2e -w @smart-finance/web   # Trình duyệt (13); tự tạo DB + server riêng
+npm run test:e2e -w @smart-finance/web   # Trình duyệt (14); tự tạo DB + server riêng
 cd apps/ai-service && pytest   # AI service (33)
 ```
 

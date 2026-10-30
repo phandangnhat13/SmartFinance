@@ -6,8 +6,15 @@ export class ApiError extends Error {
   status: number;
   code: string;
   details?: unknown;
+  /** Seconds from `Retry-After`, when the server sent a numeric value. */
+  retryAfterSeconds: number | null;
 
-  constructor(status: number, body: Partial<ApiErrorBody> | null, fallback: string) {
+  constructor(
+    status: number,
+    body: Partial<ApiErrorBody> | null,
+    fallback: string,
+    retryAfterSeconds: number | null = null,
+  ) {
     const rawMessage = (body as { message?: unknown } | null)?.message;
     const message =
       typeof rawMessage === 'string'
@@ -20,6 +27,7 @@ export class ApiError extends Error {
     this.status = status;
     this.code = body?.code ?? 'UNKNOWN';
     this.details = body?.details;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
@@ -42,7 +50,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     } catch {
       body = null;
     }
-    throw new ApiError(response.status, body, `Yêu cầu thất bại (${response.status})`);
+    const retryAfterHeader = response.headers.get('retry-after')?.trim() ?? '';
+    const retryAfterSeconds = /^\d+$/.test(retryAfterHeader) ? Number(retryAfterHeader) : null;
+    throw new ApiError(
+      response.status,
+      body,
+      `Yêu cầu thất bại (${response.status})`,
+      retryAfterSeconds,
+    );
   }
 
   if (response.status === 204) return undefined as T;

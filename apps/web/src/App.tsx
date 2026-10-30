@@ -9,6 +9,9 @@ import { Spinner } from './components/ui';
 const AccountsPage = lazy(() =>
   import('./pages/AccountsPage').then((m) => ({ default: m.AccountsPage })),
 );
+const AlertsPage = lazy(() =>
+  import('./pages/AlertsPage').then((m) => ({ default: m.AlertsPage })),
+);
 const BudgetsPage = lazy(() =>
   import('./pages/BudgetsPage').then((m) => ({ default: m.BudgetsPage })),
 );
@@ -21,6 +24,9 @@ const DashboardPage = lazy(() =>
 const GoalsPage = lazy(() => import('./pages/GoalsPage').then((m) => ({ default: m.GoalsPage })));
 const ImportsPage = lazy(() =>
   import('./pages/ImportsPage').then((m) => ({ default: m.ImportsPage })),
+);
+const InsightsPage = lazy(() =>
+  import('./pages/InsightsPage').then((m) => ({ default: m.InsightsPage })),
 );
 const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })));
 const NotFoundPage = lazy(() =>
@@ -61,10 +67,12 @@ export function App() {
           <Route element={<AppLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/insights" element={<InsightsPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/transactions/new" element={<TransactionFormPage />} />
             <Route path="/transactions/transfer" element={<TransferFormPage />} />
             <Route path="/transactions/:id/edit" element={<TransactionFormPage />} />
+            <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/budgets" element={<BudgetsPage />} />

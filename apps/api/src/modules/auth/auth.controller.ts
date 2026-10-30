@@ -12,6 +12,22 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
+/**
+ * Brute-force protection for the credential endpoints: 5 attempts per minute
+ * per IP everywhere. The isolated browser E2E suite registers several throwaway
+ * users within a minute, so it raises the limit through `AUTH_THROTTLE_LIMIT`
+ * when it boots its own API process; no other environment sets that variable.
+ * The decorator reads it at import time, so it must be a real process
+ * environment variable, not a `.env` entry.
+ */
+export const AUTH_RATE_LIMIT = {
+  limit: (() => {
+    const configured = Number(process.env.AUTH_THROTTLE_LIMIT);
+    return Number.isInteger(configured) && configured > 0 ? configured : 5;
+  })(),
+  ttl: 60_000,
+} as const;
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -22,7 +38,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: AUTH_RATE_LIMIT.limit, ttl: AUTH_RATE_LIMIT.ttl } })
   @ApiOperation({ summary: 'Đăng ký tài khoản bằng email và mật khẩu' })
   async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) response: Response) {
     const user = await this.authService.register(dto);
@@ -33,7 +49,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: AUTH_RATE_LIMIT.limit, ttl: AUTH_RATE_LIMIT.ttl } })
   @ApiOperation({ summary: 'Đăng nhập' })
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) response: Response) {
     const user = await this.authService.validateCredentials(dto);

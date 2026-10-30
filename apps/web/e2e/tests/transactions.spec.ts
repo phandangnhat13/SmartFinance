@@ -28,7 +28,9 @@ test.describe('transaction list states', () => {
     const response = await page.request.post('/api/v1/auth/register', {
       data: { email, password: 'E2ePassword123!', displayName: 'Empty State' },
     });
-    expect(response.ok()).toBeTruthy();
+    if (!response.ok()) {
+      throw new Error(`Register failed: ${response.status()} ${await response.text()}`);
+    }
 
     await page.goto('/transactions');
     await expect(page.getByText('Không có giao dịch phù hợp')).toBeVisible();
@@ -122,17 +124,72 @@ test.describe('AI-assisted transaction entry', () => {
     await expect(row.getByText('Ăn uống')).toBeVisible();
   });
 
-  test('treats a low-confidence answer as manual choice only', async ({ page }) => {
+  test('offers ranked candidates for a low-confidence answer without auto-filling', async ({
+    page,
+  }) => {
     const description = `[lowconf] mua đồ ${RUN}`;
     await openNewTransactionForm(page);
 
     await page.locator('#amount').fill('42000');
     await page.locator('#description').fill(description);
 
-    await expect(
-      page.getByText('AI chưa chắc chắn về danh mục cho mô tả này. Vui lòng tự chọn danh mục.'),
-    ).toBeVisible({ timeout: 15_000 });
+    const panel = page.getByTestId('ai-low-confidence');
+    await expect(panel).toBeVisible({ timeout: 15_000 });
+    await expect(panel).toContainText(
+      'AI chưa chắc chắn về danh mục cho mô tả này. Vui lòng tự chọn danh mục.',
+    );
+    // The prediction is never applied automatically, even though candidates exist.
     await expect(page.getByRole('button', { name: 'Dùng gợi ý' })).toHaveCount(0);
+    await expect(page.locator('#categoryId')).toHaveValue('');
+
+    await expect(panel.getByRole('button', { name: /Mua sắm/ })).toBeVisible();
+    await expect(panel.getByRole('button', { name: /Ăn uống/ })).toBeVisible();
+
+    // Picking a ranked candidate records a CORRECT (it differs from the top label).
+    const feedback = page.waitForRequest(
+      (request) =>
+        request.method() === 'POST' &&
+        /\/api\/v1\/ai\/predictions\/[^/]+\/feedback$/.test(request.url()),
+    );
+    await panel.getByRole('button', { name: /Mua sắm/ }).click();
+    const feedbackRequest = await feedback;
+    expect(feedbackRequest.postDataJSON()).toMatchObject({ action: 'CORRECT' });
+    await expect(page.locator('#categoryId')).not.toHaveValue('');
+
+    await submit(page);
+    await expect(page).toHaveURL(/\/transactions$/);
+    await expect(page.getByText(description, { exact: true })).toBeVisible();
+  });
+
+  test('falls back to manual selection when a low-confidence answer has no candidates', async ({
+    page,
+  }) => {
+    // Simulates an older AI service that omits `alternatives`.
+    await page.route('**/api/v1/ai/classify-transaction', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          categoryId: '00000000-0000-4000-8000-000000000000',
+          categoryName: 'Ăn uống',
+          slug: 'food',
+          confidence: 0.31,
+          status: 'low_confidence',
+          predictionId: null,
+          modelVersion: 'e2e-stub-v1',
+        }),
+      }),
+    );
+    const description = `[lowconf] không gợi ý ${RUN}`;
+    await openNewTransactionForm(page);
+
+    await page.locator('#amount').fill('15000');
+    await page.locator('#description').fill(description);
+
+    const panel = page.getByTestId('ai-low-confidence');
+    await expect(panel).toBeVisible({ timeout: 15_000 });
+    await expect(panel.getByRole('button')).toHaveCount(0);
+    await expect(page.locator('#categoryId')).toHaveValue('');
 
     await selectExpenseCategory(page, 'Khác');
     await submit(page);

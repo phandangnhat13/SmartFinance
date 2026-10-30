@@ -7,7 +7,9 @@ export type AccountType = 'CASH' | 'BANK' | 'E_WALLET' | 'OTHER';
 export type CategoryType = 'INCOME' | 'EXPENSE';
 export type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER';
 export type TransferDirection = 'OUT' | 'IN';
-export type GoalStatus = 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
+export type GoalStatus = 'ACTIVE' | 'COMPLETED' | 'ARCHIVED' | 'PAUSED';
+/** Stored status plus the time-derived OVERDUE state. */
+export type GoalDisplayStatus = GoalStatus | 'OVERDUE';
 export type ImportStatus = 'UPLOADED' | 'PREVIEW_READY' | 'IMPORTING' | 'COMPLETED' | 'FAILED';
 export type ImportRowStatus = 'VALID' | 'INVALID' | 'IMPORTED' | 'SKIPPED_DUPLICATE';
 export type AiPredictionStatus = 'SUGGESTED' | 'ACCEPTED' | 'CORRECTED' | 'REJECTED';
@@ -115,12 +117,24 @@ export interface BudgetProgressDto {
 export interface GoalDto {
   id: string;
   name: string;
+  description: string | null;
   targetAmount: string;
   savedAmount: string;
   remainingAmount: string;
   percentage: number;
+  currency: string;
+  startDate: string;
   targetDate: string | null;
   status: GoalStatus;
+  displayStatus: GoalDisplayStatus;
+  isOverdue: boolean;
+  /** Whole calendar months left; 0 when the target date has passed. */
+  monthsRemaining: number | null;
+  /**
+   * Remaining amount spread over the months left. `null` when there is nothing
+   * to plan against (paused, no target date, or already past the deadline).
+   */
+  requiredMonthlySaving: string | null;
   contributions: GoalContributionDto[];
 }
 
@@ -186,6 +200,19 @@ export interface ImportPreviewDto {
   rows: ImportRowDto[];
 }
 
+/**
+ * One ranked candidate from the AI service, resolved to a category the user can
+ * actually pick. The client uses these when the top label is below the
+ * confidence threshold, so an uncertain prediction still helps the user choose
+ * instead of leaving them with a bare "choose manually" warning.
+ */
+export interface AiAlternativeDto {
+  categoryId: string;
+  categoryName: string;
+  slug: string;
+  confidence: number;
+}
+
 export interface AiSuggestionDto {
   categoryId: string | null;
   categoryName: string | null;
@@ -195,6 +222,157 @@ export interface AiSuggestionDto {
   predictionId: string | null;
   modelVersion: string | null;
   message?: string;
+  /** Ranked candidates (highest first). Empty when the model is unavailable. */
+  alternatives?: AiAlternativeDto[];
+}
+
+export type SpendingAlertType = 'LARGE_TRANSACTION' | 'CATEGORY_SPIKE' | 'POSSIBLE_DUPLICATE';
+export type SpendingAlertSeverity = 'LOW' | 'MEDIUM' | 'HIGH';
+export type SpendingAlertStatus = 'OPEN' | 'ACKNOWLEDGED' | 'DISMISSED' | 'MARKED_NORMAL';
+
+export interface SpendingAlertDto {
+  id: string;
+  type: SpendingAlertType;
+  severity: SpendingAlertSeverity;
+  status: SpendingAlertStatus;
+  dedupeKey: string;
+  transactionId: string | null;
+  relatedTransactionId: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
+  /** Calendar dates (YYYY-MM-DD), only for month-scoped alerts. */
+  periodStart: string | null;
+  periodEnd: string | null;
+  /** Robust z-score, or null when the fallback ratio rule was used. Not a probability. */
+  score: string | null;
+  facts: Record<string, unknown>;
+  /** Vietnamese, rebuilt from the stored facts so it always matches them. */
+  explanation: string;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt: string | null;
+}
+
+export type AlertScanStatus = 'completed' | 'truncated';
+
+/**
+ * What one scan did. `truncated` means a documented limit was reached, so the
+ * scan must not be presented as complete: some data or candidate pairs were not
+ * examined.
+ */
+export interface AlertScanSummaryDto {
+  status: AlertScanStatus;
+  detected: number;
+  created: number;
+  alreadyPresent: number;
+  detectedByType: Record<SpendingAlertType, number>;
+  scannedTransactions: number;
+  window: {
+    currentMonth: string;
+    currentDays: number;
+    referenceMonths: string[];
+  };
+  limits: {
+    lookbackDays: number;
+    candidateDays: number;
+    maxTransactions: number;
+    maxLargeCandidates: number;
+    maxDuplicatePairs: number;
+    transactionsTruncated: boolean;
+    largeCandidatesCapped: boolean;
+    duplicateCapReached: boolean;
+  };
+}
+
+/**
+ * Financial insights (M2a).
+ *
+ * Every figure is measured from stored INCOME/EXPENSE transactions in a single
+ * currency. Internal transfers are excluded, and amounts in different
+ * currencies are never added together: `currency` on each response states
+ * which currency the numbers belong to.
+ *
+ * `monthStatus` marks a month that is still running, so the UI can say the
+ * values are actual-to-date rather than a projection. `estimated` is always
+ * false until a later milestone introduces forecasts.
+ */
+export type InsightMonthStatus = 'in_progress' | 'complete';
+
+export interface InsightsOverviewDto {
+  currency: string;
+  timezone: string;
+  /** Calendar month in the user's timezone, YYYY-MM. */
+  month: string;
+  monthStatus: InsightMonthStatus;
+  /** Calendar dates (YYYY-MM-DD) of the local month. */
+  periodStart: string;
+  periodEnd: string;
+  income: string;
+  expense: string;
+  net: string;
+  /** net / income × 100, or null when the month has no income. */
+  savingsRate: number | null;
+  transactionCount: number;
+  estimated: false;
+  previous: {
+    month: string;
+    income: string;
+    expense: string;
+    net: string;
+    savingsRate: number | null;
+    incomeChangePercent: number | null;
+    expenseChangePercent: number | null;
+  };
+  /** Currencies with at least one transaction for this user (default first). */
+  availableCurrencies: string[];
+}
+
+export interface InsightMonthPointDto {
+  month: string;
+  monthStatus: InsightMonthStatus;
+  income: string;
+  expense: string;
+  net: string;
+  savingsRate: number | null;
+  transactionCount: number;
+  hasTransactions: boolean;
+}
+
+export interface InsightsMonthlyDto {
+  currency: string;
+  timezone: string;
+  estimated: false;
+  months: InsightMonthPointDto[];
+}
+
+export interface InsightCategoryItemDto {
+  categoryId: string | null;
+  categoryName: string;
+  total: string;
+  sharePercent: number;
+  transactionCount: number;
+  previousTotal: string;
+  changeAmount: string;
+  /** null when the category had no spending in the previous month. */
+  changePercent: number | null;
+  /** previousTotal > 0 and the increase reaches the documented threshold. */
+  notableIncrease: boolean;
+  /** Spending in a category that had no spending the month before. */
+  isNewSpending: boolean;
+}
+
+export interface InsightsCategoriesDto {
+  currency: string;
+  timezone: string;
+  month: string;
+  previousMonth: string;
+  monthStatus: InsightMonthStatus;
+  total: string;
+  previousTotal: string;
+  changePercent: number | null;
+  estimated: false;
+  thresholds: { notableIncreasePercent: number };
+  items: InsightCategoryItemDto[];
 }
 
 export interface ApiErrorBody {
@@ -221,4 +399,13 @@ export const GOAL_STATUS_LABELS: Record<GoalStatus, string> = {
   ACTIVE: 'Đang thực hiện',
   COMPLETED: 'Hoàn thành',
   ARCHIVED: 'Đã lưu trữ',
+  PAUSED: 'Tạm dừng',
+};
+
+export const GOAL_DISPLAY_STATUS_LABELS: Record<GoalDisplayStatus, string> = {
+  ACTIVE: 'Đang thực hiện',
+  COMPLETED: 'Hoàn thành',
+  ARCHIVED: 'Đã lưu trữ',
+  PAUSED: 'Tạm dừng',
+  OVERDUE: 'Quá hạn',
 };

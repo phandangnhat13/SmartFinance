@@ -30,33 +30,58 @@ const EXPENSE_RULES = [
   { label: 'transfer_fee', pattern: /phí chuyển khoản|phí giao dịch/ },
 ];
 
-/** @returns {{label: string, confidence: number, isConfident: boolean}} */
+/**
+ * Alternatives are always ranked and include the top label first, like the real
+ * service. The low-confidence case deliberately offers a second plausible
+ * category so the UI can show selectable candidates instead of a dead end.
+ *
+ * @returns {{label: string, confidence: number, isConfident: boolean,
+ *   alternatives: Array<{label: string, confidence: number}>}}
+ */
 export function classifyText(description, type) {
   const text = description.toLowerCase();
   if (text.includes('[lowconf]')) {
-    return { label: 'food', confidence: 0.31, isConfident: false };
+    return {
+      label: 'food',
+      confidence: 0.31,
+      isConfident: false,
+      alternatives: [
+        { label: 'food', confidence: 0.31 },
+        { label: 'shopping', confidence: 0.24 },
+        { label: 'other', confidence: 0.17 },
+      ],
+    };
   }
+  let label;
+  let confidence;
   if (type === 'INCOME') {
     if (/lương|thưởng|thu nhập/.test(text)) {
-      return { label: 'salary', confidence: 0.91, isConfident: true };
+      label = 'salary';
+      confidence = 0.91;
+    } else {
+      label = 'income_other';
+      confidence = 0.72;
     }
-    return { label: 'income_other', confidence: 0.72, isConfident: true };
+  } else {
+    const match = EXPENSE_RULES.find((rule) => rule.pattern.test(text));
+    label = match ? match.label : 'other';
+    confidence = match ? 0.86 : 0.64;
   }
-  const match = EXPENSE_RULES.find((rule) => rule.pattern.test(text));
-  if (match) return { label: match.label, confidence: 0.86, isConfident: true };
-  return { label: 'other', confidence: 0.64, isConfident: true };
+  const runnerUp = label === 'other' ? 'shopping' : 'other';
+  const alternatives = [
+    { label, confidence },
+    { label: runnerUp, confidence: Math.round((1 - confidence) * 40) / 100 },
+  ].sort((left, right) => right.confidence - left.confidence);
+  return { label, confidence, isConfident: true, alternatives };
 }
 
 function toResponse(description, type) {
-  const { label, confidence, isConfident } = classifyText(description, type);
+  const { label, confidence, isConfident, alternatives } = classifyText(description, type);
   return {
     label,
     confidence,
     isConfident,
-    alternatives: [
-      { label, confidence },
-      { label: 'other', confidence: Math.round((1 - confidence) * 100) / 100 },
-    ],
+    alternatives,
     modelName: MODEL_NAME,
     modelVersion: MODEL_VERSION,
   };

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   AI_CONFIDENCE_THRESHOLD,
   AI_TAXONOMY,
+  type AiAlternativeDto,
   type AiSuggestionDto,
 } from '@smart-finance/shared-types';
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -196,6 +197,7 @@ export class AiService {
       typeof raw.isConfident === 'boolean'
         ? !raw.isConfident
         : confidence === null || confidence < AI_CONFIDENCE_THRESHOLD;
+    const alternatives = await this.resolveAlternatives(input.type, raw.alternatives);
     return {
       categoryId: category.id,
       categoryName: category.name,
@@ -204,10 +206,63 @@ export class AiService {
       status: lowConfidence ? 'low_confidence' : 'ok',
       predictionId: prediction.id,
       modelVersion,
+      alternatives,
       ...(lowConfidence
         ? { message: 'Độ tin cậy thấp. Vui lòng kiểm tra lại danh mục trước khi lưu.' }
         : {}),
     };
+  }
+
+  /**
+   * Turn the AI service's slug candidates into categories the client can select.
+   * Candidates of the wrong type, unknown slugs and archived categories are
+   * dropped rather than surfaced, so the UI can never offer an impossible pick.
+   * The list is capped at three, matching what the AI service returns.
+   */
+  private async resolveAlternatives(
+    type: 'INCOME' | 'EXPENSE',
+    raw: RawClassification['alternatives'],
+  ): Promise<AiAlternativeDto[]> {
+    const candidates: Array<{ slug: string; confidence: number }> = [];
+    const seen = new Set<string>();
+    for (const alternative of raw ?? []) {
+      const known = AI_TAXONOMY.find(
+        (candidate) => candidate.slug === alternative.label && candidate.type === type,
+      );
+      if (!known || seen.has(known.slug)) continue;
+      const confidence = this.clampConfidence(alternative.confidence);
+      if (confidence === null) continue;
+      seen.add(known.slug);
+      candidates.push({ slug: known.slug, confidence });
+      if (candidates.length === 3) break;
+    }
+    if (candidates.length === 0) return [];
+
+    const categories = await this.prisma.category.findMany({
+      where: {
+        slug: { in: candidates.map((candidate) => candidate.slug) },
+        isSystem: true,
+        isArchived: false,
+      },
+      select: { id: true, name: true, slug: true },
+    });
+    const bySlug = new Map(
+      categories.flatMap((category) => (category.slug ? [[category.slug, category] as const] : [])),
+    );
+    return candidates.flatMap((candidate) => {
+      const category = bySlug.get(candidate.slug);
+      return category
+        ? [
+            {
+              categoryId: category.id,
+              categoryName: category.name,
+              // The query matched on slug, so the candidate slug is the same key.
+              slug: candidate.slug,
+              confidence: candidate.confidence,
+            },
+          ]
+        : [];
+    });
   }
 
   private clampConfidence(value: number | null | undefined): number | null {

@@ -1,6 +1,7 @@
 import {
   ArrowLeftRight,
   BarChart3,
+  Bell,
   CreditCard,
   FolderTree,
   Goal,
@@ -8,6 +9,7 @@ import {
   Menu,
   Receipt,
   Settings,
+  TrendingUp,
   Upload,
   Wallet,
   X,
@@ -19,7 +21,9 @@ import { cn } from './ui';
 
 const navigation = [
   { to: '/dashboard', label: 'Tổng quan', icon: BarChart3 },
+  { to: '/insights', label: 'Phân tích', icon: TrendingUp },
   { to: '/transactions', label: 'Giao dịch', icon: Receipt },
+  { to: '/alerts', label: 'Cảnh báo', icon: Bell },
   { to: '/accounts', label: 'Tài khoản', icon: Wallet },
   { to: '/categories', label: 'Danh mục', icon: FolderTree },
   { to: '/budgets', label: 'Ngân sách', icon: CreditCard },

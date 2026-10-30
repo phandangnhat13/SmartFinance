@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   AccountDto,
+  AiAlternativeDto,
   AiSuggestionDto,
   CategoryDto,
   TransactionDto,
@@ -146,6 +147,16 @@ export function TransactionFormPage() {
   const suggestion = aiQuery.data;
   const usableSuggestion = suggestion?.categoryId ? suggestion : null;
 
+  /**
+   * Ranked candidates for a low-confidence answer, already resolved by the API
+   * to categories the user can select. When the response carries none, the form
+   * falls back to plain manual selection instead of guessing.
+   */
+  const lowConfidenceCandidates = useMemo<AiAlternativeDto[]>(
+    () => (suggestion?.status === 'low_confidence' ? (suggestion.alternatives ?? []) : []),
+    [suggestion],
+  );
+
   const feedbackMutation = useMutation({
     mutationFn: (payload: {
       predictionId: string;
@@ -178,6 +189,21 @@ export function TransactionFormPage() {
     setValue('categoryId', value, { shouldValidate: true });
     if (usableSuggestion && value !== usableSuggestion.categoryId) {
       sendFeedback('CORRECT', value);
+    }
+  }
+
+  /**
+   * Picking a ranked candidate is still the user's explicit choice; the
+   * confidence was too low to fill the field automatically. The feedback record
+   * records whether they confirmed the top label or chose another one.
+   */
+  function chooseAlternative(alternative: AiAlternativeDto) {
+    setValue('categoryId', alternative.categoryId, { shouldValidate: true });
+    if (!usableSuggestion?.predictionId) return;
+    if (alternative.slug === usableSuggestion.slug) {
+      sendFeedback('ACCEPT');
+    } else {
+      sendFeedback('CORRECT', alternative.categoryId);
     }
   }
 
@@ -362,9 +388,34 @@ export function TransactionFormPage() {
           </div>
         ) : null}
         {suggestion?.status === 'low_confidence' ? (
-          <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-            AI chưa chắc chắn về danh mục cho mô tả này. Vui lòng tự chọn danh mục.
-          </p>
+          <div
+            className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800"
+            data-testid="ai-low-confidence"
+          >
+            <p>AI chưa chắc chắn về danh mục cho mô tả này. Vui lòng tự chọn danh mục.</p>
+            {lowConfidenceCandidates.length > 0 ? (
+              <>
+                <p className="mt-2 text-amber-700">
+                  Gợi ý tham khảo — chưa đủ tin cậy để tự điền, bạn vẫn có thể chọn danh mục khác:
+                </p>
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {lowConfidenceCandidates.map((candidate) => (
+                    <button
+                      key={candidate.slug}
+                      type="button"
+                      onClick={() => chooseAlternative(candidate)}
+                      className="rounded-lg border border-amber-300 bg-white px-2.5 py-1 font-medium text-amber-900 hover:bg-amber-100"
+                    >
+                      {candidate.categoryName}
+                      {candidate.confidence > 0
+                        ? ` · ${Math.round(candidate.confidence * 100)}%`
+                        : ''}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </div>
         ) : null}
         {suggestion?.status === 'model_not_ready' ? (
           <p className="rounded-xl bg-slate-100 p-3 text-xs text-slate-600">

@@ -69,6 +69,10 @@ export default defineConfig({
         COOKIE_SECURE: 'false',
         AI_SERVICE_URL: `http://127.0.0.1:${E2E_AI_PORT}`,
         AI_TIMEOUT_MS: '1000',
+        // The suite registers a throwaway user per spec (more than the
+        // production limit of 5 registrations/minute per IP). This test-only
+        // override keeps that protection untouched in every real environment.
+        AUTH_THROTTLE_LIMIT: '100',
       },
     },
     {

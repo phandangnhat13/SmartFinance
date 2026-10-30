@@ -6,6 +6,7 @@ import { validateEnv } from './config/env.validation';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { AiModule } from './modules/ai/ai.module';
+import { AlertsModule } from './modules/alerts/alerts.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BudgetsModule } from './modules/budgets/budgets.module';
@@ -13,6 +14,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { GoalsModule } from './modules/goals/goals.module';
 import { HealthModule } from './modules/health/health.module';
 import { ImportsModule } from './modules/imports/imports.module';
+import { InsightsModule } from './modules/insights/insights.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -38,7 +40,9 @@ import { UsersModule } from './modules/users/users.module';
     TransactionsModule,
     BudgetsModule,
     GoalsModule,
+    AlertsModule,
     AnalyticsModule,
+    InsightsModule,
     ImportsModule,
     AiModule,
     HealthModule,

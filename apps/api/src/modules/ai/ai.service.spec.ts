@@ -8,7 +8,7 @@ interface Mocks {
   service: AiService;
   prisma: {
     transaction: { findFirst: jest.Mock };
-    category: { findFirst: jest.Mock };
+    category: { findFirst: jest.Mock; findMany: jest.Mock };
     aiPrediction: {
       create: jest.Mock;
       update: jest.Mock;
@@ -29,6 +29,7 @@ function createService(): Mocks {
         name: 'Ăn uống',
         slug: 'food',
       }),
+      findMany: jest.fn().mockResolvedValue([]),
     },
     aiPrediction: {
       create: jest.fn().mockResolvedValue({ id: 'prediction-1' }),
@@ -108,6 +109,84 @@ describe('AiService', () => {
 
     const result = await service.classify('user-1', { description: 'ăn tối', type: 'EXPENSE' });
     expect(result.status).toBe('low_confidence');
+  });
+
+  it('returns ranked, resolvable alternatives for a low-confidence answer', async () => {
+    const { service, prisma, provider } = createService();
+    prisma.category.findFirst.mockResolvedValue({
+      id: 'category-entertainment',
+      name: 'Giải trí',
+      slug: 'entertainment',
+    });
+    prisma.category.findMany.mockResolvedValue([
+      { id: 'category-entertainment', name: 'Giải trí', slug: 'entertainment' },
+      { id: 'category-shopping', name: 'Mua sắm', slug: 'shopping' },
+      { id: 'category-transport', name: 'Đi lại', slug: 'transport' },
+    ]);
+    provider.classify.mockResolvedValue({
+      label: 'entertainment',
+      confidence: 0.3225,
+      isConfident: false,
+      alternatives: [
+        { label: 'entertainment', confidence: 0.3225 },
+        { label: 'shopping', confidence: 0.198 },
+        { label: 'salary', confidence: 0.157 }, // wrong type for EXPENSE
+        { label: 'not_a_label', confidence: 0.12 }, // unknown slug
+        { label: 'transport', confidence: 0.157 },
+      ],
+      modelName: 'tfidf-char-logreg',
+      modelVersion: 'tfidf-char-lr-v2',
+    });
+
+    const result = await service.classify('user-1', { description: 'đi chơi', type: 'EXPENSE' });
+
+    expect(result.status).toBe('low_confidence');
+    expect(result.alternatives).toEqual([
+      {
+        categoryId: 'category-entertainment',
+        categoryName: 'Giải trí',
+        slug: 'entertainment',
+        confidence: 0.3225,
+      },
+      {
+        categoryId: 'category-shopping',
+        categoryName: 'Mua sắm',
+        slug: 'shopping',
+        confidence: 0.198,
+      },
+      {
+        categoryId: 'category-transport',
+        categoryName: 'Đi lại',
+        slug: 'transport',
+        confidence: 0.157,
+      },
+    ]);
+    expect(prisma.category.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          slug: { in: ['entertainment', 'shopping', 'transport'] },
+          isSystem: true,
+          isArchived: false,
+        },
+      }),
+    );
+  });
+
+  it('drops alternatives that cannot be offered and omits the field when the label is invalid', async () => {
+    const { service, prisma, provider } = createService();
+    provider.classify.mockResolvedValue({
+      label: 'food',
+      confidence: 0.9,
+      isConfident: true,
+      alternatives: [{ label: 'transport', confidence: 0.05 }],
+      modelVersion: 'v2',
+    });
+
+    const result = await service.classify('user-1', { description: 'nhận lương', type: 'INCOME' });
+
+    expect(result.status).toBe('invalid_label');
+    expect(result.alternatives).toBeUndefined();
+    expect(prisma.category.findMany).not.toHaveBeenCalled();
   });
 
   it('rejects a label whose type does not match the transaction type', async () => {

@@ -29,3 +29,19 @@ export function percentage(part: Prisma.Decimal, whole: Prisma.Decimal): number 
   if (whole.lessThanOrEqualTo(0)) return 0;
   return Number(part.dividedBy(whole).times(100).toFixed(2));
 }
+
+/**
+ * Percentage movement from `previous` to `current`, rounded to two decimals.
+ * Returns null when there is no baseline to compare against, so callers can
+ * say "no data" instead of inventing an infinite increase.
+ */
+export function changePercent(
+  current: Prisma.Decimal | string | number,
+  previous: Prisma.Decimal | string | number,
+): number | null {
+  const previousValue = toDecimal(previous);
+  if (previousValue.isZero()) return null;
+  return Number(
+    toDecimal(current).minus(previousValue).dividedBy(previousValue).times(100).toFixed(2),
+  );
+}
